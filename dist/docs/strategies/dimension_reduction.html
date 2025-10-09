@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimension Reduction Strategy | Documentation</title>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/style.css">
+    <link rel="stylesheet" href="../../assets/syntax-highlighting.css">
+    <script src="../../assets/highlight.js"></script>
+</head>
+<body>
+    <div class="layout">
+        
+        <header class="header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="logo">Documentation</div>
+                </div>
+                <nav class="header-nav">
+                    <a href="#" class="header-link">Docs</a>
+                    <a href="#" class="header-link">API</a>
+                    <a href="#" class="header-link">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        
+        <aside class="sidebar" id="sidebar">
+            
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation...">
+            </div>
+
+            
+            <nav>
+                <div class="nav-section"><div class="nav-section-title">.tks</div><ul class="nav-list"><div class="nav-section"><div class="nav-section-title">Done</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/done/toc_searchability_improvements.html" class="nav-link">TOC Searchability Improvements for Scale</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Protocols</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/protocols/protodoc.html" class="nav-link">Complete Acronym Protocol Reference</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Support</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/support/jot_integration_strategy.html" class="nav-link">Jot Integration: Automating Documentation Updates</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../README.html" class="nav-link">Jot</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Docs</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/CHANGELOG.html" class="nav-link">Changelog</a></li><div class="nav-section"><div class="nav-section-title">Benchmarks</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/benchmarks/stripe-docs-test.html" class="nav-link">Benchmarks</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Release</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/release/RELEASE-v0.1.0.html" class="nav-link">Jot v0.1.0 Release</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Roadmaps</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/roadmaps/rmap_01.html" class="nav-link">Roadmap</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Spec</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/spec/architecture.html" class="nav-link">System Architecture</a></li><li class="nav-item"><a href="../../docs/spec/pseudocode.html" class="nav-link">Pseudocode Design</a></li><li class="nav-item"><a href="../../docs/spec/requirements.html" class="nav-link">Requirements Spec.</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Strategies</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/strategies/dimension_reduction.html" class="nav-link active">Dimension Reduction Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/downstream_usage.html" class="nav-link">Downstream Usage Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/embedding_chunking.html" class="nav-link">Embedding & Chunking Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/post_processing.html" class="nav-link">Post-Processing Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/storage_schemas.html" class="nav-link">Storage Schemas Strategy</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../p.html" class="nav-link">Untitled</a></li></ul></div>
+            </nav>
+        </aside>
+
+        
+        <main class="main">
+            <div class="content">
+                
+                <nav class="breadcrumbs">
+                    
+                        
+                        <a href="../../index.html" class="breadcrumb-link">Home</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs.html" class="breadcrumb-link">Docs</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/strategies.html" class="breadcrumb-link">Strategies</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/strategies/dimension_reduction.html" class="breadcrumb-link">Dimension Reduction</a>
+                    
+                </nav>
+
+                
+                <article>
+                    <h1 id="dimension-reduction-strategy">Dimension Reduction Strategy</h1>
+
+<h2 id="goal">Goal</h2>
+
+<p>Shrink 768-d embedding vectors to lower-dimensional representations without materially degrading retrieval or model performance.</p>
+
+<h2 id="techniques">Techniques</h2>
+
+<ol>
+<li><strong>PCA / SVD</strong>
+
+<ul>
+<li>Fit on representative embedding batches.</li>
+<li>Retain 256–384 components; store projection matrix and explained variance.</li>
+</ul></li>
+<li><strong>Random Projection</strong>
+
+<ul>
+<li>Use sparse Johnson–Lindenstrauss transforms for fast, low-overhead reductions.</li>
+<li>Benchmark against PCA for recall retention.</li>
+</ul></li>
+<li><strong>Autoencoders</strong>
+
+<ul>
+<li>Train shallow bottleneck networks (e.g., 768→256→768) on historical embeddings.</li>
+<li>Monitor reconstruction error and retrieval quality.</li>
+</ul></li>
+<li><strong>Product Quantization (OPQ + IVF-PQ)</strong>
+
+<ul>
+<li>Integrate with FAISS for large-scale vector search to reduce storage + accelerate queries.</li>
+</ul></li>
+</ol>
+
+<h2 id="workflow">Workflow</h2>
+
+<ol>
+<li><strong>Data Prep</strong>
+
+<ul>
+<li>Gather balanced sample across sessions and chunk types.</li>
+<li>Standardize embeddings (mean-center, optionally whiten).</li>
+</ul></li>
+<li><strong>Model Training / Fitting</strong>
+
+<ul>
+<li>Run PCA baseline and evaluate explained variance.</li>
+<li>Experiment with autoencoder and OPQ configurations when higher compression needed.</li>
+</ul></li>
+<li><strong>Evaluation</strong>
+
+<ul>
+<li>Compute recall@k on labeled similarity pairs before/after reduction.</li>
+<li>Track absolute cosine similarity differences; set acceptable thresholds (e.g., Δcos ≤ 0.05 mean).</li>
+</ul></li>
+<li><strong>Deployment</strong>
+
+<ul>
+<li>Store projection parameters in versioned artifact registry.</li>
+<li>Apply reduction during embedding pipeline post-processing with opt-in flag.</li>
+<li>For vector DBs, load reduced vectors and keep mapping to original IDs.</li>
+</ul></li>
+</ol>
+
+<h2 id="deliverables">Deliverables</h2>
+
+<ul>
+<li>Reduction playbook with benchmarking results.</li>
+<li>Projection matrices / autoencoder weights stored under <code>models/dimension_reduction/</code>.</li>
+<li>Integration tests ensuring embedding pipeline supports reduced and full-dimension modes.</li>
+</ul>
+
+<h2 id="risks-mitigations">Risks &amp; Mitigations</h2>
+
+<ul>
+<li><strong>Quality Loss</strong>: mitigate by monitoring recall metrics and retaining ability to re-run with full vectors.</li>
+<li><strong>Drift</strong>: schedule periodic retraining when embedding distributions shift.</li>
+<li><strong>Operational Complexity</strong>: encapsulate transformation logic in shared library to avoid duplicated math.</li>
+</ul>
+
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            document.querySelectorAll('pre').forEach(pre => {
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.textContent = 'Copy';
+                button.onclick = function() {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+
+                    navigator.clipboard.writeText(text).then(() => {
+                        button.textContent = 'Copied!';
+                        button.classList.add('copied');
+
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+                pre.appendChild(button);
+            });
+        });
+
+        
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                console.log('Searching for:', query);
+            });
+        }
+
+        
+        document.querySelectorAll('.nav-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.parentElement;
+                section.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

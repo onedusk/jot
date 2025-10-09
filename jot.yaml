@@ -1,0 +1,52 @@
+# Jot Configuration File
+version: 1.0
+project:
+  name: 'Jot Documentation'
+  description: 'Modern documentation generator'
+  author: 'Thrive Team'
+
+input:
+  paths:
+    - '.'
+  ignore:
+    - '**/_*.md'
+    - '**/drafts/**'
+    - '**/.git/**'
+    - '**/node_modules/**'
+    - '**/vendor/**'
+    - '**/.roo/**'
+    - '**/.claude/**'
+    - '**/dist/**'
+    - '**/.roomodes'
+
+output:
+  path: './dist'
+  format: 'html'
+  theme: 'default'
+  clean: true
+
+features:
+  search: true
+  versioning: true
+  llm_export: true
+  syntax_highlighting: true
+  auto_toc: true
+
+server:
+  port: 8080
+  auto_reload: true
+  open_browser: true
+
+llm:
+  export_formats:
+    - json
+    - yaml
+    - embeddings
+  chunk_size: 512
+  overlap: 128
+
+search:
+  enable: true
+  index_path: './dist/search-index.json'
+  fuzzy: true
+  highlight: true

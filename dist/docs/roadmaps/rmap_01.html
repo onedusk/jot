@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roadmap | Documentation</title>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/style.css">
+    <link rel="stylesheet" href="../../assets/syntax-highlighting.css">
+    <script src="../../assets/highlight.js"></script>
+</head>
+<body>
+    <div class="layout">
+        
+        <header class="header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="logo">Documentation</div>
+                </div>
+                <nav class="header-nav">
+                    <a href="#" class="header-link">Docs</a>
+                    <a href="#" class="header-link">API</a>
+                    <a href="#" class="header-link">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        
+        <aside class="sidebar" id="sidebar">
+            
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation...">
+            </div>
+
+            
+            <nav>
+                <div class="nav-section"><div class="nav-section-title">.tks</div><ul class="nav-list"><div class="nav-section"><div class="nav-section-title">Done</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/done/toc_searchability_improvements.html" class="nav-link">TOC Searchability Improvements for Scale</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Protocols</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/protocols/protodoc.html" class="nav-link">Complete Acronym Protocol Reference</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Support</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/support/jot_integration_strategy.html" class="nav-link">Jot Integration: Automating Documentation Updates</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../README.html" class="nav-link">Jot</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Docs</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/CHANGELOG.html" class="nav-link">Changelog</a></li><div class="nav-section"><div class="nav-section-title">Benchmarks</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/benchmarks/stripe-docs-test.html" class="nav-link">Benchmarks</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Release</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/release/RELEASE-v0.1.0.html" class="nav-link">Jot v0.1.0 Release</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Roadmaps</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/roadmaps/rmap_01.html" class="nav-link active">Roadmap</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Spec</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/spec/architecture.html" class="nav-link">System Architecture</a></li><li class="nav-item"><a href="../../docs/spec/pseudocode.html" class="nav-link">Pseudocode Design</a></li><li class="nav-item"><a href="../../docs/spec/requirements.html" class="nav-link">Requirements Spec.</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Strategies</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/strategies/dimension_reduction.html" class="nav-link">Dimension Reduction Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/downstream_usage.html" class="nav-link">Downstream Usage Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/embedding_chunking.html" class="nav-link">Embedding & Chunking Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/post_processing.html" class="nav-link">Post-Processing Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/storage_schemas.html" class="nav-link">Storage Schemas Strategy</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../p.html" class="nav-link">Untitled</a></li></ul></div>
+            </nav>
+        </aside>
+
+        
+        <main class="main">
+            <div class="content">
+                
+                <nav class="breadcrumbs">
+                    
+                        
+                        <a href="../../index.html" class="breadcrumb-link">Home</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs.html" class="breadcrumb-link">Docs</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/roadmaps.html" class="breadcrumb-link">Roadmaps</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/roadmaps/rmap_01.html" class="breadcrumb-link">Rmap 01</a>
+                    
+                </nav>
+
+                
+                <article>
+                    <h1 id="roadmap">Roadmap</h1>
+
+<h2 id="current-version-1-0">Current Version: 1.0</h2>
+
+<h3 id="completed-features">✅ Completed Features</h3>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled checked> Markdown to HTML compilation</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> XML Table of Contents generation</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Multi-format export (JSON, YAML, LLM)</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> <strong>Local development server</strong> - HTTP server with browser auto-open</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Symlink support for markdown access</li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Global installation as <code>jotdoc</code></li>
+<li class="task-list-item"><input type="checkbox" disabled checked> Clean path format (removed <code>./</code> prefixes)</li>
+</ul>
+
+<h2 id="version-1-1-quick-improvements">Version 1.1 (Quick Improvements)</h2>
+
+<p><em>Timeline: 1-2 weeks</em></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Fix duplicate TOC entries</strong> - Improve path deduplication logic</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Better title extraction</strong> - Support frontmatter, multiple heading formats</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Markdown compiler</strong> - Native markdown output with navigation</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Config validation</strong> - Verify jot.yaml on load</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Better error messages</strong> - User-friendly error reporting</li>
+</ul>
+
+<h2 id="version-1-2-quality-of-life">Version 1.2 (Quality of Life)</h2>
+
+<p><em>Timeline: 2-3 weeks</em></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Live reload</strong> - Auto-refresh browser on file changes</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Watch mode</strong> - Auto-rebuild on file changes</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Partial builds</strong> - Only rebuild changed files</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Theme support</strong> - Multiple built-in themes</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Custom CSS</strong> - User-provided stylesheets</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Plugin system</strong> - Extensible processors</li>
+</ul>
+
+<h2 id="version-2-0-scale-performance">Version 2.0 (Scale &amp; Performance)</h2>
+
+<p><em>Timeline: 1 month</em></p>
+
+<h3 id="enhanced-toc-searchability">Enhanced TOC Searchability ⭐</h3>
+
+<p><strong><a href="docs/features/enhanced-toc-searchability.html">Full specification</a></strong></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Metadata-rich TOC</strong> (modified date, size, tags, summaries)</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Search indexing</strong> - Sub-50ms search at 5000+ docs</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Category manifests</strong> - Organized document groups</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Content hashing</strong> - Change detection &amp; caching</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>LLM-optimized format</strong> - 60% smaller context size</li>
+</ul>
+
+<p><strong>Impact:</strong> 30x faster searches at 1000 docs, 224x at 5000 docs</p>
+
+<h2 id="version-2-1-enterprise-features">Version 2.1 (Enterprise Features)</h2>
+
+<p><em>Timeline: 2 months</em></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Multi-repository support</strong> - Aggregate docs from multiple sources</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Authentication</strong> - Protected documentation</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Versioning</strong> - Multiple doc versions side-by-side</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Search API</strong> - RESTful/GraphQL endpoints</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Analytics</strong> - Usage tracking, popular pages</li>
+</ul>
+
+<h2 id="version-3-0-ai-enhanced">Version 3.0 (AI-Enhanced)</h2>
+
+<p><em>Timeline: 3-4 months</em></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Auto-tagging</strong> - NLP-based document classification</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Semantic search</strong> - Meaning-based document discovery</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Smart summaries</strong> - AI-generated document summaries</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Cross-reference suggestions</strong> - Automatic linking</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Quality scoring</strong> - Documentation completeness metrics</li>
+</ul>
+
+<h2 id="experimental-features">Experimental Features</h2>
+
+<p><em>No timeline - research phase</em></p>
+
+<ul class="task-list"><li class="task-list-item"><input type="checkbox" disabled> <strong>Real-time collaboration</strong> - Multiple users editing</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Git integration</strong> - Version control awareness</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>IDE plugins</strong> - VSCode, IntelliJ extensions</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>Mobile app</strong> - iOS/Android documentation readers</li>
+<li class="task-list-item"><input type="checkbox" disabled> <strong>PDF export</strong> - Print-ready documentation</li>
+</ul>
+
+<h2 id="performance-benchmarks">Performance Benchmarks</h2>
+
+<h3 id="current-v1-0">Current (v1.0)</h3>
+
+<table>
+<thead>
+<tr>
+<th>Documents</th>
+<th>Build Time</th>
+<th>TOC Search</th>
+<th>Memory</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>100</td>
+<td>0.8s</td>
+<td>12ms</td>
+<td>45MB</td>
+</tr>
+
+<tr>
+<td>1000</td>
+<td>8.2s</td>
+<td>450ms</td>
+<td>312MB</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="target-v2-0">Target (v2.0)</h3>
+
+<table>
+<thead>
+<tr>
+<th>Documents</th>
+<th>Build Time</th>
+<th>TOC Search</th>
+<th>Memory</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>100</td>
+<td>0.5s</td>
+<td>3ms</td>
+<td>40MB</td>
+</tr>
+
+<tr>
+<td>1000</td>
+<td>3.0s</td>
+<td>15ms</td>
+<td>200MB</td>
+</tr>
+
+<tr>
+<td>5000</td>
+<td>12s</td>
+<td>38ms</td>
+<td>800MB</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="contributing">Contributing</h2>
+
+<p>Interested in contributing? Check out:
+- <a href="https://github.com/thrive/jot/issues">Open Issues</a>
+- <a href="docs/development.html">Development Guide</a>
+- <a href="docs/architecture.html">Architecture Overview</a></p>
+
+<h2 id="feedback">Feedback</h2>
+
+<p>Have ideas for features? Found a bug?
+- Open an issue: <a href="https://github.com/thrive/jot/issues">GitHub Issues</a>
+- Email: jot@thrive.dev</p>
+
+<hr />
+
+<p><em>Last updated: 2025-10-04</em>
+<em>Next review: 2025-11-01</em></p>
+
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            document.querySelectorAll('pre').forEach(pre => {
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.textContent = 'Copy';
+                button.onclick = function() {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+
+                    navigator.clipboard.writeText(text).then(() => {
+                        button.textContent = 'Copied!';
+                        button.classList.add('copied');
+
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+                pre.appendChild(button);
+            });
+        });
+
+        
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                console.log('Searching for:', query);
+            });
+        }
+
+        
+        document.querySelectorAll('.nav-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.parentElement;
+                section.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

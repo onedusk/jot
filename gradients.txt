@@ -1,0 +1,10 @@
+FOLLOW THE EXACT LAYERING
+
+[ top ]
+- rgb(6,21,34)
+- rgb(26,70,112)
+- rgb(181,111,115)
+- rgb(250,73,35)
+[ bottom ]
+
+LEAVE ALL OTHER COLORS THE SAME FOR NOW

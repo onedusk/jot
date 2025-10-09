@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture | Documentation</title>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../assets/style.css">
+    <link rel="stylesheet" href="../../assets/syntax-highlighting.css">
+    <script src="../../assets/highlight.js"></script>
+</head>
+<body>
+    <div class="layout">
+        
+        <header class="header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="logo">Documentation</div>
+                </div>
+                <nav class="header-nav">
+                    <a href="#" class="header-link">Docs</a>
+                    <a href="#" class="header-link">API</a>
+                    <a href="#" class="header-link">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        
+        <aside class="sidebar" id="sidebar">
+            
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation...">
+            </div>
+
+            
+            <nav>
+                <div class="nav-section"><div class="nav-section-title">.tks</div><ul class="nav-list"><div class="nav-section"><div class="nav-section-title">Done</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/done/toc_searchability_improvements.html" class="nav-link">TOC Searchability Improvements for Scale</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Protocols</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/protocols/protodoc.html" class="nav-link">Complete Acronym Protocol Reference</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Support</div><ul class="nav-list"><li class="nav-item"><a href="../../.tks/support/jot_integration_strategy.html" class="nav-link">Jot Integration: Automating Documentation Updates</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../README.html" class="nav-link">Jot</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Docs</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/CHANGELOG.html" class="nav-link">Changelog</a></li><div class="nav-section"><div class="nav-section-title">Benchmarks</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/benchmarks/stripe-docs-test.html" class="nav-link">Benchmarks</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Release</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/release/RELEASE-v0.1.0.html" class="nav-link">Jot v0.1.0 Release</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Roadmaps</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/roadmaps/rmap_01.html" class="nav-link">Roadmap</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Spec</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/spec/architecture.html" class="nav-link active">System Architecture</a></li><li class="nav-item"><a href="../../docs/spec/pseudocode.html" class="nav-link">Pseudocode Design</a></li><li class="nav-item"><a href="../../docs/spec/requirements.html" class="nav-link">Requirements Spec.</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Strategies</div><ul class="nav-list"><li class="nav-item"><a href="../../docs/strategies/dimension_reduction.html" class="nav-link">Dimension Reduction Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/downstream_usage.html" class="nav-link">Downstream Usage Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/embedding_chunking.html" class="nav-link">Embedding & Chunking Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/post_processing.html" class="nav-link">Post-Processing Strategy</a></li><li class="nav-item"><a href="../../docs/strategies/storage_schemas.html" class="nav-link">Storage Schemas Strategy</a></li></ul></div></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="../../p.html" class="nav-link">Untitled</a></li></ul></div>
+            </nav>
+        </aside>
+
+        
+        <main class="main">
+            <div class="content">
+                
+                <nav class="breadcrumbs">
+                    
+                        
+                        <a href="../../index.html" class="breadcrumb-link">Home</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs.html" class="breadcrumb-link">Docs</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/spec.html" class="breadcrumb-link">Spec</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="../../docs/spec/architecture.html" class="breadcrumb-link">Architecture</a>
+                    
+                </nav>
+
+                
+                <article>
+                    <h1 id="system-architecture">System Architecture</h1>
+
+<h2 id="1-high-level-architecture">1. High-Level Architecture</h2>
+
+<pre><code>
+
+                     Core Engine
+
+
+     Engine        Control          Export
+
+
+## 2. Component Architecture
+
+### 2.1 CLI Layer (`cmd/jot/`)
+
+```go
+cmd/jot/
+ main.go              // Entry point
+ serve.go             // Server command
+
+**Responsibilities:**
+- Parse command-line arguments
+- Load configuration
+- Orchestrate core operations
+- Handle errors and display output
+
+### 2.2 Core Engine (`internal/`)
+
+```go
+internal/
+ scanner/
+ toc/
+ renderer/
+    assets.go        // Asset management
+     optimizer.go     // Output optimization
+### 2.3 Service Layer (`internal/`)
+
+```go
+internal/
+ search/
+ vcs/
+ api/
+ export/
+</code></pre>
+
+<h3 id="2-4-package-layer-pkg">2.4 Package Layer (<code>pkg/</code>)</h3>
+
+<pre class="language-go"><code class="language-go">pkg/
+ config/
+ logger/
+     paths.go         // Path utilities
+
+## 3. Data Models
+
+### 3.1 Document Model
+
+```go
+type Document struct {
+    ID           string                 // Unique identifier
+    Path         string                 // Absolute file path
+    RelativePath string                 // Relative to project root
+    Title        string                 // Extracted title
+    Content      []byte                 // Raw markdown content
+    HTML         string                 // Rendered HTML
+    Metadata     map[string]interface{} // Frontmatter data
+    ModTime      time.Time              // Last modification
+    Sections     []Section              // Document sections
+    Links        []Link                 // Internal/external links
+    CodeBlocks   []CodeBlock            // Code snippets
+}
+
+type Section struct {
+    ID        string
+    Title     string
+    Level     int
+    Content   string
+    StartLine int
+    EndLine   int
+}
+</code></pre>
+
+<h3 id="3-2-toc-model">3.2 TOC Model</h3>
+
+<pre class="language-go"><code class="language-go">type TOCNode struct {
+    ID       string
+    Title    string
+    Path     string      // nil for directories
+    Weight   int         // For custom ordering
+    Children []*TOCNode
+}
+
+type TableOfContents struct {
+    Version string
+    Root    *TOCNode
+    Index   map[string]*TOCNode // Fast lookup by ID
+}
+</code></pre>
+
+<h3 id="3-3-search-model">3.3 Search Model</h3>
+
+<pre class="language-go"><code class="language-go">type SearchIndex struct {
+    Version   string
+    Documents []SearchDocument
+    Terms     map[string][]TermOccurrence
+    Fuzzy     *FuzzyIndex
+}
+
+type SearchResult struct {
+    Document  SearchDocument
+    Score     float64
+    Snippets  []string
+    Highlight map[string][]int // Term positions
+}
+</code></pre>
+
+<h2 id="4-api-design">4. API Design</h2>
+
+<h3 id="4-1-restful-endpoints">4.1 RESTful Endpoints</h3>
+
+<pre><code>GET    /api/v1/docs                 # List all documents
+GET    /api/v1/docs/:id             # Get specific document
+GET    /api/v1/search?q=query       # Search documents
+GET    /api/v1/toc                  # Get table of contents
+GET    /api/v1/export/:format       # Export documentation
+POST   /api/v1/embeddings           # Generate embeddings
+GET    /api/v1/changes              # Get recent changes
+WS     /api/v1/ws                   # WebSocket for live updates
+</code></pre>
+
+<h3 id="4-2-response-formats">4.2 Response Formats</h3>
+
+<pre class="language-json"><code class="language-json">// Document Response
+{
+  &quot;id&quot;: &quot;getting-started-installation&quot;,
+  &quot;path&quot;: &quot;docs/getting-started/installation.md&quot;,
+  &quot;title&quot;: &quot;Installation Guide&quot;,
+  &quot;content&quot;: &quot;# Installation Guide\n...&quot;,
+  &quot;html&quot;: &quot;&lt;h1&gt;Installation Guide&lt;/h1&gt;...&quot;,
+  &quot;metadata&quot;: {
+    &quot;author&quot;: &quot;John Doe&quot;,
+    &quot;tags&quot;: [&quot;tutorial&quot;, &quot;setup&quot;]
+  },
+  &quot;sections&quot;: [...],
+  &quot;links&quot;: {
+    &quot;internal&quot;: [&quot;./quickstart.md&quot;],
+    &quot;external&quot;: [&quot;https://golang.org&quot;]
+  }
+}
+
+// Search Response
+{
+  &quot;query&quot;: &quot;install&quot;,
+  &quot;results&quot;: [
+    {
+      &quot;document&quot;: {...},
+      &quot;score&quot;: 0.95,
+      &quot;snippets&quot;: [
+        &quot;...to &lt;mark&gt;install&lt;/mark&gt; Jot, run the following...&quot;
+      ]
+    }
+  ],
+  &quot;total&quot;: 15,
+  &quot;took&quot;: 12
+}
+</code></pre>
+
+<h2 id="5-file-structure">5. File Structure</h2>
+
+<h3 id="5-1-project-layout">5.1 Project Layout</h3>
+
+<pre><code>jot-project/
+ .jotignore           # Ignore patterns
+    getting-started/
+        reference.md
+       installation.html
+       js/
+     temp/
+### 5.2 Template Structure
+
+</code></pre>
+
+<p>web/templates/
+ layouts/
+    header.html      # Page header
+    footer.html      # Page footer
+        themes/      # Theme variations
+         highlight.js # Syntax highlighting</p>
+
+<h2 id="6-deployment-architecture">6. Deployment Architecture</h2>
+
+<h3 id="6-1-binary-distribution">6.1 Binary Distribution</h3>
+
+<pre><code>releases/
+ jot-v0.1.0-darwin-amd64.tar.gz
+ checksums.txt
+### 6.2 Docker Support
+
+```dockerfile
+# Multi-stage build
+FROM golang:1.21 AS builder
+WORKDIR /app
+COPY . .
+RUN go build -o jot cmd/jot/main.go
+
+FROM alpine:latest
+RUN apk add --no-cache ca-certificates
+COPY --from=builder /app/jot /usr/local/bin/
+ENTRYPOINT [&quot;jot&quot;]
+</code></pre>
+
+<h2 id="7-performance-considerations">7. Performance Considerations</h2>
+
+<h3 id="7-1-concurrency-model">7.1 Concurrency Model</h3>
+
+<ul>
+<li><strong>Parallel file scanning</strong>: Worker pool for I/O operations</li>
+<li><strong>Concurrent rendering</strong>: Process multiple documents simultaneously</li>
+<li><strong>Async search indexing</strong>: Background index updates</li>
+<li><strong>Buffered WebSocket</strong>: Efficient real-time updates</li>
+</ul>
+
+<h3 id="7-2-caching-strategy">7.2 Caching Strategy</h3>
+
+<ul>
+<li><strong>Template cache</strong>: Pre-compiled templates</li>
+<li><strong>Markdown cache</strong>: Parsed AST storage</li>
+<li><strong>Search cache</strong>: Query result caching</li>
+<li><strong>Asset cache</strong>: Compressed static files</li>
+</ul>
+
+<h3 id="7-3-memory-management">7.3 Memory Management</h3>
+
+<ul>
+<li><strong>Streaming</strong>: Large file handling</li>
+<li><strong>Pooling</strong>: Reusable buffers</li>
+<li><strong>Lazy loading</strong>: On-demand processing</li>
+<li><strong>GC tuning</strong>: Optimized for throughput</li>
+</ul>
+
+<h2 id="8-security-architecture">8. Security Architecture</h2>
+
+<h3 id="8-1-input-validation">8.1 Input Validation</h3>
+
+<ul>
+<li><strong>Path sanitization</strong>: Prevent directory traversal</li>
+<li><strong>Markdown sanitization</strong>: XSS prevention</li>
+<li><strong>Config validation</strong>: Type and range checks</li>
+<li><strong>API validation</strong>: Request parameter validation</li>
+</ul>
+
+<h3 id="8-2-access-control">8.2 Access Control</h3>
+
+<ul>
+<li><strong>Read-only by default</strong>: No file modifications</li>
+<li><strong>Sandboxed execution</strong>: Limited system access</li>
+<li><strong>Rate limiting</strong>: API request throttling</li>
+<li><strong>CORS configuration</strong>: Controlled cross-origin access</li>
+</ul>
+
+<h2 id="9-extensibility">9. Extensibility</h2>
+
+<h3 id="9-1-plugin-interface">9.1 Plugin Interface</h3>
+
+<pre class="language-go"><code class="language-go">type Plugin interface {
+    Name() string
+    Version() string
+    Process(doc *Document) error
+    RegisterAPI(router *gin.Engine)
+}
+</code></pre>
+
+<h3 id="9-2-theme-system">9.2 Theme System</h3>
+
+<pre class="language-yaml"><code class="language-yaml">theme:
+  name: &quot;custom-theme&quot;
+  extends: &quot;default&quot;
+  variables:
+    primary-color: &quot;#007bff&quot;
+    font-family: &quot;Inter, sans-serif&quot;
+  templates:
+    - &quot;custom-header.html&quot;
+</code></pre>
+
+<h2 id="10-integration-points">10. Integration Points</h2>
+
+<h3 id="10-1-ci-cd-integration">10.1 CI/CD Integration</h3>
+
+<pre class="language-yaml"><code class="language-yaml"># GitHub Actions Example
+- name: Build Documentation
+  uses: thrive/jot-action@v1
+  with:
+    config: jot.yaml
+    output: ./dist
+
+# GitLab CI Example
+build-docs:
+  image: thrive/jot:latest
+  script:
+    - jot build
+  artifacts:
+    paths:
+      - dist/
+</code></pre>
+
+<h3 id="10-2-editor-integration">10.2 Editor Integration</h3>
+
+<ul>
+<li>VS Code extension for live preview</li>
+<li>IntelliJ plugin for documentation generation</li>
+<li>Vim plugin for markdown validation</li>
+</ul>
+
+<p>This architecture provides a scalable, maintainable foundation for the Jot documentation generator with clear separation of concerns and extensibility points.</p>
+
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            document.querySelectorAll('pre').forEach(pre => {
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.textContent = 'Copy';
+                button.onclick = function() {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+
+                    navigator.clipboard.writeText(text).then(() => {
+                        button.textContent = 'Copied!';
+                        button.classList.add('copied');
+
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+                pre.appendChild(button);
+            });
+        });
+
+        
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                console.log('Searching for:', query);
+            });
+        }
+
+        
+        document.querySelectorAll('.nav-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.parentElement;
+                section.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

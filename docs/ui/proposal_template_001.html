@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abel Documentation</title>
+    
+    <!-- Modern Font Stack -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables for Theme */
+        :root {
+            /* Layout */
+            --sidebar-width: 280px;
+            --content-max-width: 900px;
+            --header-height: 64px;
+            
+            /* Protocol-inspired Dark Theme Colors */
+            --color-bg: #0a0b0e;
+            --color-bg-secondary: rgba(255, 255, 255, 0.02);
+            --color-bg-tertiary: rgba(255, 255, 255, 0.04);
+            
+            --color-glass: rgba(255, 255, 255, 0.03);
+            --color-glass-hover: rgba(255, 255, 255, 0.06);
+            --color-glass-active: rgba(255, 255, 255, 0.08);
+            
+            --color-text: #e4e4e7;
+            --color-text-secondary: #a1a1aa;
+            --color-text-tertiary: #71717a;
+            
+            --color-border: rgba(255, 255, 255, 0.08);
+            --color-border-secondary: rgba(255, 255, 255, 0.04);
+            
+            --color-accent: #10b981;
+            --color-accent-hover: #34d399;
+            --color-accent-light: rgba(16, 185, 129, 0.1);
+            
+            --color-code-bg: rgba(255, 255, 255, 0.02);
+            --color-code-border: rgba(255, 255, 255, 0.06);
+            
+            /* Gradient colors */
+            --gradient-blue: #0ea5e9;
+            --gradient-teal: #14b8a6;
+            --gradient-orange: #f97316;
+            --gradient-amber: #f59e0b;
+            
+            /* Typography */
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            --font-mono: 'JetBrains Mono', 'SF Mono', Monaco, Consolas, monospace;
+            
+            /* Spacing */
+            --spacing-xs: 0.25rem;
+            --spacing-sm: 0.5rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            
+            /* Transitions */
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+            --transition-slow: 300ms ease;
+            
+            /* Blur Effects */
+            --blur-sm: 8px;
+            --blur-md: 16px;
+            --blur-lg: 24px;
+            --blur-xl: 40px;
+        }
+        
+        /* Reset & Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-text);
+            background: var(--color-bg);
+            line-height: 1.6;
+            letter-spacing: -0.011em;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Subtle Gradient Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at top left, rgba(14, 165, 233, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, var(--color-bg) 0%, #0d0e11 100%);
+            z-index: -2;
+        }
+        
+        /* Animated Gradient Orbs */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+            z-index: -1;
+            background: 
+                radial-gradient(circle 800px at 100% 200px, rgba(14, 165, 233, 0.1) 0%, transparent 40%),
+                radial-gradient(circle 600px at 0% 300px, rgba(20, 184, 166, 0.08) 0%, transparent 40%),
+                radial-gradient(circle 700px at 50% 100%, rgba(249, 115, 22, 0.06) 0%, transparent 40%);
+            animation: gradientFloat 20s ease infinite;
+        }
+        
+        @keyframes gradientFloat {
+            0%, 100% { 
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% { 
+                transform: translate(-20px, -20px) rotate(1deg);
+            }
+            66% { 
+                transform: translate(20px, -10px) rotate(-1deg);
+            }
+        }
+        
+        /* Layout Structure */
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: rgba(10, 11, 14, 0.8);
+            backdrop-filter: blur(var(--blur-md));
+            -webkit-backdrop-filter: blur(var(--blur-md));
+            border-bottom: 1px solid var(--color-border);
+            z-index: 100;
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 100%;
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-xl);
+        }
+        
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            color: var(--color-text);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+        
+        .logo::before {
+            content: '';
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--gradient-teal) 0%, var(--gradient-blue) 100%);
+            border-radius: 8px;
+        }
+        
+        .header-nav {
+            display: flex;
+            gap: var(--spacing-xl);
+        }
+        
+        .header-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color var(--transition-base);
+        }
+        
+        .header-link:hover {
+            color: var(--color-text);
+        }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: rgba(10, 11, 14, 0.5);
+            backdrop-filter: blur(var(--blur-lg));
+            -webkit-backdrop-filter: blur(var(--blur-lg));
+            border-right: 1px solid var(--color-border);
+            overflow-y: auto;
+            padding: var(--spacing-xl);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .nav-section {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .nav-section-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-sm);
+            padding-left: var(--spacing-sm);
+        }
+        
+        .nav-list {
+            list-style: none;
+        }
+        
+        .nav-item {
+            margin-bottom: 2px;
+        }
+        
+        .nav-link {
+            display: block;
+            padding: var(--spacing-sm) var(--spacing-md);
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            transition: all var(--transition-base);
+            position: relative;
+            background: transparent;
+        }
+        
+        .nav-link:hover {
+            color: var(--color-text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        
+        .nav-link.active {
+            color: var(--color-accent);
+            background: var(--color-accent-light);
+        }
+        
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: var(--color-accent);
+            border-radius: 1px;
+        }
+        
+        /* Main Content */
+        .main {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .content {
+            max-width: var(--content-max-width);
+            margin: 0 auto;
+            padding: var(--spacing-2xl) var(--spacing-xl);
+        }
+        
+        /* Content Container - Subtle glass effect */
+        article {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(var(--blur-sm));
+            -webkit-backdrop-filter: blur(var(--blur-sm));
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2xl);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Breadcrumbs */
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            margin-bottom: var(--spacing-xl);
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+        }
+        
+        .breadcrumb-separator {
+            color: var(--color-text-tertiary);
+        }
+        
+        .breadcrumb-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            transition: color var(--transition-base);
+        }
+        
+        .breadcrumb-link:hover {
+            color: var(--color-accent);
+        }
+        
+        /* Typography */
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.2;
+        }
+        
+        h2 {
+            font-size: 1.875rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            margin-top: var(--spacing-2xl);
+            margin-bottom: var(--spacing-lg);
+            padding-top: var(--spacing-lg);
+            border-top: 1px solid var(--color-border);
+        }
+        
+        h2:first-of-type {
+            border-top: none;
+            padding-top: 0;
+            margin-top: var(--spacing-xl);
+        }
+        
+        h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-top: var(--spacing-xl);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        p {
+            margin-bottom: var(--spacing-lg);
+            color: var(--color-text-secondary);
+            line-height: 1.75;
+        }
+        
+        /* Links */
+        a {
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: color var(--transition-base);
+            border-bottom: 1px solid transparent;
+        }
+        
+        a:hover {
+            color: var(--color-accent-hover);
+            border-bottom-color: var(--color-accent-hover);
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin-bottom: var(--spacing-lg);
+            padding-left: var(--spacing-xl);
+            color: var(--color-text-secondary);
+        }
+        
+        li {
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        /* Code Blocks */
+        pre {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-lg);
+            overflow-x: auto;
+            margin-bottom: var(--spacing-lg);
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+        
+        code {
+            font-family: var(--font-mono);
+            font-size: 0.875em;
+            background: rgba(14, 165, 233, 0.1);
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            color: #67e8f9;
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        
+        pre code {
+            background: none;
+            padding: 0;
+            font-size: inherit;
+            color: var(--color-text);
+            border: none;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: var(--spacing-lg);
+            font-size: 0.875rem;
+            background: rgba(255, 255, 255, 0.01);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            padding: var(--spacing-md) var(--spacing-lg);
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text);
+            border-bottom: 1px solid var(--color-border);
+        }
+        
+        td {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            color: var(--color-text-secondary);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        /* Blockquotes */
+        blockquote {
+            border-left: 2px solid var(--color-accent);
+            padding-left: var(--spacing-lg);
+            margin: var(--spacing-lg) 0;
+            color: var(--color-text-secondary);
+            font-style: italic;
+        }
+        
+        /* Callout Boxes */
+        .callout {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            padding: var(--spacing-lg);
+            margin-bottom: var(--spacing-lg);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .callout::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 3px;
+        }
+        
+        .callout-info {
+            border-color: rgba(14, 165, 233, 0.3);
+            background: rgba(14, 165, 233, 0.05);
+        }
+        
+        .callout-info::before {
+            background: var(--gradient-blue);
+        }
+        
+        .callout-warning {
+            border-color: rgba(249, 115, 22, 0.3);
+            background: rgba(249, 115, 22, 0.05);
+        }
+        
+        .callout-warning::before {
+            background: var(--gradient-orange);
+        }
+        
+        .callout-error::before {
+            background: #ef4444;
+        }
+        
+        /* TOC */
+        .toc {
+            position: fixed;
+            right: var(--spacing-xl);
+            top: calc(var(--header-height) + var(--spacing-2xl));
+            width: 200px;
+            padding: var(--spacing-lg);
+            background: transparent;
+        }
+        
+        .toc-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-tertiary);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .toc-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .toc-item {
+            margin-bottom: var(--spacing-xs);
+        }
+        
+        .toc-link {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 0.813rem;
+            transition: color var(--transition-base);
+            display: block;
+            padding: var(--spacing-xs) 0;
+            position: relative;
+            padding-left: var(--spacing-md);
+        }
+        
+        .toc-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 0;
+            background: var(--color-accent);
+            transition: height var(--transition-base);
+        }
+        
+        .toc-link:hover {
+            color: var(--color-text);
+            border-bottom: none;
+        }
+        
+        .toc-link.active {
+            color: var(--color-accent);
+            font-weight: 500;
+        }
+        
+        .toc-link.active::before {
+            height: 16px;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 1280px) {
+            .toc {
+                display: none;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            :root {
+                --header-height: 56px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform var(--transition-slow);
+                z-index: 90;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main {
+                margin-left: 0;
+            }
+            
+            .content {
+                padding: var(--spacing-lg) var(--spacing-md);
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-muted {
+            color: var(--color-text-tertiary);
+        }
+        
+        .text-small {
+            font-size: 0.875rem;
+        }
+        
+        .mt-0 { margin-top: 0; }
+        .mt-1 { margin-top: var(--spacing-sm); }
+        .mt-2 { margin-top: var(--spacing-md); }
+        .mt-3 { margin-top: var(--spacing-lg); }
+        .mt-4 { margin-top: var(--spacing-xl); }
+        
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: var(--spacing-sm); }
+        .mb-2 { margin-bottom: var(--spacing-md); }
+        .mb-3 { margin-bottom: var(--spacing-lg); }
+        .mb-4 { margin-bottom: var(--spacing-xl); }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn var(--transition-slow) ease-out;
+        }
+        
+        /* Search Box */
+        .search-container {
+            margin-bottom: var(--spacing-xl);
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: var(--spacing-sm) var(--spacing-md);
+            padding-left: 2.5rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius-sm);
+            font-size: 0.875rem;
+            color: var(--color-text);
+            transition: all var(--transition-base);
+        }
+        
+        .search-input::placeholder {
+            color: var(--color-text-tertiary);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            background: rgba(255, 255, 255, 0.03);
+            box-shadow: 0 0 0 1px var(--color-accent);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: var(--spacing-md);
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--color-text-tertiary);
+        }
+        
+        /* Menu Toggle (Mobile) */
+        .menu-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            color: var(--color-text);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            transition: all var(--transition-base);
+        }
+        
+        .menu-toggle:hover {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: var(--color-text-secondary);
+        }
+        
+        .menu-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Copy Button for Code Blocks */
+        .code-container {
+            position: relative;
+        }
+        
+        .copy-button {
+            position: absolute;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-base);
+            opacity: 0;
+        }
+        
+        .code-container:hover .copy-button {
+            opacity: 1;
+        }
+        
+        .copy-button:hover {
+            background: rgba(14, 165, 233, 0.1);
+            color: var(--color-text);
+            border-color: rgba(14, 165, 233, 0.3);
+        }
+        
+        .copy-button.copied {
+            color: var(--color-accent);
+            border-color: var(--color-accent);
+            background: rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="logo">Abel</div>
+                </div>
+                <nav class="header-nav">
+                    <a href="#" class="header-link">Docs</a>
+                    <a href="#" class="header-link">API</a>
+                    <a href="#" class="header-link">GitHub</a>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Search -->
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation...">
+            </div>
+            
+            <!-- Navigation -->
+            <nav>
+                <div class="nav-section">
+                    <div class="nav-section-title">Getting Started</div>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="nav-link active">Introduction</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Quick Start</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Installation</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Architecture</div>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="nav-link">System Overview</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Hardware Design</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Network Topology</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Communication Protocols</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">Components</div>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="nav-link">Sensor Nodes</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Actuator Nodes</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Gateway Controller</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">Power Management</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-section-title">API Reference</div>
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="#" class="nav-link">REST API</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">WebSocket API</a></li>
+                        <li class="nav-item"><a href="#" class="nav-link">MQTT Topics</a></li>
+                    </ul>
+                </div>
+            </nav>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main">
+            <div class="content">
+                <!-- Breadcrumbs -->
+                <nav class="breadcrumbs">
+                    <a href="#" class="breadcrumb-link">Home</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <a href="#" class="breadcrumb-link">Documentation</a>
+                    <span class="breadcrumb-separator">/</span>
+                    <span>Introduction</span>
+                </nav>
+                
+                <!-- Article Content -->
+                <article class="fade-in">
+                    <h1>Abel Hydro Documentation</h1>
+                    
+                    <p class="text-large">
+                        Abel Hydro is a distributed IoT system for hydroponic monitoring and control. This documentation covers the complete system architecture, hardware specifications, and software implementation.
+                    </p>
+                    
+                    <h2>Overview</h2>
+                    
+                    <p>
+                        The Abel Hydro system provides comprehensive monitoring and control capabilities for hydroponic installations through a distributed mesh network of ESP32-based nodes. The system is designed for scalability, reliability, and ease of deployment.
+                    </p>
+                    
+                    <h3>Key Features</h3>
+                    
+                    <ul>
+                        <li>Distributed mesh network architecture</li>
+                        <li>Real-time sensor monitoring</li>
+                        <li>Automated control systems</li>
+                        <li>Cloud connectivity and remote management</li>
+                        <li>Ultra-low power consumption design</li>
+                    </ul>
+                    
+                    <h2>System Architecture</h2>
+                    
+                    <p>
+                        The system employs a hierarchical architecture with three primary node types: sensor nodes for environmental monitoring, actuator nodes for system control, and a gateway controller for coordination and cloud connectivity.
+                    </p>
+                    
+                    <div class="callout callout-info">
+                        <strong>Note:</strong> The distributed architecture ensures system resilience through redundancy and automatic failover capabilities.
+                    </div>
+                    
+                    <h3>Code Example</h3>
+                    
+                    <div class="code-container">
+                        <pre><code class="language-cpp">// Initialize sensor node
+void setup() {
+    Serial.begin(115200);
+    
+    // Initialize mesh network
+    mesh.init(MESH_PREFIX, MESH_PASSWORD, &userScheduler, MESH_PORT);
+    mesh.onReceive(&receivedCallback);
+    mesh.onNewConnection(&newConnectionCallback);
+    
+    // Initialize sensors
+    initSensors();
+}</code></pre>
+                        <button class="copy-button" onclick="copyCode(this)">Copy</button>
+                    </div>
+                    
+                    <h2>Hardware Specifications</h2>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Specification</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Microcontroller</td>
+                                <td>ESP32-S3</td>
+                                <td>Main gateway controller</td>
+                            </tr>
+                            <tr>
+                                <td>Sensor MCU</td>
+                                <td>ESP32-C3</td>
+                                <td>Sensor and actuator nodes</td>
+                            </tr>
+                            <tr>
+                                <td>Power Supply</td>
+                                <td>5V/3.3V regulated</td>
+                                <td>System power</td>
+                            </tr>
+                            <tr>
+                                <td>Communication</td>
+                                <td>WiFi/BLE/ESP-NOW</td>
+                                <td>Mesh networking</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <h2>Getting Started</h2>
+                    
+                    <p>
+                        To begin with Abel Hydro, you'll need to set up your development environment, configure the hardware nodes, and deploy the mesh network. Follow our quick start guide for step-by-step instructions.
+                    </p>
+                    
+                    <blockquote>
+                        "The future of agriculture lies in the intelligent integration of technology with traditional farming practices."
+                    </blockquote>
+                </article>
+            </div>
+            
+            <!-- Table of Contents (for wider screens) -->
+            <aside class="toc">
+                <div class="toc-title">On this page</div>
+                <ul class="toc-list">
+                    <li class="toc-item"><a href="#overview" class="toc-link active">Overview</a></li>
+                    <li class="toc-item"><a href="#features" class="toc-link">Key Features</a></li>
+                    <li class="toc-item"><a href="#architecture" class="toc-link">System Architecture</a></li>
+                    <li class="toc-item"><a href="#hardware" class="toc-link">Hardware Specifications</a></li>
+                    <li class="toc-item"><a href="#getting-started" class="toc-link">Getting Started</a></li>
+                </ul>
+            </aside>
+        </main>
+    </div>
+    
+    <script>
+        // Toggle sidebar on mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+        
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.previousElementSibling.querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        // Smooth scroll for TOC links
+        document.querySelectorAll('.toc-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+                
+                // Update active state
+                document.querySelectorAll('.toc-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
+        
+        // Search functionality
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                // Implement search logic here
+                console.log('Searching for:', query);
+            });
+        }
+        
+        // Intersection Observer for TOC active state
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0% -70% 0%',
+            threshold: 0
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const id = entry.target.getAttribute('id');
+                    const tocLink = document.querySelector(`.toc-link[href="#${id}"]`);
+                    
+                    if (tocLink) {
+                        document.querySelectorAll('.toc-link').forEach(link => {
+                            link.classList.remove('active');
+                        });
+                        tocLink.classList.add('active');
+                    }
+                }
+            });
+        }, observerOptions);
+        
+        // Observe all headings
+        document.querySelectorAll('h2, h3').forEach(heading => {
+            if (heading.id) {
+                observer.observe(heading);
+            }
+        });
+    </script>
+</body>
+</html>
