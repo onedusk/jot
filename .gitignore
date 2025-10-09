@@ -52,3 +52,7 @@ coverage.out
 scripts/ghub.sh;
 docs/internal
 docs/.maps
+.ctxt/
+docs/strategies/
+# for now, until we test it
+Dockerfile
