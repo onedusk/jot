@@ -1,0 +1,22 @@
+version: 1.0
+
+project:
+  name: "Basic Example"
+  description: "A simple documentation project"
+  author: "Jot User"
+
+input:
+  paths:
+    - "docs"
+    - "README.md"
+  ignore:
+    - "**/_*.md"
+
+output:
+  path: "dist"
+  format: "html"
+  theme: "default"
+
+features:
+  search: true
+  toc: true
