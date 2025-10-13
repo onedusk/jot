@@ -201,3 +201,26 @@ jot export --format llm --output docs-llm.json
 - On macOS/Linux: Run `chmod +x jot` after downloading binary
 - On Windows: Check that antivirus isn't blocking the executable
 - Ensure write permissions for output directory
+
+## FAQ
+
+### Can Jot handle large documentation sets?
+Yes, Jot is designed to handle thousands of documents efficiently. It uses optimized scanning and rendering algorithms.
+
+### Does Jot support custom themes?
+Currently Jot uses a default theme. Custom theme support is planned for future releases.
+
+### Can I use Jot with CI/CD pipelines?
+Yes! Jot is a CLI tool that integrates easily with CI/CD. Run `jot build` in your pipeline to generate docs automatically.
+
+### What markdown flavors are supported?
+Jot supports GitHub-flavored markdown with extensions for frontmatter, code highlighting, tables, task lists, and footnotes.
+
+### Can I export to formats other than HTML?
+Yes, Jot supports JSON, YAML, and LLM-optimized formats via the `jot export` command.
+
+### How does LLM export work?
+LLM export creates optimized chunks (512 tokens with 128 token overlap) suitable for feeding into language models with context window limits.
+
+### Is there a watch mode for development?
+Yes, use `jot watch` to automatically rebuild when files change (requires the serve command to be running).
