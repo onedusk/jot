@@ -55,6 +55,11 @@ jot init
 jot build
 
 # Output is generated in ./dist/
+
+# Use custom configuration file
+jot build --config my-config.yaml
+
+# By default, jot looks for jot.yaml in the current directory
 ```
 
 ### Export Documentation
