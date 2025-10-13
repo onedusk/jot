@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/onedusk/jot/actions/workflows/ci.yml/badge.svg)](https://github.com/onedusk/jot/actions/workflows/ci.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/onedusk/jot)](https://goreportcard.com/report/github.com/onedusk/jot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/onedusk/jot/blob/main/LICENSE)
 
 Jot is a documentation generator that converts markdown files into modern, searchable documentation websites. Built as a replacement for JetBrains deprecated Writerside IDE.
 
