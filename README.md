@@ -119,28 +119,31 @@ jot export --format llm --output docs-llm.json
 Edit `jot.yaml` to customize your documentation:
 
 ```yaml
-version: 1.0
+version: 1.0  # Configuration version (required)
+
 project:
-  name: "My Documentation"
-  description: "Project documentation"
-  author: "Your Name"
+  name: "My Documentation"        # Project name (required)
+  description: "Project documentation"  # Brief description (optional)
+  author: "Your Name"             # Author name (optional)
 
 input:
   paths:
-    - "docs"        # Clean paths without ./
-    - "README.md"
+    - "docs"        # Source paths to scan (required)
+    - "README.md"   # Supports files and directories
   ignore:
-    - "**/_*.md"
+    - "**/_*.md"    # Glob patterns to ignore (optional)
     - "**/drafts/**"
+    - "**/node_modules/**"
 
 output:
-  path: "dist"
-  format: "html"
-  theme: "default"
+  path: "dist"     # Output directory (default: "dist")
+  format: "html"   # Output format: html, json, yaml (default: "html")
+  theme: "default" # Theme name (default: "default")
 
 features:
-  search: true
-  llm_export: true
+  search: true      # Enable full-text search (default: true)
+  llm_export: true  # Enable LLM-optimized export (default: false)
+  toc: true         # Generate table of contents (default: true)
 ```
 
 ## Project Structure
