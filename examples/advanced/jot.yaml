@@ -1,0 +1,26 @@
+version: 1.0
+
+project:
+  name: "Advanced Example"
+  description: "Demonstrates advanced Jot features"
+  author: "Jot Team"
+
+input:
+  paths:
+    - "docs"
+    - "api"
+    - "README.md"
+  ignore:
+    - "**/_*.md"
+    - "**/drafts/**"
+    - "**/TODO.md"
+
+output:
+  path: "dist"
+  format: "html"
+  theme: "default"
+
+features:
+  search: true
+  llm_export: true
+  toc: true
