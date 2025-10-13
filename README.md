@@ -59,6 +59,9 @@ jot build
 # Use custom configuration file
 jot build --config my-config.yaml
 
+# Enable verbose output for detailed logging
+jot build --verbose
+
 # By default, jot looks for jot.yaml in the current directory
 ```
 
