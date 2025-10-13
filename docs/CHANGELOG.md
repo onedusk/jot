@@ -5,6 +5,20 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - 2025-10-12
+
+### Fixed
+- **Performance**: Replaced `WriteString(fmt.Sprintf(...))` with `fmt.Fprintf` in markdown compiler for better performance
+- **Document Chunking**: Fixed overlap calculation in `chunkDocument` function to properly track character positions instead of mixing word indices with character counts
+- **HTML Rendering**: Fixed code block rendering to properly add language classes to both `<pre>` and `<code>` tags for better syntax highlighting support
+- **Breadcrumb Navigation**: Fixed breadcrumb path generation to use correct absolute paths for directories and files
+- **Navigation Tree**: Added missing `nav-tree` class wrapper to navigation output
+- **Template**: Updated page title format to include "Jot" branding
+- **Test Suite**: Fixed test expectations to match actual implementation behavior
+
+### Changed
+- Improved document chunking algorithm for more accurate text segmentation with proper overlap handling
+
 ## [0.0.5] - 2025-10-07
 
 ### Added

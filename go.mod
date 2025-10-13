@@ -1,4 +1,4 @@
-module github.com/thrive/jot
+module github.com/onedusk/jot
 
 go 1.22.3
 

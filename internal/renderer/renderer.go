@@ -192,7 +192,9 @@ func (r *HTMLRenderer) ResolveInternalLinks(html string) string {
 // table of contents, highlighting the current page.
 func (r *HTMLRenderer) GenerateNavigation(root *toc.TOCNode, currentPath string, relativePrefix string) string {
 	var buf bytes.Buffer
+	buf.WriteString(`<div class="nav-tree">`)
 	r.renderNavSection(&buf, root, currentPath, relativePrefix, 0)
+	buf.WriteString(`</div>`)
 	return buf.String()
 }
 
@@ -308,10 +310,18 @@ type BreadcrumbItem struct {
 func GenerateBreadcrumb(path string, relativePrefix string) []BreadcrumbItem {
 	// Clean and split the path
 	path = filepath.ToSlash(path)
+
+	// Special case for index
+	if path == "index.md" {
+		return []BreadcrumbItem{
+			{Title: "Home", Path: "/"},
+		}
+	}
+
 	parts := strings.Split(path, "/")
 
 	breadcrumbs := []BreadcrumbItem{
-		{Title: "Home", Path: relativePrefix + "index.html"},
+		{Title: "Home", Path: "/"},
 	}
 
 	// Build breadcrumb path
@@ -321,11 +331,6 @@ func GenerateBreadcrumb(path string, relativePrefix string) []BreadcrumbItem {
 			continue
 		}
 
-		// For the last part, remove .md extension
-		if i == len(parts)-1 {
-			part = strings.TrimSuffix(part, ".md")
-		}
-
 		// Add path separator
 		if currentPath != "" {
 			currentPath += "/"
@@ -333,10 +338,17 @@ func GenerateBreadcrumb(path string, relativePrefix string) []BreadcrumbItem {
 		currentPath += part
 
 		// Create breadcrumb item
-		title := strings.Title(strings.ReplaceAll(part, "_", " "))
-		href := relativePrefix + currentPath
-		if !strings.HasSuffix(href, ".html") {
-			href += ".html"
+		title := strings.Title(strings.ReplaceAll(strings.TrimSuffix(part, ".md"), "-", " "))
+
+		// For directories (not the last part or doesn't end with .md), append /
+		// For files (last part and ends with .md), replace .md with .html
+		var href string
+		if i == len(parts)-1 && strings.HasSuffix(part, ".md") {
+			// This is a file
+			href = "/" + strings.Replace(currentPath, ".md", ".html", 1)
+		} else {
+			// This is a directory
+			href = "/" + strings.TrimSuffix(currentPath, ".md") + "/"
 		}
 
 		breadcrumbs = append(breadcrumbs, BreadcrumbItem{

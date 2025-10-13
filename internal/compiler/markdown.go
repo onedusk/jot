@@ -69,9 +69,9 @@ func (m *MarkdownCompiler) compileDocument(doc scanner.Document, toc *toc.TableO
 
 	// Add navigation header
 	enhanced.WriteString("---\n")
-	enhanced.WriteString(fmt.Sprintf("title: %s\n", doc.Title))
-	enhanced.WriteString(fmt.Sprintf("path: %s\n", doc.RelativePath))
-	enhanced.WriteString(fmt.Sprintf("modified: %s\n", doc.ModTime.Format("2006-01-02")))
+	fmt.Fprintf(&enhanced, "title: %s\n", doc.Title)
+	fmt.Fprintf(&enhanced, "path: %s\n", doc.RelativePath)
+	fmt.Fprintf(&enhanced, "modified: %s\n", doc.ModTime.Format("2006-01-02"))
 	enhanced.WriteString("---\n\n")
 
 	// Add breadcrumb navigation
@@ -121,16 +121,16 @@ func (m *MarkdownCompiler) generateConsolidatedMarkdown(documents []scanner.Docu
 
 	// Generate TOC
 	for i, doc := range documents {
-		consolidated.WriteString(fmt.Sprintf("%d. [%s](#doc-%d)\n", i+1, doc.Title, i))
+		fmt.Fprintf(&consolidated, "%d. [%s](#doc-%d)\n", i+1, doc.Title, i)
 	}
 	consolidated.WriteString("\n---\n\n")
 
 	// Add all documents
 	for i, doc := range documents {
-		consolidated.WriteString(fmt.Sprintf("<a name=\"doc-%d\"></a>\n\n", i))
-		consolidated.WriteString(fmt.Sprintf("## %s\n\n", doc.Title))
-		consolidated.WriteString(fmt.Sprintf("**Path:** `%s`\n", doc.RelativePath))
-		consolidated.WriteString(fmt.Sprintf("**Modified:** %s\n\n", doc.ModTime.Format("2006-01-02")))
+		fmt.Fprintf(&consolidated, "<a name=\"doc-%d\"></a>\n\n", i)
+		fmt.Fprintf(&consolidated, "## %s\n\n", doc.Title)
+		fmt.Fprintf(&consolidated, "**Path:** `%s`\n", doc.RelativePath)
+		fmt.Fprintf(&consolidated, "**Modified:** %s\n\n", doc.ModTime.Format("2006-01-02"))
 		consolidated.Write(doc.Content)
 		consolidated.WriteString("\n\n---\n\n")
 	}
@@ -164,13 +164,13 @@ func (m *MarkdownCompiler) nodeToMarkdown(builder *strings.Builder, node *toc.TO
 
 	if node.IsLeaf() {
 		// Document link
-		builder.WriteString(fmt.Sprintf("%s- [%s](%s)\n", indent, node.Title, node.Path))
+		fmt.Fprintf(builder, "%s- [%s](%s)\n", indent, node.Title, node.Path)
 	} else {
 		// Section header
 		if depth == 0 {
-			builder.WriteString(fmt.Sprintf("\n## %s\n\n", node.Title))
+			fmt.Fprintf(builder, "\n## %s\n\n", node.Title)
 		} else {
-			builder.WriteString(fmt.Sprintf("%s- **%s**\n", indent, node.Title))
+			fmt.Fprintf(builder, "%s- **%s**\n", indent, node.Title)
 		}
 
 		// Process children

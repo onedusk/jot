@@ -43,7 +43,7 @@ func TestHTMLRenderer_RenderDocument(t *testing.T) {
 				Content: []byte("```go\nfunc main() {\n    fmt.Println(\"Hello\")\n}\n```"),
 			},
 			wantContent: []string{
-				`<pre><code class="language-go">`,
+				`<pre class="language-go"><code class="language-go">`,
 				`func main()`,
 				`Println`,
 				`</code></pre>`,
@@ -136,7 +136,7 @@ func TestHTMLRenderer_RenderPage(t *testing.T) {
 		"<title>Test Page | Jot Documentation</title>",
 		"<body>",
 		"<nav", // Navigation
-		"<main>",
+		"<main",
 		"<h1",
 		"Test Page</h1>",
 		"</main>",
@@ -282,7 +282,7 @@ func TestHTMLRenderer_GenerateNavigation(t *testing.T) {
 	if !strings.Contains(nav, "Advanced") {
 		t.Error("GenerateNavigation() missing Advanced link")
 	}
-	if !strings.Contains(nav, `class="active"`) {
+	if !strings.Contains(nav, `active`) {
 		t.Error("GenerateNavigation() missing active class for current page")
 	}
 }

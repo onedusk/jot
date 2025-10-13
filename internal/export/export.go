@@ -216,55 +216,51 @@ func chunkDocument(doc scanner.Document, maxSize, overlap int) []Chunk {
 	}
 
 	chunks := make([]Chunk, 0)
-	words := strings.Fields(content)
-
-	currentChunk := strings.Builder{}
-	chunkStart := 0
 	chunkID := 0
+	startPos := 0
 
-	for i, word := range words {
-		potentialSize := currentChunk.Len() + len(word) + 1
+	for startPos < len(content) {
+		// Calculate end position for this chunk
+		endPos := minInt(startPos+maxSize, len(content))
 
-		if potentialSize > maxSize && currentChunk.Len() > 0 {
-			// Save current chunk
-			chunks = append(chunks, Chunk{
-				ID:       fmt.Sprintf("chunk-%d", chunkID),
-				Text:     currentChunk.String(),
-				StartPos: chunkStart,
-				EndPos:   chunkStart + currentChunk.Len(),
-			})
-
-			// Start new chunk with overlap
-			currentChunk.Reset()
-			chunkID++
-
-			// Add overlap from previous chunk
-			overlapStart := maxInt(0, i-overlap/10) // Approximate word-based overlap
-			for j := overlapStart; j <= i; j++ {
-				if j < len(words) {
-					if currentChunk.Len() > 0 {
-						currentChunk.WriteString(" ")
-					}
-					currentChunk.WriteString(words[j])
+		// Try to break at word boundary if not at end
+		if endPos < len(content) && endPos > startPos {
+			// Look for last space before maxSize
+			for i := endPos; i > startPos && i > endPos-50; i-- {
+				if content[i-1] == ' ' || content[i-1] == '\n' {
+					endPos = i
+					break
 				}
 			}
-			chunkStart = chunkStart + maxSize - overlap
-		} else {
-			if currentChunk.Len() > 0 {
-				currentChunk.WriteString(" ")
-			}
-			currentChunk.WriteString(word)
 		}
-	}
 
-	// Add final chunk
-	if currentChunk.Len() > 0 {
+		// Extract chunk text
+		chunkText := content[startPos:endPos]
+
 		chunks = append(chunks, Chunk{
 			ID:       fmt.Sprintf("chunk-%d", chunkID),
-			Text:     currentChunk.String(),
-			StartPos: chunkStart,
-			EndPos:   len(content),
+			Text:     chunkText,
+			StartPos: startPos,
+			EndPos:   endPos,
 		})
+
+		chunkID++
+
+		// Move to next chunk with overlap
+		if endPos >= len(content) {
+			break
+		}
+
+		// Calculate next start position with overlap
+		nextStart := endPos - overlap
+		if nextStart <= startPos {
+			// Ensure we make progress
+			nextStart = startPos + (maxSize - overlap)
+			if nextStart <= startPos {
+				nextStart = endPos
+			}
+		}
+		startPos = nextStart
 	}
 
 	return chunks
@@ -316,6 +312,14 @@ func contains(slice []string, item string) bool {
 // maxInt returns the greater of two integers.
 func maxInt(a, b int) int {
 	if a > b {
+		return a
+	}
+	return b
+}
+
+// minInt returns the smaller of two integers.
+func minInt(a, b int) int {
+	if a < b {
 		return a
 	}
 	return b
