@@ -1,5 +1,7 @@
 # Jot
 
+[![CI](https://github.com/onedusk/jot/actions/workflows/ci.yml/badge.svg)](https://github.com/onedusk/jot/actions/workflows/ci.yml)
+
 Jot is a documentation generator that converts markdown files into modern, searchable documentation websites. Built as a replacement for JetBrains deprecated Writerside IDE.
 
 ## Features
