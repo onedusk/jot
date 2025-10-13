@@ -179,3 +179,25 @@ jot export --format llm --output docs-llm.json
 # - Section extraction
 # - Metadata preservation
 ```
+
+## Troubleshooting
+
+### Build fails with "config file not found"
+- Ensure `jot.yaml` exists in your project root
+- Use `--config` flag to specify custom config location
+- Run `jot init` to create a default configuration
+
+### No documents found during build
+- Check that input paths in `jot.yaml` are correct
+- Verify markdown files aren't being ignored by patterns
+- Use `--verbose` flag to see which files are being scanned
+
+### Search not working in generated site
+- Ensure `features.search: true` in `jot.yaml`
+- Check that JavaScript is enabled in browser
+- Verify search index was generated in output directory
+
+### Permission denied errors
+- On macOS/Linux: Run `chmod +x jot` after downloading binary
+- On Windows: Check that antivirus isn't blocking the executable
+- Ensure write permissions for output directory
