@@ -47,6 +47,14 @@ chmod +x jot
 sudo mv jot /usr/local/bin/
 ```
 
+### Windows
+
+**Binary Installation (PowerShell):**
+```powershell
+Invoke-WebRequest -Uri https://github.com/onedusk/jot/releases/latest/download/jot-windows-amd64.exe -OutFile jot.exe
+# Add jot.exe to your PATH or move to a directory in PATH
+```
+
 **Build from Source:**
 ```bash
 # Clone repository
