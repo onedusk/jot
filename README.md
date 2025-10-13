@@ -13,13 +13,25 @@ Jot is a documentation generator that converts markdown files into modern, searc
 - **Large Scale** - Proven on thousands of documents
 - **Zero-Copy Markdown** - Symlink support for direct markdown access
 
+## Installation
+
+### macOS
+
+**Binary Installation (Intel):**
 ```bash
-# Download the latest release
 curl -L https://github.com/onedusk/jot/releases/latest/download/jot-darwin-amd64 -o jot
 chmod +x jot
 sudo mv jot /usr/local/bin/
 ```
 
+**Binary Installation (Apple Silicon):**
+```bash
+curl -L https://github.com/onedusk/jot/releases/latest/download/jot-darwin-arm64 -o jot
+chmod +x jot
+sudo mv jot /usr/local/bin/
+```
+
+**Build from Source:**
 ```bash
 # Clone repository
 git clone https://github.com/onedusk/jot
