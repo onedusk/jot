@@ -31,6 +31,22 @@ chmod +x jot
 sudo mv jot /usr/local/bin/
 ```
 
+### Linux
+
+**Binary Installation (amd64):**
+```bash
+curl -L https://github.com/onedusk/jot/releases/latest/download/jot-linux-amd64 -o jot
+chmod +x jot
+sudo mv jot /usr/local/bin/
+```
+
+**Binary Installation (arm64):**
+```bash
+curl -L https://github.com/onedusk/jot/releases/latest/download/jot-linux-arm64 -o jot
+chmod +x jot
+sudo mv jot /usr/local/bin/
+```
+
 **Build from Source:**
 ```bash
 # Clone repository
