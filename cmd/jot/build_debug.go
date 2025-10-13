@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/thrive/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/scanner"
 )
 
 // debugCmd provides a command for debugging the document scanning process.

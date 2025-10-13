@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/thrive/jot/internal/export"
-	"github.com/thrive/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/export"
+	"github.com/onedusk/jot/internal/scanner"
 )
 
 // exportCmd provides the command for exporting documentation into various formats

@@ -48,5 +48,47 @@
     "status": "",
     "uuid": "",
     "urgency": ""
+  },
+  {
+    "id": "4",
+    "description": "[[plan]]--> Set up branch protection rules on GitHub for main branch (require PRs, status checks, prevent force pushes)",
+    "protocols": "jot/.tasks/protocols/protodoc.md",
+    "protocols_enabled": "TRUE",
+    "docs": [],
+    "entry": "",
+    "modified": "",
+    "priority": "",
+    "project": "",
+    "status": "",
+    "uuid": "",
+    "urgency": ""
+  },
+  {
+    "id": "5",
+    "description": "[[plan]]--> GitHub settings: set main as default branch, enable auto-delete head branches",
+    "protocols": "jot/.tasks/protocols/protodoc.md",
+    "protocols_enabled": "TRUE",
+    "docs": [],
+    "entry": "",
+    "modified": "",
+    "priority": "",
+    "project": "",
+    "status": "",
+    "uuid": "",
+    "urgency": ""
+  },
+  {
+    "id": "6",
+    "description": "[[plan]]--> Adding GitHub Actions for CI/CD (tests, builds, linting)",
+    "protocols": "jot/.tasks/protocols/protodoc.md",
+    "protocols_enabled": "TRUE",
+    "docs": [],
+    "entry": "",
+    "modified": "",
+    "priority": "",
+    "project": "",
+    "status": "",
+    "uuid": "",
+    "urgency": ""
   }
 ]

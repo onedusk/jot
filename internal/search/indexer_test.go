@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/thrive/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/scanner"
 )
 
 // TestNewIndexer tests the creation of a new Indexer.

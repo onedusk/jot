@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/thrive/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/scanner"
 )
 
 // Index represents the top-level structure of the search index. It contains a list

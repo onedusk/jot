@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/thrive/jot/internal/scanner"
-	"github.com/thrive/jot/internal/toc"
+	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/toc"
 )
 
 // TestNewHTMLRenderer tests the creation of a new HTMLRenderer.

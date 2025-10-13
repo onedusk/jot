@@ -287,14 +287,14 @@ theme:
 ```yaml
 # GitHub Actions Example
 - name: Build Documentation
-  uses: thrive/jot-action@v1
+  uses: onedusk/jot-action@v1
   with:
     config: jot.yaml
     output: ./dist
 
 # GitLab CI Example
 build-docs:
-  image: thrive/jot:latest
+  image: onedusk/jot:latest
   script:
     - jot build
   artifacts:

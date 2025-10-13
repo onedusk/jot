@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/thrive/jot/internal/scanner"
-	"github.com/thrive/jot/internal/toc"
+	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/toc"
 )
 
 // MarkdownCompiler generates markdown output with enhanced navigation features

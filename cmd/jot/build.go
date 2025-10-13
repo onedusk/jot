@@ -9,9 +9,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/thrive/jot/internal/compiler"
-	"github.com/thrive/jot/internal/scanner"
-	"github.com/thrive/jot/internal/toc"
+	"github.com/onedusk/jot/internal/compiler"
+	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/toc"
 )
 
 // buildCmd represents the command for building the documentation.

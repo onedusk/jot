@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/thrive/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/scanner"
 	"gopkg.in/yaml.v3"
 )
 

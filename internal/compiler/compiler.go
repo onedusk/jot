@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/thrive/jot/internal/renderer"
-	"github.com/thrive/jot/internal/scanner"
-	"github.com/thrive/jot/internal/search"
-	"github.com/thrive/jot/internal/toc"
+	"github.com/onedusk/jot/internal/renderer"
+	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/search"
+	"github.com/onedusk/jot/internal/toc"
 )
 
 // Compiler orchestrates the documentation build process. It handles file processing,

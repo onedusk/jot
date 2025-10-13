@@ -89,15 +89,15 @@
 ## Contributing
 
 Interested in contributing? Check out:
-- [Open Issues](https://github.com/thrive/jot/issues)
+- [Open Issues](https://github.com/onedusk/jot/issues)
 - [Development Guide](docs/development.md)
 - [Architecture Overview](docs/architecture.md)
 
 ## Feedback
 
 Have ideas for features? Found a bug?
-- Open an issue: [GitHub Issues](https://github.com/thrive/jot/issues)
-- Email: jot@thrive.dev
+- Open an issue: [GitHub Issues](https://github.com/onedusk/jot/issues)
+- Email: jot@onedusk.dev
 
 ---
 

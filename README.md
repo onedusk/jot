@@ -11,14 +11,14 @@ Jot is a documentation generator that converts markdown files into modern, searc
 
 ```bash
 # Download the latest release
-curl -L https://github.com/thrive/jot/releases/latest/download/jot-darwin-amd64 -o jot
+curl -L https://github.com/onedusk/jot/releases/latest/download/jot-darwin-amd64 -o jot
 chmod +x jot
 sudo mv jot /usr/local/bin/
 ```
 
 ```bash
 # Clone repository
-git clone https://github.com/thrive/jot
+git clone https://github.com/onedusk/jot
 cd jot
 
 # Install dependencies

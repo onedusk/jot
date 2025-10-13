@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/russross/blackfriday/v2"
-	"github.com/thrive/jot/internal/scanner"
-	"github.com/thrive/jot/internal/toc"
+	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/toc"
 )
 
 // HTMLRenderer is responsible for converting markdown documents into final HTML pages.
