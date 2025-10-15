@@ -10,6 +10,6 @@ This is a minimal Jot documentation project demonstrating basic usage.
 
 ## Structure
 
-- `jot.yaml` - Project configuration
+- `jot.yml` - Project configuration
 - `docs/` - Documentation files
 - `dist/` - Generated output (created after build)

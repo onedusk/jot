@@ -43,7 +43,7 @@ RUN mkdir -p /app/docs /app/dist && \
 USER jot
 
 # Default configuration
-COPY --chown=jot:jot jot.yaml.example /app/jot.yaml
+COPY --chown=jot:jot jot.yml.example /app/jot.yml
 
 # Expose port for serve command
 EXPOSE 8080

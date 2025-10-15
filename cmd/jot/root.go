@@ -48,6 +48,7 @@ func init() {
 	rootCmd.AddCommand(buildCmd)
 	rootCmd.AddCommand(serveCmd)
 	rootCmd.AddCommand(watchCmd)
+	rootCmd.AddCommand(tocCmd)
 }
 
 // initConfig reads in the config file and environment variables if they are set.

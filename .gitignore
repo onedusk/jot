@@ -54,3 +54,7 @@ docs/internal
 docs/.maps
 .ctxt/
 docs/strategies/
+
+# Generated TOC files
+toc.xml
+toc.json

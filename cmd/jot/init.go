@@ -19,9 +19,9 @@ var initCmd = &cobra.Command{
 
 // runInit executes the logic for the init command.
 func runInit(cmd *cobra.Command, args []string) error {
-	// Check if jot.yaml already exists
-	if _, err := os.Stat("jot.yaml"); err == nil {
-		return fmt.Errorf("jot.yaml already exists in current directory")
+	// Check if jot.yml already exists
+	if _, err := os.Stat("jot.yml"); err == nil {
+		return fmt.Errorf("jot.yml already exists in current directory")
 	}
 
 	// Default configuration
@@ -75,10 +75,10 @@ search:
 `
 
 	// Write config file
-	if err := os.WriteFile("jot.yaml", []byte(defaultConfig), 0644); err != nil {
-		return fmt.Errorf("failed to create jot.yaml: %w", err)
+	if err := os.WriteFile("jot.yml", []byte(defaultConfig), 0644); err != nil {
+		return fmt.Errorf("failed to create jot.yml: %w", err)
 	}
-	fmt.Println("  Created jot.yaml")
+	fmt.Println("  Created jot.yml")
 
 	// Create .jotignore file only if it doesn't exist
 	if _, err := os.Stat(".jotignore"); os.IsNotExist(err) {
@@ -141,7 +141,7 @@ This is an example documentation project using Jot.
 
 ## Getting Started
 
-1. Edit the ` + "`jot.yaml`" + ` configuration file
+1. Edit the ` + "`jot.yml`" + ` configuration file
 2. Add your markdown files to the ` + "`docs`" + ` directory
 3. Run ` + "`jot build`" + ` to generate your documentation
 4. Run ` + "`jot serve`" + ` to preview locally

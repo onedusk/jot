@@ -17,7 +17,7 @@
 - [ ] **Fix duplicate TOC entries** - Improve path deduplication logic
 - [ ] **Better title extraction** - Support frontmatter, multiple heading formats
 - [ ] **Markdown compiler** - Native markdown output with navigation
-- [ ] **Config validation** - Verify jot.yaml on load
+- [ ] **Config validation** - Verify jot.yml on load
 - [ ] **Better error messages** - User-friendly error reporting
 
 ## Version 1.2 (Quality of Life)

@@ -78,7 +78,7 @@ go test ./...
 jot init
 
 # This creates:
-# - jot.yaml (configuration)
+# - jot.yml (configuration)
 # - .jotignore (ignore patterns)
 # - docs/ (documentation directory)
 # - README.md (example file)
@@ -98,7 +98,7 @@ jot build --config my-config.yaml
 # Enable verbose output for detailed logging
 jot build --verbose
 
-# By default, jot looks for jot.yaml in the current directory
+# By default, jot looks for jot.yml in the current directory
 ```
 
 ### Export Documentation
@@ -114,9 +114,29 @@ jot export --format yaml --output docs.yaml
 jot export --format llm --output docs-llm.json
 ```
 
+### Generate Table of Contents
+
+```bash
+# Generate toc.xml in each directory with markdown files
+jot toc
+
+# Preview without writing files
+jot toc --dry-run
+
+# Include subdirectories in each toc.xml (recursive)
+jot toc --recursive
+
+# The command will:
+# - Generate toc.xml in each directory containing .md files
+# - Create toc.json at project root with paths to all toc.xml files
+# - Use paths from jot.yml configuration
+```
+
+The `toc.json` file acts like a lock file, tracking all generated toc.xml locations with relative paths from the project root.
+
 ## Configuration
 
-Edit `jot.yaml` to customize your documentation:
+Edit `jot.yml` to customize your documentation:
 
 ```yaml
 version: 1.0  # Configuration version (required)
@@ -150,7 +170,7 @@ features:
 
 ```
 my-project/
- jot.yaml          # Configuration
+ jot.yml           # Configuration
        installation.md
  dist/             # Generated output
 ```
@@ -183,17 +203,17 @@ jot export --format llm --output docs-llm.json
 ## Troubleshooting
 
 ### Build fails with "config file not found"
-- Ensure `jot.yaml` exists in your project root
+- Ensure `jot.yml` exists in your project root
 - Use `--config` flag to specify custom config location
 - Run `jot init` to create a default configuration
 
 ### No documents found during build
-- Check that input paths in `jot.yaml` are correct
+- Check that input paths in `jot.yml` are correct
 - Verify markdown files aren't being ignored by patterns
 - Use `--verbose` flag to see which files are being scanned
 
 ### Search not working in generated site
-- Ensure `features.search: true` in `jot.yaml`
+- Ensure `features.search: true` in `jot.yml`
 - Check that JavaScript is enabled in browser
 - Verify search index was generated in output directory
 

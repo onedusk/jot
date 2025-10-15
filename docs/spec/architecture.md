@@ -289,7 +289,7 @@ theme:
 - name: Build Documentation
   uses: onedusk/jot-action@v1
   with:
-    config: jot.yaml
+    config: jot.yml
     output: ./dist
 
 # GitLab CI Example

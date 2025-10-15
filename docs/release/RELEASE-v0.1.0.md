@@ -37,7 +37,7 @@
 
 ### CLI Interface
 - Commands: `init`, `build`, `serve`, `watch`
-- Configuration file support (jot.yaml)
+- Configuration file support (jot.yml)
 - Project initialization with templates
 - Progress feedback and error handling
 

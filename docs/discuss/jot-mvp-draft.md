@@ -153,7 +153,7 @@ jot export --format json
 ## Configuration Schema
 
 ```yaml
-# jot.yaml
+# jot.yml
 version: 1.0
 project:
   name: "My Documentation"
