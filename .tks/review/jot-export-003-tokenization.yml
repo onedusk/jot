@@ -1,10 +1,10 @@
 id: "jot-export-003"
 task: "Replace character-based chunking with token-based using tiktoken-go tokenizer"
 entry: "2025-10-21T00:00:00Z"
-modified: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T16:30:00Z"
 priority: "H"
 project: "jot-llm-export"
-status: "todo"
+status: "done"
 uuid: "v1.0.0"
 urgency: 10
 

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/tokenizer"
 	"gopkg.in/yaml.v3"
 )
 
@@ -179,28 +180,46 @@ func TestExporter_ToLLMFormat(t *testing.T) {
 
 // TestChunkDocument tests the document chunking logic.
 func TestChunkDocument(t *testing.T) {
+	tok, err := tokenizer.NewTokenizer()
+	if err != nil {
+		t.Fatalf("Failed to create tokenizer: %v", err)
+	}
+
 	content := strings.Repeat("This is a test sentence. ", 100)
 	doc := scanner.Document{
 		Content: []byte(content),
 	}
 
-	chunks := chunkDocument(doc, 100, 20)
+	chunks := chunkDocument(doc, 100, 20, tok)
 	if len(chunks) == 0 {
 		t.Error("chunkDocument() returned no chunks")
 	}
 
-	// Check overlap
+	// Verify all chunks have token counts
+	for i, chunk := range chunks {
+		if chunk.TokenCount == 0 {
+			t.Errorf("Chunk %d has zero token count", i)
+		}
+		// Verify token count matches actual text
+		actualTokens := tok.Count(chunk.Text)
+		if chunk.TokenCount != actualTokens {
+			t.Errorf("Chunk %d TokenCount mismatch: got %d, actual %d", i, chunk.TokenCount, actualTokens)
+		}
+		// Verify chunk doesn't exceed maxTokens
+		if chunk.TokenCount > 100 {
+			t.Errorf("Chunk %d exceeds maxTokens: %d > 100", i, chunk.TokenCount)
+		}
+	}
+
+	// Check that chunks are properly positioned
 	for i := 1; i < len(chunks); i++ {
 		prev := chunks[i-1]
 		curr := chunks[i]
 
-		// There should be some overlap
-		if !strings.HasSuffix(prev.Text, curr.Text[:20]) && len(curr.Text) > 20 {
-			// Overlap might not be exact due to word boundaries
-			// Just check that chunks are sequential
-			if prev.EndPos >= curr.StartPos {
-				t.Errorf("chunkDocument() chunks not properly overlapped at index %d", i)
-			}
+		// Chunks should overlap (curr starts before prev ends)
+		if curr.StartPos >= prev.EndPos {
+			t.Errorf("chunkDocument() chunks not overlapping at index %d (curr.StartPos=%d >= prev.EndPos=%d)",
+				i, curr.StartPos, prev.EndPos)
 		}
 	}
 }

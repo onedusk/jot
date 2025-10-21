@@ -30,11 +30,12 @@ type LLMDocument struct {
 // Chunk represents a segment of text from a document, typically sized for
 // tasks like vector embedding or processing within a model's context window.
 type Chunk struct {
-	ID       string    `json:"id" yaml:"id"`
-	Text     string    `json:"text" yaml:"text"`
-	StartPos int       `json:"start_pos" yaml:"start_pos"`
-	EndPos   int       `json:"end_pos" yaml:"end_pos"`
-	Vector   []float32 `json:"vector,omitempty" yaml:"vector,omitempty"`
+	ID         string    `json:"id" yaml:"id"`
+	Text       string    `json:"text" yaml:"text"`
+	StartPos   int       `json:"start_pos" yaml:"start_pos"`
+	EndPos     int       `json:"end_pos" yaml:"end_pos"`
+	TokenCount int       `json:"token_count" yaml:"token_count"`
+	Vector     []float32 `json:"vector,omitempty" yaml:"vector,omitempty"`
 }
 
 // LLMSection represents a distinct section within a document, such as a

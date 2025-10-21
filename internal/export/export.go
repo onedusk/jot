@@ -10,6 +10,7 @@ import (
 
 	"github.com/onedusk/jot/internal/scanner"
 	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,6 +51,23 @@ func (e *Exporter) ToYAML(documents []scanner.Document) (string, error) {
 // ToLLMFormat exports documents to a structure optimized for consumption by Large Language Models.
 // This format includes chunking, sectioning, and metadata extraction.
 func (e *Exporter) ToLLMFormat(documents []scanner.Document) (*LLMExport, error) {
+	// Initialize tokenizer for accurate token-based chunking
+	tok, err := tokenizer.NewTokenizer()
+	if err != nil {
+		return nil, fmt.Errorf("failed to initialize tokenizer: %w", err)
+	}
+
+	// Read chunking configuration from viper with sensible defaults
+	chunkSize := viper.GetInt("llm.chunk_size")
+	if chunkSize == 0 {
+		chunkSize = 512
+	}
+
+	overlap := viper.GetInt("llm.overlap")
+	if overlap == 0 {
+		overlap = 128
+	}
+
 	export := &LLMExport{
 		Version:   "1.0",
 		Generated: time.Now().Format(time.RFC3339),
@@ -66,7 +84,7 @@ func (e *Exporter) ToLLMFormat(documents []scanner.Document) (*LLMExport, error)
 			Title:    doc.Title,
 			Path:     doc.RelativePath,
 			Content:  string(doc.Content),
-			Chunks:   chunkDocument(doc, 512, 128),
+			Chunks:   chunkDocument(doc, chunkSize, overlap, tok),
 			Metadata: doc.Metadata,
 		}
 
@@ -203,15 +221,19 @@ func (e *Exporter) indexDocument(doc *LLMDocument, index *SemanticIndex) {
 
 // chunkDocument splits a document's content into smaller, potentially overlapping chunks.
 // This is useful for processing large documents with token limits.
-func chunkDocument(doc scanner.Document, maxSize, overlap int) []Chunk {
+// Uses token-based chunking instead of character-based for accurate LLM context window management.
+func chunkDocument(doc scanner.Document, maxTokens, overlapTokens int, tok tokenizer.Tokenizer) []Chunk {
 	content := string(doc.Content)
-	if len(content) <= maxSize {
+
+	// Check if entire content fits within token limit
+	if tok.Count(content) <= maxTokens {
 		return []Chunk{
 			{
-				ID:       "chunk-0",
-				Text:     content,
-				StartPos: 0,
-				EndPos:   len(content),
+				ID:         "chunk-0",
+				Text:       content,
+				StartPos:   0,
+				EndPos:     len(content),
+				TokenCount: tok.Count(content),
 			},
 		}
 	}
@@ -221,16 +243,37 @@ func chunkDocument(doc scanner.Document, maxSize, overlap int) []Chunk {
 	startPos := 0
 
 	for startPos < len(content) {
-		// Calculate end position for this chunk
-		endPos := minInt(startPos+maxSize, len(content))
+		// Find end position where token count reaches maxTokens
+		endPos := len(content)
+		currentText := content[startPos:endPos]
 
-		// Try to break at word boundary if not at end
-		if endPos < len(content) && endPos > startPos {
-			// Look for last space before maxSize
-			for i := endPos; i > startPos && i > endPos-50; i-- {
-				if content[i-1] == ' ' || content[i-1] == '\n' {
-					endPos = i
-					break
+		// If current text exceeds maxTokens, find the right boundary
+		if tok.Count(currentText) > maxTokens {
+			// Binary search for the right character position
+			left, right := startPos, len(content)
+
+			for left < right {
+				mid := (left + right + 1) / 2
+				testText := content[startPos:mid]
+
+				if tok.Count(testText) <= maxTokens {
+					left = mid
+				} else {
+					right = mid - 1
+				}
+			}
+
+			endPos = left
+
+			// Try to break at word boundary to avoid splitting words
+			if endPos < len(content) && endPos > startPos {
+				// Look backwards for space or newline within reasonable range
+				searchStart := maxInt(startPos, endPos-100)
+				for i := endPos; i > searchStart; i-- {
+					if content[i-1] == ' ' || content[i-1] == '\n' {
+						endPos = i
+						break
+					}
 				}
 			}
 		}
@@ -239,10 +282,11 @@ func chunkDocument(doc scanner.Document, maxSize, overlap int) []Chunk {
 		chunkText := content[startPos:endPos]
 
 		chunks = append(chunks, Chunk{
-			ID:       fmt.Sprintf("chunk-%d", chunkID),
-			Text:     chunkText,
-			StartPos: startPos,
-			EndPos:   endPos,
+			ID:         fmt.Sprintf("chunk-%d", chunkID),
+			Text:       chunkText,
+			StartPos:   startPos,
+			EndPos:     endPos,
+			TokenCount: tok.Count(chunkText),
 		})
 
 		chunkID++
@@ -252,16 +296,39 @@ func chunkDocument(doc scanner.Document, maxSize, overlap int) []Chunk {
 			break
 		}
 
-		// Calculate next start position with overlap
-		nextStart := endPos - overlap
-		if nextStart <= startPos {
-			// Ensure we make progress
-			nextStart = startPos + (maxSize - overlap)
-			if nextStart <= startPos {
-				nextStart = endPos
+		// Calculate next start position with token-based overlap
+		// Find position that gives us approximately overlapTokens
+		if overlapTokens > 0 {
+			// Binary search for overlap position
+			targetTokens := tok.Count(chunkText) - overlapTokens
+			if targetTokens <= 0 {
+				// If overlap is larger than chunk, just move forward minimally
+				nextStart := endPos
+				startPos = nextStart
+				continue
 			}
+
+			left, right := startPos, endPos
+			for left < right {
+				mid := (left + right + 1) / 2
+				testText := content[startPos:mid]
+
+				if tok.Count(testText) <= targetTokens {
+					left = mid
+				} else {
+					right = mid - 1
+				}
+			}
+
+			startPos = left
+		} else {
+			startPos = endPos
 		}
-		startPos = nextStart
+
+		// Ensure we make progress
+		if startPos >= endPos {
+			startPos = endPos
+		}
 	}
 
 	return chunks
