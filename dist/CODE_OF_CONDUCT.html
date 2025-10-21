@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code of Conduct | Jot Documentation</title>
+
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="assets/style.css">
+    <link rel="stylesheet" href="assets/syntax-highlighting.css">
+    <script src="assets/highlight.js"></script>
+</head>
+<body>
+    <div class="layout">
+        
+        <header class="header">
+            <div class="header-content">
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                    <div class="logo">Documentation</div>
+                </div>
+                <nav class="header-nav">
+                    <a href="#" class="header-link">Docs</a>
+                    <a href="#" class="header-link">API</a>
+                    <a href="#" class="header-link">GitHub</a>
+                </nav>
+            </div>
+        </header>
+
+        
+        <aside class="sidebar" id="sidebar">
+            
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" class="search-input" placeholder="Search documentation...">
+            </div>
+
+            
+            <nav>
+                <div class="nav-tree"><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="CHANGELOG.html" class="nav-link">Changelog</a></li></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="CODE_OF_CONDUCT.html" class="nav-link active">Code of Conduct</a></li></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="CONTRIBUTING.html" class="nav-link">Contributing to Jot</a></li></ul></div><div class="nav-section"><ul class="nav-list"><li class="nav-item"><a href="INSTALL.html" class="nav-link">Installing Jot</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Benchmarks</div><ul class="nav-list"><li class="nav-item"><a href="benchmarks/stripe-docs-test.html" class="nav-link">Benchmarks</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Roadmaps</div><ul class="nav-list"><li class="nav-item"><a href="roadmaps/rmap_01.html" class="nav-link">Roadmap</a></li></ul></div><div class="nav-section"><div class="nav-section-title">Spec</div><ul class="nav-list"><li class="nav-item"><a href="spec/architecture.html" class="nav-link">System Architecture</a></li><li class="nav-item"><a href="spec/pseudocode.html" class="nav-link">Pseudocode Design</a></li><li class="nav-item"><a href="spec/requirements.html" class="nav-link">Requirements Spec.</a></li></ul></div></div>
+            </nav>
+        </aside>
+
+        
+        <main class="main">
+            <div class="content">
+                
+                <nav class="breadcrumbs">
+                    
+                        
+                        <a href="/" class="breadcrumb-link">Home</a>
+                    
+                        <span class="breadcrumb-separator">/</span>
+                        <a href="/CODE_OF_CONDUCT.html" class="breadcrumb-link">CODE_OF_CONDUCT</a>
+                    
+                </nav>
+
+                
+                <article>
+                    <h1 id="code-of-conduct">Code of Conduct</h1>
+
+<h2 id="our-pledge">Our Pledge</h2>
+
+<p>We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.</p>
+
+<h2 id="our-standards">Our Standards</h2>
+
+<p>Examples of behavior that contributes to a positive environment:</p>
+
+<ul>
+<li>Using welcoming and inclusive language</li>
+<li>Being respectful of differing viewpoints and experiences</li>
+<li>Gracefully accepting constructive criticism</li>
+<li>Focusing on what is best for the community</li>
+<li>Showing empathy towards other community members</li>
+</ul>
+
+<p>Examples of unacceptable behavior:</p>
+
+<ul>
+<li>Trolling, insulting/derogatory comments, and personal or political attacks</li>
+<li>Public or private harassment</li>
+<li>Publishing others&rsquo; private information without permission</li>
+<li>Other conduct which could reasonably be considered inappropriate</li>
+</ul>
+
+<h2 id="our-responsibilities">Our Responsibilities</h2>
+
+<p>Project maintainers are responsible for clarifying standards of acceptable behavior and will take appropriate and fair corrective action in response to unacceptable behavior.</p>
+
+<h2 id="scope">Scope</h2>
+
+<p>This Code of Conduct applies within all project spaces and when an individual is representing the project or its community in public spaces.</p>
+
+<h2 id="enforcement">Enforcement</h2>
+
+<p>Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by opening an issue. All complaints will be reviewed and investigated promptly and fairly.</p>
+
+<h2 id="attribution">Attribution</h2>
+
+<p>This Code of Conduct is adapted from the Contributor Covenant, version 2.0.</p>
+
+                </article>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            document.querySelectorAll('pre').forEach(pre => {
+                const button = document.createElement('button');
+                button.className = 'copy-button';
+                button.textContent = 'Copy';
+                button.onclick = function() {
+                    const code = pre.querySelector('code');
+                    const text = code ? code.textContent : pre.textContent;
+
+                    navigator.clipboard.writeText(text).then(() => {
+                        button.textContent = 'Copied!';
+                        button.classList.add('copied');
+
+                        setTimeout(() => {
+                            button.textContent = 'Copy';
+                            button.classList.remove('copied');
+                        }, 2000);
+                    });
+                };
+                pre.appendChild(button);
+            });
+        });
+
+        
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase();
+                
+                console.log('Searching for:', query);
+            });
+        }
+
+        
+        document.querySelectorAll('.nav-section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.parentElement;
+                section.classList.toggle('open');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,10 +1,10 @@
 id: "jot-export-004"
 task: "Implement JSONL line-delimited JSON export for vector database ingestion"
 entry: "2025-10-21T00:00:00Z"
-modified: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T20:28:21Z"
 priority: "M"
 project: "jot-llm-export"
-status: "todo"
+status: "done"
 uuid: "v1.0.0"
 urgency: 7
 

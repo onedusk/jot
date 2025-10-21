@@ -1,5 +1,5 @@
 # Jot Configuration File
-version: 1.0
+version: 0.1.0
 project:
   name: "Jot Documentation"
   description: "Modern documentation generator"

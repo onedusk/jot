@@ -5,6 +5,66 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.0] - 2025-10-21
+
+### Added
+
+#### Multi-Format LLM Export System
+- **llms.txt format**: Lightweight documentation index per [llmstxt.org](https://llmstxt.org/) specification
+- **llms-full.txt format**: Complete documentation concatenation optimized for LLM context windows
+- **JSONL format**: JSON Lines export for vector database ingestion (Pinecone, Weaviate, Qdrant)
+- **Enriched Markdown format**: Markdown with YAML frontmatter metadata for enhanced processing
+
+#### Token-Based Chunking
+- **tiktoken-go integration**: Accurate token counting using OpenAI's `cl100k_base` encoding
+- **Token-aware chunking**: Replaced character-based chunking with token-based for precise LLM context management
+- **Word boundary preservation**: Intelligent splitting that avoids breaking words mid-token
+- **Binary search algorithm**: Efficient token boundary detection
+
+#### Pluggable Chunking Strategies
+- **Fixed-size strategy**: Token-based fixed-size chunks with configurable overlap
+- **Markdown headers strategy**: Splits documents at markdown header boundaries (`#` to `######`)
+- **Recursive strategy**: Hierarchical splitting using multiple separators (paragraph → line → space → character)
+- **Semantic strategy**: Stub implementation for future embedding-based boundary detection
+
+#### CLI Enhancements
+- **New export formats**: `--format` flag supports `json`, `yaml`, `llms-txt`, `llms-full`, `jsonl`, `markdown`
+- **Chunking configuration**: `--strategy`, `--chunk-size`, `--chunk-overlap` flags for fine-grained control
+- **Workflow presets**:
+  - `--for-rag`: Optimized for RAG (jsonl + semantic + 512 tokens)
+  - `--for-context`: Optimized for context windows (markdown + headers + 1024 tokens)
+  - `--for-training`: Optimized for training (jsonl + fixed + 256 tokens)
+- **Embeddings support**: `--include-embeddings` flag for JSONL with API cost warnings
+- **Comprehensive validation**: Flag validation with helpful error messages and examples
+
+#### Build Integration
+- **Auto-generation**: `jot build` automatically generates `llms.txt` and `llms-full.txt`
+- **Configuration**: `features.llm_export` in `jot.yml` (default: true)
+- **Skip flag**: `--skip-llms-txt` to disable LLM export during build
+- **File size reporting**: Humanized byte sizes (KB, MB, GB) in build logs
+- **Non-breaking errors**: LLM export failures don't break builds
+
+### Changed
+- **Export system architecture**: Refactored to support multiple exporters with consistent interface
+- **Chunk struct**: Added `TokenCount` field for accurate token reporting
+- **Export types**: Added `ProjectConfig` and `ChunkMetadata` structs
+
+### Fixed
+- **Token counting bug**: Replaced `len(content)` with accurate token counting via tokenizer
+- **Chunk overlap calculation**: Now uses token-based overlap instead of character-based
+
+### Performance
+- **Binary search chunking**: Efficient token boundary detection using binary search algorithm
+- **Benchmarks added**: Performance benchmarks for all chunking strategies
+- **Streaming support**: JSONL format supports line-by-line streaming for large datasets
+
+### Technical Details
+- **Dependencies**: Added `github.com/pkoukk/tiktoken-go` for token counting
+- **New packages**: `internal/tokenizer`, `internal/chunking`
+- **New files**: 15 new implementation files, comprehensive test suites
+- **Tests**: 71 passing tests across 7 packages, 0 failures
+- **Coverage**: >85% test coverage for new packages
+
 ## [Unreleased] - 2025-10-12
 
 ### Fixed

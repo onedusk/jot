@@ -39,7 +39,7 @@ func runTOC(cmd *cobra.Command, args []string) error {
 	config := loadBuildConfig(cmd)
 
 	if dryRun {
-		fmt.Println(" [DRY RUN MODE] - No files will be written\n")
+		fmt.Println(" [DRY RUN MODE] - No files will be written")
 	}
 
 	fmt.Println(" Scanning for directories with markdown files...")

@@ -1,0 +1,25 @@
+# Jot Documentation
+
+> Modern documentation generator
+
+## Root
+
+- [Changelog](CHANGELOG.md): All notable changes to Jot will be documented in this file.
+- [Code of Conduct](CODE_OF_CONDUCT.md): We pledge to make participation in our project a harassment-free experience for everyone, regardl...
+- [Contributing to Jot](CONTRIBUTING.md): Thank you for your interest in contributing to Jot! This document provides guidelines for contrib...
+- [Installing Jot](INSTALL.md): There are several ways to install Jot on your system. Choose the method that works best for your ...
+
+## benchmarks
+
+- [Benchmarks](benchmarks/stripe-docs-test.md): **Test Date:** 2025-01-15 **Dataset:** Stripe's documentation **FIles:** 2,679 markdown files
+
+## roadmaps
+
+- [Roadmap](roadmaps/rmap_01.md): - [x] Markdown to HTML compilation - [x] XML Table of Contents generation - [x] Multi-format expo...
+
+## spec
+
+- [System Architecture](spec/architecture.md): Core Engine
+- [Pseudocode Design](spec/pseudocode.md): PROGRAM Jot
+- [Requirements Spec.](spec/requirements.md): Jot is a modern documentation generator designed to replace JetBrains' deprecated Writerside IDE....
+

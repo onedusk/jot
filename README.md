@@ -9,7 +9,13 @@ Jot is a documentation generator that converts markdown files into modern, searc
 ## Features
 
 - **Automatic TOC Generation** - Hierarchical table of contents from your file structure
-- **Multiple Export Formats** - HTML, JSON, YAML, and LLM-optimized outputs
+- **Multiple Export Formats** - HTML, JSON, YAML, llms.txt, JSONL, and enriched Markdown
+- **LLM-Optimized Exports** - Token-accurate chunking with multiple strategies for AI/ML workflows
+- **Vector Database Ready** - JSONL export with metadata for Pinecone, Weaviate, Qdrant
+- **Pluggable Chunking** - Fixed, semantic, markdown-headers, and recursive strategies
+- **Workflow Presets** - `--for-rag`, `--for-context`, `--for-training` for common use cases
+- **Token-Based Chunking** - Accurate token counting with tiktoken-go (GPT-4/Claude compatible)
+- **Auto-Generation** - LLM exports automatically generated during `jot build`
 - **Large Scale** - Proven on thousands of documents
 - **Zero-Copy Markdown** - Symlink support for direct markdown access
 
@@ -110,8 +116,29 @@ jot export --format json --output docs.json
 # Export as YAML
 jot export --format yaml --output docs.yaml
 
-# Export for LLMs (optimized format with chunks)
-jot export --format llm --output docs-llm.json
+# Export to llms.txt format (lightweight index per llmstxt.org)
+jot export --format llms-txt --output llms.txt
+
+# Export to llms-full.txt (complete documentation for LLM context)
+jot export --format llms-full --output llms-full.txt
+
+# Export to JSONL for vector databases (Pinecone, Weaviate, Qdrant)
+jot export --format jsonl --output docs.jsonl
+
+# Export to enriched markdown with YAML frontmatter
+jot export --format markdown --output docs.md
+
+# Use presets for common workflows
+jot export --for-rag --output rag-ready.jsonl      # RAG: semantic chunking, 512 tokens
+jot export --for-context --output context.md       # Context: header chunking, 1024 tokens
+jot export --for-training --output training.jsonl  # Training: fixed chunking, 256 tokens
+
+# Advanced: Custom chunking strategies
+jot export --format jsonl --strategy semantic --chunk-size 1024 --chunk-overlap 256 --output custom.jsonl
+jot export --format markdown --strategy markdown-headers --output docs-headers.md
+
+# Advanced: Include embeddings (warning: API costs apply)
+jot export --format jsonl --include-embeddings --output embeddings.jsonl
 ```
 
 ### Generate Table of Contents
@@ -139,7 +166,7 @@ The `toc.json` file acts like a lock file, tracking all generated toc.xml locati
 Edit `jot.yml` to customize your documentation:
 
 ```yaml
-version: 1.0  # Configuration version (required)
+version: 0.1.0  # Configuration version (required)
 
 project:
   name: "My Documentation"        # Project name (required)
@@ -162,8 +189,12 @@ output:
 
 features:
   search: true      # Enable full-text search (default: true)
-  llm_export: true  # Enable LLM-optimized export (default: false)
+  llm_export: true  # Auto-generate llms.txt during build (default: true)
   toc: true         # Generate table of contents (default: true)
+
+llm:
+  chunk_size: 512   # Maximum tokens per chunk (default: 512)
+  overlap: 128      # Token overlap between chunks (default: 128)
 ```
 
 ## Project Structure
@@ -187,18 +218,73 @@ Jot supports standard markdown with extensions:
 
 ## LLM Integration
 
-Jot can export documentation in LLM-optimized format with automatic chunking:
+Jot provides comprehensive LLM-optimized export formats with token-accurate chunking:
+
+### Automatic Export During Build
 
 ```bash
-# Export with chunks for context windows
-jot export --format llm --output docs-llm.json
+# Build automatically generates llms.txt and llms-full.txt
+jot build
 
-# The LLM format includes:
-# - Document chunking (512 token chunks with 128 token overlap)
-# - Semantic indexing
-# - Section extraction
-# - Metadata preservation
+# Skip LLM export if needed
+jot build --skip-llms-txt
 ```
+
+### Export Formats
+
+**llms.txt** - Lightweight index per [llmstxt.org](https://llmstxt.org/) specification:
+- H1 header with project name
+- Blockquote with description
+- Grouped by directory with markdown links
+- Optimized for quick LLM scanning
+
+**llms-full.txt** - Complete documentation for LLM context:
+- Full content concatenation with separators
+- README.md appears first
+- Preserves all markdown formatting
+- Size warnings for large outputs (>1MB)
+
+**JSONL** - Vector database ingestion format:
+- One JSON object per line (streaming-friendly)
+- Token counts for each chunk
+- Navigation fields (prev/next chunk IDs)
+- Vector field for embeddings (optional)
+- Compatible with Pinecone, Weaviate, Qdrant
+
+**Enriched Markdown** - Markdown with YAML frontmatter:
+- Metadata: source, section, chunk_id, token_count, modified
+- Preserved markdown formatting
+- Table of contents with anchor links
+- Ready for contextual enrichment
+
+### Chunking Strategies
+
+- **Fixed**: Token-based fixed-size chunks with word boundaries (default)
+- **Semantic**: Embedding-based boundary detection for natural breaks
+- **Markdown-headers**: Split at header boundaries (`#` to `######`)
+- **Recursive**: Hierarchical splitting (paragraph → line → space → character)
+- **Contextual**: Context-aware chunking (alias for semantic)
+
+### Workflow Presets
+
+```bash
+# RAG workflows: JSONL + semantic + 512 tokens
+jot export --for-rag --output rag.jsonl
+
+# Context window optimization: Markdown + headers + 1024 tokens
+jot export --for-context --output context.md
+
+# Training datasets: JSONL + fixed + 256 tokens
+jot export --for-training --output training.jsonl
+```
+
+### Token Accuracy
+
+Jot uses `tiktoken-go` with `cl100k_base` encoding for accurate token counting:
+- Compatible with GPT-4, GPT-3.5-turbo, and Claude models
+- Binary search algorithm for efficient chunking
+- Word boundary preservation to avoid splitting mid-word
+- Configurable chunk size and overlap
 
 ## Troubleshooting
 
@@ -240,7 +326,13 @@ Jot supports GitHub-flavored markdown with extensions for frontmatter, code high
 Yes, Jot supports JSON, YAML, and LLM-optimized formats via the `jot export` command.
 
 ### How does LLM export work?
-LLM export creates optimized chunks (512 tokens with 128 token overlap) suitable for feeding into language models with context window limits.
+Jot provides multiple LLM-optimized formats:
+- **llms.txt**: Lightweight index for quick LLM scanning
+- **llms-full.txt**: Complete docs with full context
+- **JSONL**: Token-accurate chunks for vector databases
+- **Enriched Markdown**: Metadata-rich markdown with frontmatter
+
+All formats use token-based chunking (default: 512 tokens with 128 overlap) with accurate token counting via tiktoken-go. You can customize chunking strategies (fixed, semantic, headers, recursive) and use workflow presets (`--for-rag`, `--for-context`, `--for-training`).
 
 ### Is there a watch mode for development?
 Yes, use `jot watch` to automatically rebuild when files change (requires the serve command to be running).

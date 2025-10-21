@@ -1,12 +1,13 @@
 id: "jot-export-008"
 task: "Update export command with new formats, strategies, and preset configurations"
 entry: "2025-10-21T00:00:00Z"
-modified: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T20:33:56Z"
 priority: "H"
 project: "jot-llm-export"
-status: "todo"
+status: "done"
 uuid: "v1.0.0"
 urgency: 8
+completed: "2025-10-21T20:33:56Z"
 
 # Parallel execution metadata
 dependencies: ["jot-export-001", "jot-export-002", "jot-export-003", "jot-export-004", "jot-export-005", "jot-export-006", "jot-export-007"]

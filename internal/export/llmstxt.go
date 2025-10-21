@@ -2,7 +2,6 @@
 package export
 
 import (
-	"fmt"
 	"log"
 	"path/filepath"
 	"sort"

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/onedusk/jot/internal/chunking"
 	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/tokenizer"
 )
 
 // JSONLExporter handles exporting documents to JSONL (JSON Lines) format.
@@ -25,31 +25,29 @@ func NewJSONLExporter() *JSONLExporter {
 	return &JSONLExporter{}
 }
 
-// ToJSONL converts documents to JSONL format using the provided chunking strategy.
+// ToJSONL converts documents to JSONL format with token-based chunking.
 // Each chunk is exported as a single line of compact JSON followed by a newline character.
 //
 // Parameters:
 //   - documents: The documents to export
-//   - chunker: The chunking strategy to use for splitting documents
 //   - maxTokens: Maximum number of tokens per chunk
 //   - overlapTokens: Number of tokens to overlap between consecutive chunks
 //
 // Returns:
 //   - A string containing the JSONL output (newline-delimited JSON objects)
 //   - An error if chunking or JSON marshaling fails
-func (e *JSONLExporter) ToJSONL(documents []scanner.Document, chunker chunking.ChunkStrategy, maxTokens, overlapTokens int) (string, error) {
-	if chunker == nil {
-		return "", fmt.Errorf("chunker cannot be nil")
+func (e *JSONLExporter) ToJSONL(documents []scanner.Document, maxTokens, overlapTokens int) (string, error) {
+	// Initialize tokenizer for chunking
+	tok, err := tokenizer.NewTokenizer()
+	if err != nil {
+		return "", fmt.Errorf("failed to initialize tokenizer: %w", err)
 	}
 
 	var builder strings.Builder
 
 	for _, doc := range documents {
-		// Chunk the document using the provided strategy
-		chunks, err := chunker.Chunk(doc, maxTokens, overlapTokens)
-		if err != nil {
-			return "", fmt.Errorf("failed to chunk document %s: %w", doc.ID, err)
-		}
+		// Chunk the document using token-based chunking
+		chunks := chunkDocument(doc, maxTokens, overlapTokens, tok)
 
 		// Convert each chunk to ChunkMetadata and write as JSONL
 		for i, chunk := range chunks {

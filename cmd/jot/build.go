@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/onedusk/jot/internal/compiler"
+	"github.com/onedusk/jot/internal/export"
 	"github.com/onedusk/jot/internal/scanner"
 	"github.com/onedusk/jot/internal/toc"
 )
@@ -27,6 +28,7 @@ var buildCmd = &cobra.Command{
 func init() {
 	buildCmd.Flags().StringP("output", "o", "", "output directory (overrides config)")
 	buildCmd.Flags().BoolP("clean", "c", false, "clean output directory before building")
+	buildCmd.Flags().Bool("skip-llms-txt", false, "skip generation of llms.txt and llms-full.txt files")
 }
 
 // runBuild executes the main build logic for the documentation.
@@ -99,6 +101,57 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	fmt.Printf("  Generated %d HTML files\n", len(allDocs))
 	fmt.Printf("  Created assets/styles.css\n\n")
 
+	// Generate llms.txt and llms-full.txt
+	if config.GenerateLLMSTxt {
+		fmt.Println(" Generating llms.txt...")
+
+		// Create project config from viper settings
+		projectConfig := export.ProjectConfig{
+			Name:        viper.GetString("project.name"),
+			Description: viper.GetString("project.description"),
+		}
+
+		// Set defaults if not configured
+		if projectConfig.Name == "" {
+			projectConfig.Name = "Documentation"
+		}
+		if projectConfig.Description == "" {
+			projectConfig.Description = "Project documentation"
+		}
+
+		exporter := export.NewLLMSTxtExporter()
+
+		// Generate llms.txt
+		llmsTxt, err := exporter.ToLLMSTxt(allDocs, projectConfig)
+		if err != nil {
+			fmt.Printf("  Warning: failed to generate llms.txt: %v\n", err)
+		} else {
+			llmsTxtPath := filepath.Join(config.OutputPath, "llms.txt")
+			if err := os.WriteFile(llmsTxtPath, []byte(llmsTxt), 0644); err != nil {
+				fmt.Printf("  Warning: failed to write llms.txt: %v\n", err)
+			} else {
+				llmsTxtSize := len(llmsTxt)
+				fmt.Printf("  Created llms.txt (%s)\n", humanizeBytes(llmsTxtSize))
+			}
+		}
+
+		// Generate llms-full.txt
+		llmsFullTxt, err := exporter.ToLLMSFullTxt(allDocs, projectConfig)
+		if err != nil {
+			fmt.Printf("  Warning: failed to generate llms-full.txt: %v\n", err)
+		} else {
+			llmsFullTxtPath := filepath.Join(config.OutputPath, "llms-full.txt")
+			if err := os.WriteFile(llmsFullTxtPath, []byte(llmsFullTxt), 0644); err != nil {
+				fmt.Printf("  Warning: failed to write llms-full.txt: %v\n", err)
+			} else {
+				llmsFullTxtSize := len(llmsFullTxt)
+				fmt.Printf("  Created llms-full.txt (%s)\n", humanizeBytes(llmsFullTxtSize))
+			}
+		}
+
+		fmt.Println()
+	}
+
 	// Summary
 	elapsed := time.Since(start)
 	fmt.Printf(" Build completed in %.2fs\n", elapsed.Seconds())
@@ -109,20 +162,31 @@ func runBuild(cmd *cobra.Command, args []string) error {
 // BuildConfig holds the configuration settings for the build process,
 // combining values from the config file and command-line flags.
 type BuildConfig struct {
-	InputPaths     []string
-	OutputPath     string
-	IgnorePatterns []string
-	Clean          bool
+	InputPaths         []string
+	OutputPath         string
+	IgnorePatterns     []string
+	Clean              bool
+	GenerateLLMSTxt    bool
+	ProjectName        string
+	ProjectDescription string
 }
 
 // loadBuildConfig loads the build configuration from Viper and overrides it with
 // any values provided via command-line flags. It also sets default values.
 func loadBuildConfig(cmd *cobra.Command) BuildConfig {
 	config := BuildConfig{
-		InputPaths:     viper.GetStringSlice("input.paths"),
-		OutputPath:     viper.GetString("output.path"),
-		IgnorePatterns: viper.GetStringSlice("input.ignore"),
-		Clean:          viper.GetBool("output.clean"),
+		InputPaths:         viper.GetStringSlice("input.paths"),
+		OutputPath:         viper.GetString("output.path"),
+		IgnorePatterns:     viper.GetStringSlice("input.ignore"),
+		Clean:              viper.GetBool("output.clean"),
+		GenerateLLMSTxt:    true, // Default to true
+		ProjectName:        viper.GetString("project.name"),
+		ProjectDescription: viper.GetString("project.description"),
+	}
+
+	// Read llm_export from config if explicitly set
+	if viper.IsSet("features.llm_export") {
+		config.GenerateLLMSTxt = viper.GetBool("features.llm_export")
 	}
 
 	// Override with command flags
@@ -131,6 +195,9 @@ func loadBuildConfig(cmd *cobra.Command) BuildConfig {
 	}
 	if clean, _ := cmd.Flags().GetBool("clean"); clean {
 		config.Clean = true
+	}
+	if skipLLMSTxt, _ := cmd.Flags().GetBool("skip-llms-txt"); skipLLMSTxt {
+		config.GenerateLLMSTxt = false
 	}
 
 	// Defaults
@@ -142,4 +209,21 @@ func loadBuildConfig(cmd *cobra.Command) BuildConfig {
 	}
 
 	return config
+}
+
+// humanizeBytes converts a byte count to a human-readable string (e.g., "15KB", "2.3MB")
+func humanizeBytes(bytes int) string {
+	const unit = 1024
+	if bytes < unit {
+		return fmt.Sprintf("%dB", bytes)
+	}
+
+	div, exp := int64(unit), 0
+	for n := bytes / unit; n >= unit; n /= unit {
+		div *= unit
+		exp++
+	}
+
+	units := []string{"KB", "MB", "GB", "TB"}
+	return fmt.Sprintf("%.1f%s", float64(bytes)/float64(div), units[exp])
 }

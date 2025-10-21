@@ -1,10 +1,10 @@
 id: "jot-export-007"
 task: "Auto-generate llms.txt and llms-full.txt during jot build workflow"
 entry: "2025-10-21T00:00:00Z"
-modified: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T20:34:22Z"
 priority: "M"
 project: "jot-llm-export"
-status: "todo"
+status: "done"
 uuid: "v1.0.0"
 urgency: 7
 
