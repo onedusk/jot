@@ -1,10 +1,10 @@
 id: "jot-export-001"
 task: "Implement llms.txt export format per llmstxt.org specification"
 entry: "2025-10-21T00:00:00Z"
-modified: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T17:00:00Z"
 priority: "H"
 project: "jot-llm-export"
-status: "todo"
+status: "done"
 uuid: "v1.0.0"
 urgency: 8
 
