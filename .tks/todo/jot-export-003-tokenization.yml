@@ -1,0 +1,64 @@
+id: "jot-export-003"
+task: "Replace character-based chunking with token-based using tiktoken-go tokenizer"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "H"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 10
+
+# Parallel execution metadata
+dependencies: []
+parallel_group: "B"
+blocks: ["jot-export-006", "jot-export-008"]
+execution_phase: "PHASE_2"
+can_start_when: "Immediately - but CRITICAL PATH. Task 6 (chunking strategies) depends on this completing. Run sequentially, not in parallel"
+
+subtasks:
+  - desc: "Run 'go get github.com/pkoukk/tiktoken-go' from /Users/macadelic/dusk-indust/shared/packages/jot directory and verify it appears in go.mod dependencies"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Create internal/tokenizer/tokenizer.go with Tokenizer interface defining Encode(text string) []int and Count(text string) int methods"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Implement TikTokenizer struct in internal/tokenizer/tokenizer.go using tiktoken.GetEncoding('cl100k_base') for GPT-4 compatibility"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Create NewTokenizer() (*TikTokenizer, error) factory function in internal/tokenizer/tokenizer.go handling encoding initialization errors"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Refactor chunkDocument signature in internal/export/export.go:205 from (doc scanner.Document, maxSize, overlap int) to (doc scanner.Document, maxTokens, overlapTokens int, tokenizer tokenizer.Tokenizer)"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Replace len(content) checks with tokenizer.Count(text) in chunk boundary detection at internal/export/export.go:224-235 preserving word boundaries"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-5"
+
+  - desc: "Add TokenCount int field to Chunk struct at internal/export/types.go:36 and populate with actual token count during chunking"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Update ToLLMFormat call at internal/export/export.go:68 to use viper.GetInt('llm.chunk_size') defaulting to 512 and viper.GetInt('llm.overlap') defaulting to 128"
+    agent: "tokenizer-dev"
+    parallel: false
+    depends_on_subtask: "subtask-7"
+
+must_reference:
+  - "internal/export/export.go:205-267 - Current buggy chunkDocument using character counts"
+  - "internal/export/types.go:32-38 - Chunk struct to modify"
+  - "https://github.com/pkoukk/tiktoken-go - Tokenizer library documentation"
+  - "jot.yml:40-46 - Existing llm.chunk_size: 512 and llm.overlap: 128 config"
+  - "go.mod:1-27 - Dependencies file to update"

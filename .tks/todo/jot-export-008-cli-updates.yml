@@ -1,0 +1,66 @@
+id: "jot-export-008"
+task: "Update export command with new formats, strategies, and preset configurations"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "H"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 8
+
+# Parallel execution metadata
+dependencies: ["jot-export-001", "jot-export-002", "jot-export-003", "jot-export-004", "jot-export-005", "jot-export-006", "jot-export-007"]
+parallel_group: "E"
+blocks: []
+execution_phase: "PHASE_5"
+can_start_when: "After ALL other tasks complete - final integration of all export formats and strategies"
+
+subtasks:
+  - desc: "Update exportCmd.Flags().StringP('format') in cmd/jot/export.go:25 to accept values: llms-txt, llms-full, jsonl, markdown, json, yaml with default 'json'"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Add exportCmd.Flags().StringP('strategy', 's', 'fixed', 'chunking strategy: fixed, semantic, markdown-headers, recursive, contextual') at line 26"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Add exportCmd.Flags().IntP('chunk-size', '', 512, 'tokens per chunk') and exportCmd.Flags().IntP('chunk-overlap', '', 128, 'token overlap') with validation >0 and <=2048"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Implement --for-rag, --for-context, --for-training boolean flags setting preset combinations: rag=jsonl+semantic+512, context=markdown+headers+1024, training=jsonl+fixed+256"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Add validateExportFlags(cmd *cobra.Command) error function checking mutually exclusive formats, preset conflicts, and providing helpful error messages with examples"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Update runExport switch statement at cmd/jot/export.go:76-91 adding cases 'llms-txt', 'llms-full', 'jsonl', 'markdown' routing to appropriate exporters with error handling"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: "subtask-5"
+
+  - desc: "Add --include-embeddings boolean flag for JSONL format with fmt.Printf warning log about API costs and processing time when enabled before exporting"
+    agent: "cli-dev"
+    parallel: false
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Update exportCmd.Long help text at cmd/jot/export.go:20 with examples: 'jot export --format llms-txt', 'jot export --for-rag --output docs.jsonl', 'jot export --format markdown --strategy headers'"
+    agent: "cli-dev"
+    parallel: true
+    depends_on_subtask: "subtask-7"
+
+must_reference:
+  - "cmd/jot/export.go:15-115 - Existing export command to modify"
+  - "internal/export/llmstxt.go - llms.txt exporters from Tasks 1-2"
+  - "internal/export/jsonl.go - JSONL exporter from Task 4"
+  - "internal/export/markdown.go - Markdown exporter from Task 5"
+  - "internal/chunking/factory.go - Strategy factory from Task 6"
+  - "README.md - CLI documentation to update with new command examples"
+  - "cmd/jot/build.go:120-145 - loadBuildConfig pattern for flag reading"

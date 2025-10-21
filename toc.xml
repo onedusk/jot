@@ -1,122 +1,32 @@
 <toc version="1.0" llm-optimized="true">
   <metadata>
-    <totalDocs>17</totalDocs>
+    <totalDocs>5</totalDocs>
   </metadata>
   <sections>
-    <section id="tks">
-      <title>.tks</title>
-      <section id="tks-done">
-        <title>Done</title>
-        <chapter id="tks-done-toc-searchability-improvements" path=".tks/done/toc_searchability_improvements.md" modified="2025-10-01T11:36:25Z" size="3478" words="402" readTime="1min" hash="sha256:5f72f7a02bb78390">
-          <title>TOC Searchability Improvements for Scale</title>
-          <summary>TOC Searchability Improvements for Scale ## Current Rating: 65/100 ## Target Rating: 90+/100 ## Quick Wins (Implement in jot) ### 1. Add Metadata Attributes (+15 points) ```xml &lt;chapter id=&quot;...&quot; ...</summary>
-          <keywords>docs, metadata, documents, parse, scale, load, current, context, index, (+10</keywords>
-        </chapter>
-      </section>
-      <section id="tks-protocols">
-        <title>Protocols</title>
-        <chapter id="tks-protocols-protodoc" path=".tks/protocols/protodoc.md" modified="2025-10-01T11:36:25Z" size="14214" words="1859" readTime="7min" hash="sha256:92c845d5d2c9168c">
-          <title>Complete Acronym Protocol Reference</title>
-          <summary>Complete Acronym Protocol Reference ## Eliminating Ambiguity in AI &amp; Agent Communication --- ## Original AI Communication Framework ### Core Operations - **VET** = &quot;Validate input, Error handli...</summary>
-          <keywords>time, tasks, notified, minutes, cases, prepared, token, boundary, acronyms, codes</keywords>
-        </chapter>
-      </section>
-      <section id="tks-support">
-        <title>Support</title>
-        <chapter id="tks-support-jot-integration-strategy" path=".tks/support/jot_integration_strategy.md" modified="2025-10-01T11:36:25Z" size="5046" words="715" readTime="2min" hash="sha256:1c0907a014233f0c">
-          <title>Jot Integration: Automating Documentation Updates</title>
-          <summary>Jot Integration: Automating Documentation Updates ## The Problem We Solved Remember when we kept having to manually update indexes? - &quot;good, now lets add this to the index =&gt; /Users/macadelic/dusk...</summary>
-          <keywords>integration, code, stripe&apos;s, prizms, that&apos;s, solve, automation, automatically, organized, agent</keywords>
-        </chapter>
-      </section>
-    </section>
-    <chapter id="readme" path="README.md" modified="2025-10-08T17:17:39Z" size="2680" words="375" readTime="1min" hash="sha256:26edc3e9b90fd9f3">
-      <title>Jot</title>
-      <summary>Jot Jot is a documentation generator that converts markdown files into modern, searchable documentation websites. Built as a replacement for JetBrains deprecated Writerside IDE. ## Features - **A...</summary>
-      <keywords>yaml, documents, project, documentation, features, markdown, llm-optimized, structure, export</keywords>
+    <chapter id="changelog" path="CHANGELOG.md" modified="2025-10-21T12:58:11Z" size="1599" words="226" readTime="1min" hash="sha256:16f156412af7873a">
+      <title>Changelog</title>
+      <summary>Changelog All notable changes to this project will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semanti...</summary>
+      <keywords>html, file, command, table, project, markdown, flag, support, master, toc.xml</keywords>
     </chapter>
-    <section id="docs">
-      <title>Docs</title>
-      <chapter id="docs-changelog" path="docs/CHANGELOG.md" modified="2025-10-07T16:16:39Z" size="5801" words="816" readTime="3min" hash="sha256:fb93582da6a831c2">
-        <title>Changelog</title>
-        <summary>Changelog All notable changes to Jot will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Version...</summary>
-        <keywords>improved, smart, planned, development, animations, formats, document, file, collapsible, port</keywords>
-      </chapter>
-      <section id="docs-benchmarks">
-        <title>Benchmarks</title>
-        <chapter id="docs-benchmarks-stripe-docs-test" path="docs/benchmarks/stripe-docs-test.md" modified="2025-10-01T11:36:25Z" size="477" words="63" readTime="1min" hash="sha256:0b34a1177a57d54d">
-          <title>Benchmarks</title>
-          <summary>Benchmarks ## Stripe Documentation **Test Date:** 2025-01-15 **Dataset:** Stripe&apos;s documentation **FIles:** 2,679 markdown files ## Results ``` ❯❯ jotdoc build ✓ Scanning for markdown file...</summary>
-          <keywords>documentation</keywords>
-        </chapter>
-      </section>
-      <section id="docs-release">
-        <title>Release</title>
-        <chapter id="docs-release-release-v0-1-0" path="docs/release/RELEASE-v0.1.0.md" modified="2025-10-01T11:36:25Z" size="3318" words="447" readTime="1min" hash="sha256:dc6e775cb73ef0dc">
-          <title>Jot v0.1.0 Release</title>
-          <summary>Jot v0.1.0 Release ## Release Overview ## New Features in v0.1.0 ### 2. **Mermaid Diagram Support** - Automatic detection and rendering of Mermaid diagrams - Supports flowcharts, sequence diagra...</summary>
-          <keywords>html, /jot, detection, more, features, build, prism.js, conversion, project, diagram</keywords>
-        </chapter>
-      </section>
-      <section id="docs-roadmaps">
-        <title>Roadmaps</title>
-        <chapter id="docs-roadmaps-rmap-01" path="docs/roadmaps/rmap_01.md" modified="2025-10-03T21:05:06Z" size="3628" words="540" readTime="2min" hash="sha256:ee5edcaaa413e4b3">
-          <title>Roadmap</title>
-          <summary>Roadmap ## Current Version: 1.0 ### ✅ Completed Features - [x] Markdown to HTML compilation - [x] XML Table of Contents generation - [x] Multi-format export (JSON, YAML, LLM) - [x] **Local devel...</summary>
-          <keywords>weeks*, changes, time, features, 1000, size, documents, |-----------|------------|------------|---------|, browser, support</keywords>
-        </chapter>
-      </section>
-      <section id="docs-spec">
-        <title>Spec</title>
-        <chapter id="docs-spec-architecture" path="docs/spec/architecture.md" modified="2025-10-01T11:36:25Z" size="6576" words="759" readTime="3min" hash="sha256:392acfb02a2789b7">
-          <title>System Architecture</title>
-          <summary>System Architecture ## 1. High-Level Architecture ``` Core Engine Engine Control Export ## 2. Component Architecture ### 2.1 CLI Layer (`cmd/jot/`)...</summary>
-          <keywords>copy, page, output, string, plugin, yaml, name, documentation, theme, example</keywords>
-        </chapter>
-        <chapter id="docs-spec-pseudocode" path="docs/spec/pseudocode.md" modified="2025-10-01T11:36:25Z" size="12734" words="1031" readTime="4min" hash="sha256:545fdd301c3181aa">
-          <title>Pseudocode Design</title>
-          <summary>Pseudocode Design ## 1. Main Application Flow ```pseudocode PROGRAM Jot INITIALIZE: config = LoadConfiguration() logger = SetupLogging() MAIN: command = ParseCLIArguments() SWIT...</summary>
-          <keywords>design, algorithm, implementation, pseudocode</keywords>
-        </chapter>
-        <chapter id="docs-spec-requirements" path="docs/spec/requirements.md" modified="2025-10-01T11:36:25Z" size="5506" words="814" readTime="3min" hash="sha256:eb8766a17bb332db">
-          <title>Requirements Spec.</title>
-          <summary>Requirements Spec. ## 1. Executive Summary Jot is a modern documentation generator designed to replace JetBrains&apos; deprecated Writerside IDE. It provides a fast, simple, and platform-independent so...</summary>
-          <keywords>offline, schema, dependencies, reload, files, code, standard, error, provide, interface</keywords>
-        </chapter>
-      </section>
-      <section id="docs-strategies">
-        <title>Strategies</title>
-        <chapter id="docs-strategies-dimension-reduction" path="docs/strategies/dimension_reduction.md" modified="2025-10-06T17:37:48Z" size="2122" words="272" readTime="1min" hash="sha256:9388e5f48933b057">
-          <title>Dimension Reduction Strategy</title>
-          <summary>Dimension Reduction Strategy ## Goal Shrink 768-d embedding vectors to lower-dimensional representations without materially degrading retrieval or model performance. ## Techniques 1. **PCA / SVD**...</summary>
-          <keywords>reduction, vectors, store, embeddings, retrieval, embedding, projection, variance, recall, reduced</keywords>
-        </chapter>
-        <chapter id="docs-strategies-downstream-usage" path="docs/strategies/downstream_usage.md" modified="2025-10-06T17:37:48Z" size="1694" words="237" readTime="1min" hash="sha256:ec9706f7abed7ec4">
-          <title>Downstream Usage Strategy</title>
-          <summary>Downstream Usage Strategy ## Goal Leverage the structured action log for automation, analytics, and knowledge reuse across teams. ## Use Cases &amp; Plans 1. **Fine-Tuning / Training Data** - Gener...</summary>
-          <keywords>action, error, sessions, actions, usage, normalized, data, query, (e.g</keywords>
-        </chapter>
-        <chapter id="docs-strategies-embedding-chunking" path="docs/strategies/embedding_chunking.md" modified="2025-10-06T17:37:48Z" size="1709" words="225" readTime="1min" hash="sha256:be02e9e54ceaecb6">
-          <title>Embedding &amp; Chunking Strategy</title>
-          <summary>Embedding &amp; Chunking Strategy ## Goal Prepare transcript-derived text for high-quality semantic search and modeling by generating 768-d embeddings with durable metadata. ## Chunk Design 1. **Actio...</summary>
-          <keywords>embeddings, chunks**, metadata, chunk, strategy, embedding, 768-d, action, jsonl, adjacent</keywords>
-        </chapter>
-        <chapter id="docs-strategies-post-processing" path="docs/strategies/post_processing.md" modified="2025-10-06T17:37:48Z" size="2249" words="281" readTime="1min" hash="sha256:33e4f64b292ae5a6">
-          <title>Post-Processing Strategy</title>
-          <summary>Post-Processing Strategy ## Goal Transform the raw marker-based transcript into structured, analytics-ready objects while safeguarding formatting fidelity for downstream teams. ## Context - Source...</summary>
-          <keywords>nbsp, structured, timestamps, verb, file, anomalies, summary, validation, session, source</keywords>
-        </chapter>
-        <chapter id="docs-strategies-storage-schemas" path="docs/strategies/storage_schemas.md" modified="2025-10-06T17:37:48Z" size="2085" words="263" readTime="1min" hash="sha256:2bf2126a8acf5471">
-          <title>Storage Schemas Strategy</title>
-          <summary>Storage Schemas Strategy ## Goal Select and implement durable storage patterns that balance analytics needs, pipeline ingestion, and operational simplicity. ## Candidates 1. **JSONL (Primary)** ...</summary>
-          <keywords>logs, pipeline, jsonl, fields, parquet, schema, schemas, analytics, storage, sample</keywords>
-        </chapter>
-      </section>
-    </section>
-    <chapter id="p" path="p.md" modified="2025-10-06T17:37:48Z" size="476" words="74" readTime="1min" hash="sha256:276ce8c1e0ea131b">
-      <title>Untitled</title>
-      <summary>▌ the objective: find a/some stable pattern(s) within =&gt; 2025-10-03-this-session-is-being-continued-from-a-previous-co.txt =&gt; - find a repeatable and reliable method to extract the data we need. - c...</summary>
-      <keywords>lines, find</keywords>
+    <chapter id="code-of-conduct" path="CODE_OF_CONDUCT.md" modified="2025-10-21T12:58:11Z" size="1607" words="222" readTime="1min" hash="sha256:02050a3e48cab7f6">
+      <title>Code of Conduct</title>
+      <summary>Code of Conduct ## Our Pledge We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, sex characteristics, ge...</summary>
+      <keywords>identity, behavior, other, spaces, project, conduct, experience, unacceptable, community, private</keywords>
+    </chapter>
+    <chapter id="contributing" path="CONTRIBUTING.md" modified="2025-10-21T12:58:11Z" size="1309" words="204" readTime="1min" hash="sha256:04221b38b8c67ffb">
+      <title>Contributing to Jot</title>
+      <summary>Contributing to Jot Thank you for your interest in contributing to Jot! This document provides guidelines for contributing to the project. ## Getting Started 1. Fork the repository 2. Clone your ...</summary>
+      <keywords>contributing, create, functions, write, features, tests, review, maintainers, types, changes</keywords>
+    </chapter>
+    <chapter id="install" path="INSTALL.md" modified="2025-10-21T12:58:11Z" size="3675" words="533" readTime="2min" hash="sha256:ac5687e73e54aa97">
+      <title>Installing Jot</title>
+      <summary>Installing Jot There are several ways to install Jot on your system. Choose the method that works best for your setup. ## Prerequisites - Go 1.19 or later (for building from source) - Git (for cl...</summary>
+      <keywords>make, installed, appropriate, linux, sudo), verify, 1.19, clone, ensure, require</keywords>
+    </chapter>
+    <chapter id="readme" path="README.md" modified="2025-10-21T12:58:11Z" size="7101" words="956" readTime="3min" hash="sha256:35be1e41db6cff8c">
+      <title>Jot</title>
+      <summary>Jot [![CI](https://github.com/onedusk/jot/actions/workflows/ci.yml/badge.svg)](https://github.com/onedusk/jot/actions/workflows/ci.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/...</summary>
+      <keywords>does, github-flavored, search, optimized, support, custom, contents, automatically, handle, ci/cd</keywords>
     </chapter>
   </sections>
 </toc>

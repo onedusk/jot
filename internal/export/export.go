@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/internal/tokenizer"
 	"gopkg.in/yaml.v3"
 )
 

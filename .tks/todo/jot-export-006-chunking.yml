@@ -1,0 +1,64 @@
+id: "jot-export-006"
+task: "Create pluggable chunking strategy system with multiple implementations"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "H"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 8
+
+# Parallel execution metadata
+dependencies: ["jot-export-003"]
+parallel_group: "B"
+blocks: ["jot-export-004", "jot-export-008"]
+execution_phase: "PHASE_2"
+can_start_when: "After Task 3 (tokenizer) completes - needs tokenizer.Tokenizer interface. CRITICAL PATH continues"
+
+subtasks:
+  - desc: "Create internal/chunking/strategy.go with ChunkStrategy interface defining Chunk(doc scanner.Document, maxTokens, overlapTokens int) ([]export.Chunk, error) method signature"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Create internal/chunking/fixed.go implementing FixedSizeStrategy struct with tokenizer field using token-based chunking from internal/tokenizer calling tokenizer.Count()"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create internal/chunking/headers.go implementing MarkdownHeaderStrategy splitting on markdown header boundaries using regexp.MustCompile('^#{1,6}\\s+(.+)$')"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create internal/chunking/recursive.go implementing RecursiveStrategy with separators []string{'\\n\\n', '\\n', ' ', ''} trying each hierarchically until chunk size met"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create internal/chunking/semantic.go implementing SemanticStrategy struct with Chunk method returning error with TODO comment for embedding-based boundary detection"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create internal/chunking/factory.go with NewChunkStrategy(name string, tokenizer tokenizer.Tokenizer) (ChunkStrategy, error) factory function mapping 'fixed', 'headers', 'recursive', 'semantic' to implementations"
+    agent: "chunking-dev"
+    parallel: false
+    depends_on_subtask: "subtask-5"
+
+  - desc: "Create internal/chunking/strategy_test.go with table-driven tests TestFixedStrategy, TestHeaderStrategy, TestRecursiveStrategy comparing chunk counts and boundary quality"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Create internal/chunking/benchmark_test.go with BenchmarkFixedStrategy, BenchmarkHeaderStrategy, BenchmarkRecursiveStrategy measuring ns/op and B/op allocations"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+must_reference:
+  - "internal/export/export.go:205-267 - Current chunking to replace with strategy pattern"
+  - "internal/tokenizer/tokenizer.go - Tokenizer interface from Task 3"
+  - "https://python.langchain.com/docs/how_to/markdown_header_metadata_splitter/ - Header splitting reference"
+  - "internal/export/types.go:32-38 - Chunk struct output format"
+  - ".tks/protocols/protodoc.md:57-60 - SOLID-CHECK for interface design"

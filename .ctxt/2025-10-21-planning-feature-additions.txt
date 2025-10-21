@@ -1,0 +1,3546 @@
+
+╭─── Claude Code v2.0.24 ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                                                                                                     │
+│                   Welcome back J!                  │ Run /init to create a CLAUDE.md file with instructions for Claude                                                                            │
+│                                                    │ ─────────────────────────────────────────────────────────────────                                                                            │
+│                       ▐▛███▜▌                      │ Recent activity                                                                                                                              │
+│                      ▝▜█████▛▘                     │ No recent activity                                                                                                                           │
+│                        ▘▘ ▝▝                       │                                                                                                                                              │
+│                                                    │                                                                                                                                              │
+│              Sonnet 4.5 · Claude Max               │                                                                                                                                              │
+│  /Users/macadelic/dusk-indust/shared/packages/jot  │                                                                                                                                              │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+> lets find the logic that deals with the following - jot export --format llm --output docs-llm.json - and then lets score it on applicability out of the box, what could be done to potentially 
+improve it in any aspect, 
+
+⏺ I'll help you find and analyze the jot export --format llm logic. Let me explore the codebase to understand how this command works.
+
+⏺ Search(pattern: "**/*.{ts,js,json}")
+  ⎿  Found 4 files (ctrl+o to expand)
+
+⏺ Search(pattern: "export.*--format|format.*llm")
+  ⎿  Found 6 files (ctrl+o to expand)
+
+⏺ Search(pattern: "jot export")
+  ⎿  Found 4 files (ctrl+o to expand)
+
+⏺ Search(pattern: "**/*.go")
+  ⎿  Found 27 files (ctrl+o to expand)
+
+⏺ Read(cmd/jot/export.go)
+  ⎿  Read 116 lines
+
+⏺ Read(docs-llm.json)
+  ⎿  Error reading file
+
+⏺ Read(internal/export/export.go)
+  ⎿  Read 327 lines
+
+⏺ Read(internal/export/types.go)
+  ⎿  Read 71 lines
+
+⏺ Read(internal/export/export_test.go)
+  ⎿  Read 207 lines
+
+⏺ Bash(head -n 100 /Users/macadelic/dusk-indust/shared/packages/jot/docs-llm.json)
+  ⎿  {                                          
+       "version": "1.0",
+       "generated": "2025-10-21T14:48:56-04:00",
+     … +164 lines (ctrl+o to expand)
+
+⏺ Search(pattern: "--format llm|export.*llm", path: "README.md", output_mode: "content")
+  ⎿  Found 13 lines (ctrl+o to expand)
+
+⏺ Read(internal/scanner/document.go)
+  ⎿  Read 218 lines
+
+⏺ Now let me create a comprehensive analysis of the LLM export functionality.
+
+  Analysis: jot export --format llm Feature
+
+  Based on my review of the codebase, here's a detailed assessment:
+
+  Code Flow
+
+  1. cmd/jot/export.go:30-115 - CLI command handler
+  2. internal/export/export.go:49-109 - ToLLMFormat() core logic
+  3. internal/export/export.go:205-267 - Document chunking
+  4. internal/export/export.go:184-201 - Semantic indexing
+
+  ---
+  Applicability Score: 6.5/10
+
+  Breakdown:
+
+  Works Well (Strengths) ✓
+  - Data Structure (8/10): Clean, well-organized JSON schema with documents, chunks, sections, code blocks, links
+  - Extraction Quality (7/10): Properly extracts sections, code blocks, internal/external links, frontmatter metadata
+  - Integration (8/10): Seamlessly integrates with existing scanner infrastructure
+  - Documentation (7/10): Has basic docs in README about the feature
+
+  Needs Improvement (Weaknesses) ✗
+  - Chunking Strategy (4/10): Major issues
+    - Uses characters not tokens (512 chars ≠ 512 tokens)
+    - Hardcoded sizes with no configuration
+    - Simplistic word-boundary detection (only looks back 50 chars)
+    - No semantic awareness (can split mid-sentence, mid-section)
+  - Semantic Index (3/10): Very basic
+    - Simple stop-word filtering only (line 276-282)
+    - No stemming, lemmatization, or NLP
+    - Concepts = just lowercased section titles
+    - Keywords map to documents, not chunks
+  - LLM-Specific Features (2/10): Missing critical features
+    - No actual token counts
+    - Vector field exists but never populated
+    - No embeddings support
+    - No document summaries/abstracts
+    - No relationship graph
+
+  ---
+  Improvement Recommendations
+
+  Priority 1 (High Impact, Core Functionality)
+
+  1. Fix Chunking to Use Actual Tokens
+  - Issue: internal/export/export.go:68 uses character counts, not tokens
+  - Fix: Integrate tiktoken or similar tokenizer
+  - Add: CLI flags --chunk-size and --chunk-overlap
+  - Improve: Smart chunking that respects section boundaries
+
+  // Suggested improvement
+  func chunkDocument(doc scanner.Document, maxTokens, overlapTokens int, tokenizer Tokenizer) []Chunk {
+      // Use actual tokenizer.Encode() instead of len(content)
+      // Respect section boundaries where possible
+      // Add metadata about which section each chunk belongs to
+  }
+
+  2. Enhance Semantic Indexing
+  - Issue: extractKeywords() at line 271 is overly simplistic
+  - Fix: Add stemming/lemmatization (use github.com/kljensen/snowball)
+  - Improve: Index keywords to specific chunks, not just documents
+  - Add: TF-IDF scoring or frequency counts
+
+  3. Add Token Count Metadata
+  - Track actual token counts per document and chunk
+  - Add to export structure: token_count, estimated_cost, etc.
+  - Helps LLMs understand context window usage
+
+  Priority 2 (Medium Impact, Feature Gaps)
+
+  4. Section-Aware Chunking
+  // New field in Chunk type
+  type Chunk struct {
+      ID       string    `json:"id"`
+      Text     string    `json:"text"`
+      SectionID string   `json:"section_id"`  // NEW: which section this belongs to
+      TokenCount int     `json:"token_count"` // NEW: actual tokens
+      StartPos int       `json:"start_pos"`
+      EndPos   int       `json:"end_pos"`
+      Vector   []float32 `json:"vector,omitempty"`
+  }
+
+  5. Document Relationship Graph
+  - Track internal links between documents
+  - Build adjacency list or graph structure
+  - Add to SemanticIndex
+
+  6. Add HTML Rendering
+  - The HTML field in LLMDocument exists (types.go:22) but is never populated
+  - Useful for LLMs that can process both markdown and HTML
+
+  Priority 3 (Lower Impact, Polish)
+
+  7. Configurable Export Options
+  exportCmd.Flags().Int("chunk-size", 512, "tokens per chunk")
+  exportCmd.Flags().Int("chunk-overlap", 128, "token overlap between chunks")
+  exportCmd.Flags().Bool("include-html", false, "include rendered HTML")
+  exportCmd.Flags().Bool("generate-summaries", false, "generate document summaries")
+
+  8. Add Document Summaries
+  - Generate or extract executive summary for each document
+  - First paragraph extraction or LLM-generated summary
+
+  9. Improve Overlap Logic
+  - Current overlap in export.go:255-262 can create infinite loops
+  - Better handling of edge cases
+
+  10. Add Statistics/Metadata
+  type LLMExport struct {
+      Version   string         `json:"version"`
+      Generated string         `json:"generated"`
+      Stats     ExportStats    `json:"stats"`  // NEW
+      Documents []LLMDocument  `json:"documents"`
+      Index     *SemanticIndex `json:"index"`
+  }
+
+  type ExportStats struct {
+      TotalDocuments int            `json:"total_documents"`
+      TotalTokens    int            `json:"total_tokens"`
+      LanguageStats  map[string]int `json:"language_stats"` // code block languages
+      AverageChunks  float64        `json:"average_chunks_per_doc"`
+  }
+
+  ---
+  Example Output Issues Found
+
+  Looking at the generated docs-llm.json:
+  - Chunks split mid-sentence (chunk-0 ends with "to properly track ")
+  - Character positions don't help LLMs understand context
+  - No indication which section a chunk belongs to
+  - Keywords index would be massive and not very useful
+
+  ---
+  Would you like me to implement any of these improvements? I'd recommend starting with Priority 1 items as they address fundamental issues with the current implementation.
+
+> id like to explore other approaches if exists 
+
+⏺ Great question! Let me research alternative approaches for exporting documentation for LLM consumption. I'll look at industry standards, different chunking strategies, and what other tools
+  are doing.
+
+⏺ Web Search("documentation export LLM format chunking strategies RAG 2024")
+  ⎿  Did 1 search in 30s                                                                                                                                                                        
+
+⏺ Web Search("markdown to LLM context optimization semantic chunking")
+  ⎿  Did 1 search in 27s                                                                                                                                                                        
+
+⏺ Web Search("vector database document ingestion format best practices 2024")
+  ⎿  Did 1 search in 27s                                                                                                                                                                        
+
+⏺ Web Search("LlamaIndex markdown loader document ingestion format 2024")
+  ⎿  Did 1 search in 26s                                                                                                                                                                        
+
+⏺ Web Search("LangChain document loaders markdown chunking recursive character")
+  ⎿  Did 1 search in 25s                                                                                                                                                                        
+
+⏺ Web Search("Anthropic contextual retrieval chunk enrichment documentation")
+  ⎿  Did 1 search in 20s                                                                                                                                                                        
+
+⏺ Web Search("Pinecone Weaviate Qdrant document ingestion format JSON schema 2024")
+  ⎿  Did 1 search in 23s                                                                                                                                                                        
+
+⏺ Web Search("docusaurus gitbook documentation export API JSON format")
+  ⎿  Did 1 search in 28s                                                                                                                                                                        
+
+> 2025 not 2024 
+
+⏺ Web Search("advanced chunking strategies RAG LLM 2025")
+  ⎿  Did 1 search in 31s                                                                                                                                                                        
+
+⏺ Excellent research! Here's a comprehensive overview of alternative approaches for LLM documentation export, organized by strategy type:
+
+  ---
+  🎯 Alternative Chunking Strategies
+
+  Your current implementation uses fixed-size character chunking. Here are the modern alternatives:
+
+  1. Semantic Chunking (Most Effective for RAG - 2025 Research)
+
+  How it works:
+  - Split document into sentences
+  - Generate embeddings for each sentence + surrounding context
+  - Compare cosine similarity between adjacent groups
+  - When similarity drops below threshold = new chunk boundary
+
+  Pros:
+  - Most coherent chunks (2025 research shows best performance)
+  - Natural topic boundaries
+  - Better retrieval accuracy
+
+  Cons:
+  - Requires embedding model (cost/latency during export)
+  - More complex implementation
+
+  Implementation: LangChain SemanticChunker, LlamaIndex SemanticSplitterNodeParser
+
+  ---
+  2. Recursive Hierarchical Chunking (Best for Markdown)
+
+  How it works:
+  Try separators in order: ["\n\n", "\n", " ", ""]
+  1. Split by paragraphs (\n\n)
+  2. If chunk > max_size, split by lines (\n)
+  3. If still too big, split by sentences
+  4. Last resort: split by words
+
+  Pros:
+  - Preserves structure naturally
+  - Works great with markdown
+  - Fast and deterministic
+
+  Cons:
+  - May split semantic units
+  - Requires tuning separator hierarchy
+
+  Implementation: LangChain RecursiveCharacterTextSplitter
+
+  ---
+  3. Markdown Header-Based Chunking (Structure-Aware)
+
+  How it works:
+  - Split on markdown headers (#, ##, ###)
+  - Each chunk = section with its subsections
+  - Metadata includes header path (e.g., "Getting Started > Installation > Prerequisites")
+
+  Pros:
+  - Perfect for documentation
+  - Preserves document hierarchy
+  - Natural navigation structure
+
+  Cons:
+  - Chunks can vary wildly in size
+  - May need secondary splitting for large sections
+
+  Implementation:
+  - LangChain MarkdownHeaderTextSplitter
+  - LlamaIndex MarkdownNodeParser
+
+  Combined approach (recommended):
+  # 1. Split by headers
+  header_splits = MarkdownHeaderTextSplitter(headers_to_split_on)
+  # 2. Then apply recursive chunking to large sections
+  final_chunks = RecursiveCharacterTextSplitter(chunk_size, chunk_overlap)
+
+  ---
+  4. Anthropic Contextual Retrieval (2025 Best Practice)
+
+  How it works:
+  1. Chunk document using any strategy above
+  2. For each chunk, prompt Claude:
+  <document>{{WHOLE_DOCUMENT}}</document>
+  <chunk>{{CHUNK_CONTENT}}</chunk>
+
+  Provide brief context (50-100 tokens) to situate this chunk
+  within the overall document for search retrieval purposes.
+  3. Prepend generated context to each chunk before embedding
+
+  Pros:
+  - 35% improvement in retrieval accuracy (Anthropic's data)
+  - Solves "lost context" problem
+  - Works with any base chunking strategy
+
+  Cons:
+  - $1.02 per million document tokens (one-time cost)
+  - Adds latency to export process
+  - Requires API calls
+
+  Perfect for: Production RAG systems where accuracy matters
+
+  ---
+  5. Agentic Chunking (Experimental, 2025)
+
+  How it works:
+  - Use LLM to decide chunk boundaries based on semantic meaning
+  - Considers: topic shifts, narrative flow, information density
+  - Simulates human reasoning about "what belongs together"
+
+  Pros:
+  - Most intelligent chunking
+  - Adapts to content type
+
+  Cons:
+  - Very expensive (LLM call per decision)
+  - Slow
+  - Non-deterministic
+
+  When to use: High-value documents where quality > cost
+
+  ---
+  6. Late Chunking (Cutting Edge)
+
+  How it works:
+  - Embed the entire document first
+  - Extract chunk-level embeddings from the full document embedding
+  - Preserves full context during embedding phase
+
+  Pros:
+  - Solves context loss at embedding stage
+  - Better semantic representations
+
+  Cons:
+  - Requires special embedding models
+  - Not widely supported yet
+
+  ---
+  📊 Alternative Export Formats
+
+  Your current format is a custom JSON structure. Here are industry alternatives:
+
+  1. LangChain Document Format (Industry Standard)
+
+  {
+    "page_content": "chunk text here",
+    "metadata": {
+      "source": "path/to/file.md",
+      "chunk_id": "chunk-0",
+      "section": "Getting Started > Installation",
+      "start_line": 45,
+      "end_line": 67,
+      "token_count": 512,
+      "language": "en"
+    }
+  }
+  Benefit: Direct compatibility with LangChain loaders
+
+  ---
+  2. LlamaIndex Node Format
+
+  {
+    "id_": "uuid-here",
+    "text": "chunk content",
+    "metadata": {...},
+    "relationships": {
+      "1": "parent_node_id",  // source document
+      "2": "prev_chunk_id",   // previous chunk
+      "3": "next_chunk_id"    // next chunk
+    }
+  }
+  Benefit: Built-in document graph relationships
+
+  ---
+  3. JSONL (Line-Delimited JSON)
+
+  Instead of one massive JSON object:
+  {"doc_id": "1", "chunk_id": "0", "text": "...", "metadata": {...}}
+  {"doc_id": "1", "chunk_id": "1", "text": "...", "metadata": {...}}
+  {"doc_id": "2", "chunk_id": "0", "text": "...", "metadata": {...}}
+
+  Benefits:
+  - Streaming ingestion (don't load entire file into memory)
+  - Easier to process in batches
+  - Standard format for vector DB ingestion
+  - Each line is valid JSON
+
+  ---
+  4. Parquet Format (For Scale)
+
+  Binary columnar format used by:
+  - Databricks RAG pipelines
+  - Large-scale document processing
+
+  Benefits:
+  - Compression (10x smaller than JSON)
+  - Fast columnar queries
+  - Schema enforcement
+
+  When to use: 10,000+ documents
+
+  ---
+  5. Markdown Export (Simplest)
+
+  Just output enriched markdown:
+  ---
+  source: docs/api.md
+  section: Authentication
+  chunk_id: chunk-3
+  tokens: 487
+  ---
+
+  ## Authentication
+
+  Content here...
+
+  <!-- CONTEXT: This section describes OAuth2 authentication 
+       in the API Reference documentation -->
+
+  Benefits:
+  - Human-readable
+  - LLMs can directly consume
+  - Easy to version control
+  - No parsing needed
+
+  When to use: For direct LLM prompt inclusion (not RAG)
+
+  ---
+  🎯 Use-Case-Specific Approaches
+
+  Different LLM use cases need different formats:
+
+  Use Case 1: RAG (Retrieval-Augmented Generation)
+
+  Best approach:
+  - Chunking: Semantic or Header-based + Recursive
+  - Size: 512-1024 tokens per chunk
+  - Overlap: 128-256 tokens
+  - Format: JSONL with embeddings
+  - Enrichment: Contextual Retrieval (if budget allows)
+
+  Output structure:
+  {
+    "id": "doc1-chunk5",
+    "text": "...",
+    "embedding": [0.123, 0.456, ...],
+    "metadata": {
+      "document": "api-reference.md",
+      "section_path": "API > Authentication > OAuth2",
+      "token_count": 487,
+      "context": "This describes OAuth2 flow in the API docs"
+    }
+  }
+
+  ---
+  Use Case 2: Fine-Tuning
+
+  Best approach:
+  - Chunking: Document-level or large sections
+  - Format: Training pairs (Q&A or completion)
+
+  {"prompt": "How do I authenticate?", "completion": "Use OAuth2..."}
+  {"prompt": "What is the rate limit?", "completion": "100 req/min..."}
+
+  ---
+  Use Case 3: Direct Context Injection
+
+  Best approach:
+  - Chunking: Entire documents or major sections
+  - Format: Plain markdown with metadata header
+  - Strategy: Select specific docs per query, insert into prompt
+
+  Output: Just improved markdown files
+
+  ---
+  Use Case 4: Agent Knowledge Base
+
+  Best approach:
+  - Chunking: Hierarchical (preserve document structure)
+  - Format: Graph structure with relationships
+  - Additional: Tool descriptions, API schemas
+
+  {
+    "documents": [...],
+    "graph": {
+      "nodes": [{"id": "doc1", "type": "document"}],
+      "edges": [{"from": "doc1", "to": "doc2", "type": "references"}]
+    },
+    "tools": [{"name": "search_api", "description": "..."}]
+  }
+
+  ---
+  🏗️ What Popular Tools Do
+
+  LlamaIndex / LangChain
+
+  - Support multiple chunking strategies (not one-size-fits-all)
+  - Output Node/Document objects with rich metadata
+  - Support streaming ingestion (JSONL)
+  - Emphasize metadata preservation
+
+  Unstructured.io
+
+  - Pre-process complex docs (PDFs, Word) → clean markdown
+  - Contextual chunking built-in
+  - API-first approach
+
+  Vector Databases (Pinecone, Weaviate, Qdrant)
+
+  - Expect: {id, vector, metadata, sparse_vector (optional)}
+  - Prefer batch ingestion (100-1000 vectors at a time)
+  - Support namespaces for multi-tenant isolation
+
+  Docusaurus / GitBook
+
+  - Don't have LLM export (gap in market!)
+  - Export markdown → GitHub
+  - You'd need to process their markdown with chunking
+
+  ---
+  🚀 Recommended Approach for Jot
+
+  Based on the research, here's my recommendation:
+
+  Offer Multiple Export Strategies (Not One)
+
+  # Strategy-based export
+  jot export --format llm --strategy semantic --output docs.jsonl
+  jot export --format llm --strategy markdown-headers --output docs.jsonl
+  jot export --format llm --strategy contextual --output docs.jsonl  # Uses Claude
+
+  # Use-case-based presets
+  jot export --for-rag --output docs.jsonl        # Optimized for RAG
+  jot export --for-context --output docs.md       # Optimized for direct prompts
+  jot export --for-training --output train.jsonl  # Q&A pairs
+
+  # Format options
+  jot export --format jsonl  # Line-delimited (recommended)
+  jot export --format json   # Current approach
+  jot export --format markdown  # Enriched markdown
+
+  Recommended Default Configuration
+
+  # jot.yml
+  export:
+    strategy: "markdown-headers"  # Structure-aware for docs
+    chunk_size: 1024  # tokens (not chars!)
+    chunk_overlap: 200
+    format: "jsonl"  # Streaming-friendly
+    include_embeddings: false  # User can add later
+    contextual_enrichment: false  # Opt-in (costs money)
+
+  ---
+  Would you like me to create a detailed implementation plan for any of these approaches? I can also prototype a multi-strategy export system that lets users choose based on their use case.
+
+> what about llms.txt..? 
+
+⏺ Excellent point! Let me research llms.txt - this is a newer standard I should investigate.
+
+⏺ Web Search("llms.txt standard documentation LLM format 2025")
+  ⎿  Did 1 search in 30s                                                                                                                                                                        
+
+⏺ Web Search("llms.txt specification anthropic examples")
+  ⎿  Did 1 search in 22s                                                                                                                                                                        
+
+⏺ Web Search("llms-full.txt llms.txt best practices markdown")
+  ⎿  Did 1 search in 31s                                                                                                                                                                        
+
+⏺ Fetch(https://llmstxt.org/)
+  ⎿  Received 47.1KB (200 OK)
+
+⏺ Fetch(https://docs.anthropic.com/llms.txt)
+  ⎿  Received 460 bytes (301 Moved Permanently)
+
+⏺ Fetch(https://docs.claude.com/llms.txt)
+  ⎿  Received 618.7KB (200 OK)
+
+⏺ Fetch(https://docs.claude.com/llms-full.txt)
+  ⎿  Error: maxContentLength size of 10485760 exceeded
+
+⏺ Web Search(""llms.txt" example file format site:github.com")
+  ⎿  Did 1 search in 26s                                                                                                                                                                        
+
+⏺ Perfect! llms.txt is actually a game-changer for documentation export and very relevant to Jot. Let me break down what it is and how it compares:
+
+  ---
+  📄 What is llms.txt?
+
+  llms.txt is a proposed standard (September 2024) for making website documentation LLM-friendly. It's essentially a simple markdown-based sitemap designed specifically for AI consumption.
+
+  Two File Types:
+
+  1. /llms.txt - Lightweight index (like a table of contents)
+  2. /llms-full.txt - Complete documentation in a single file
+
+  ---
+  📋 Format Specification
+
+  llms.txt Structure:
+
+  # Project Name
+
+  > Brief summary of the project in 1-2 sentences. Include key context
+  > that helps LLMs understand what this documentation is about.
+
+  Additional context paragraphs here (optional).
+
+  ## Getting Started
+
+  - [Installation Guide](https://example.com/install): How to install the project
+  - [Quick Start](https://example.com/quickstart): 5-minute tutorial for beginners
+  - [Configuration](https://example.com/config): Environment setup and options
+
+  ## API Reference
+
+  - [Authentication](https://example.com/api/auth): OAuth2 and API key authentication
+  - [Endpoints](https://example.com/api/endpoints): REST API endpoint documentation
+  - [Rate Limits](https://example.com/api/limits): Request quotas and throttling
+
+  ## Optional
+
+  - [Changelog](https://example.com/changelog): Version history
+  - [Contributing](https://example.com/contributing): How to contribute
+
+  llms-full.txt Structure:
+
+  # Project Name
+
+  > Summary here
+
+  ---
+
+  ## Installation Guide
+
+  Full content of the installation page...
+
+  ---
+
+  ## Quick Start
+
+  Full content of the quick start page...
+
+  ---
+
+  ## API Reference
+
+  Full content of all API docs...
+
+  Key insight: llms-full.txt is literally all your docs concatenated into one markdown file.
+
+  ---
+  🎯 Why llms.txt is Brilliant
+
+  Pros:
+
+  1. Dead Simple - Just markdown, no complex JSON schema
+  2. Human Readable - Can be browsed directly in browser
+  3. Industry Adoption - Anthropic, Cursor, Mintlify all support it
+  4. LLM Native - Designed specifically for how LLMs consume content
+  5. Tiny Files - llms.txt is usually <50KB (just links)
+  6. Single URL - Can paste /llms-full.txt directly into Claude/ChatGPT
+  7. No Parsing Needed - LLMs consume markdown natively
+  8. Web Standard - Works with websites (not just local docs)
+
+  Cons:
+
+  1. Not Optimized for RAG - No chunking, embeddings, or metadata
+  2. Web-Focused - Assumes HTTP URLs (not local file paths)
+  3. Size Limits - llms-full.txt can exceed context windows (Anthropic's is 10MB+)
+  4. No Semantic Structure - Just flat sections
+  5. No Vector Search - Can't be ingested into Pinecone/Weaviate as-is
+
+  ---
+  🤔 llms.txt vs. Current Jot Export
+
+  | Feature           | llms.txt            | Jot's Current LLM Export            |
+  |-------------------|---------------------|-------------------------------------|
+  | Format            | Markdown            | JSON                                |
+  | Chunking          | None (full content) | Fixed 512-char chunks               |
+  | Metadata          | Minimal             | Rich (sections, code blocks, links) |
+  | Use Case          | Direct LLM prompts  | RAG/vector databases                |
+  | File Size         | Can be huge (10MB+) | Chunked, manageable                 |
+  | Human Readable    | ✅ Very              | ❌ JSON blob                         |
+  | Industry Standard | ✅ Emerging          | ❌ Custom                            |
+  | Web Compatible    | ✅ Yes               | ❌ No (local focus)                  |
+  | Embeddings        | ❌ No                | ❌ No (but structured for it)        |
+
+  ---
+  💡 Perfect Use Cases Comparison
+
+  Use llms.txt when:
+
+  - Serving docs as a website
+  - Users paste docs directly into Claude/ChatGPT
+  - Building MCP servers for IDEs
+  - Want simple, human-readable export
+  - Documentation < 1M tokens
+  - No vector search needed
+
+  Use Jot's JSON export when:
+
+  - Building RAG systems
+  - Ingesting into vector databases
+  - Need precise chunking control
+  - Want rich metadata (sections, code blocks, links)
+  - Processing large doc sets (thousands of files)
+  - Need searchable embeddings
+
+  ---
+  🚀 How Jot Could Support llms.txt
+
+  Here's the killer combination: Jot should support BOTH approaches!
+
+  # For web deployment (llms.txt standard)
+  jot export --format llms-txt --output dist/llms.txt
+  jot export --format llms-full --output dist/llms-full.txt
+
+  # For RAG/vector databases (current approach)
+  jot export --format llm --strategy semantic --output docs-rag.jsonl
+
+  # For direct LLM consumption (enriched markdown)
+  jot export --format markdown --output docs-llm.md
+
+  ---
+  📐 Proposed llms.txt Implementation for Jot
+
+  llms.txt Generator:
+
+  // internal/export/llmstxt.go
+  func (e *Exporter) ToLLMSTxt(documents []scanner.Document) (string, error) {
+      var buf strings.Builder
+
+      // H1: Project name from config
+      buf.WriteString("# " + config.ProjectName + "\n\n")
+
+      // Blockquote: Summary
+      buf.WriteString("> " + config.Description + "\n\n")
+
+      // Group by directory/section
+      sections := groupDocumentsBySection(documents)
+
+      for sectionName, docs := range sections {
+          buf.WriteString("## " + sectionName + "\n\n")
+
+          for _, doc := range docs {
+              // Format: - [Title](url): Brief description
+              description := extractFirstParagraph(doc.Content)
+              buf.WriteString(fmt.Sprintf("- [%s](%s): %s\n",
+                  doc.Title,
+                  doc.RelativePath,
+                  truncate(description, 100)))
+          }
+          buf.WriteString("\n")
+      }
+
+      return buf.String(), nil
+  }
+
+  llms-full.txt Generator:
+
+  func (e *Exporter) ToLLMSFullTxt(documents []scanner.Document) (string, error) {
+      var buf strings.Builder
+
+      // Header
+      buf.WriteString("# " + config.ProjectName + "\n\n")
+      buf.WriteString("> " + config.Description + "\n\n")
+
+      // Concatenate all documents
+      for _, doc := range documents {
+          buf.WriteString("---\n\n")
+          buf.WriteString("# " + doc.Title + "\n\n")
+          buf.WriteString(string(doc.Content) + "\n\n")
+      }
+
+      return buf.String(), nil
+  }
+
+  Integration with jot build:
+
+  # jot.yml
+  build:
+    output: dist/
+    generate_llms_txt: true  # Auto-generate llms.txt files during build
+
+  During jot build:
+  1. Build HTML docs → dist/
+  2. Generate dist/llms.txt (index)
+  3. Generate dist/llms-full.txt (complete)
+
+  ---
+  🎨 Enhanced Version: Best of Both Worlds
+
+  Hybrid Approach:
+
+  # My Project
+
+  > Comprehensive API documentation for MyProject v2.0
+
+  ## Getting Started
+
+  - [Installation](install.md): Setup guide for all platforms
+  - [Quick Start](quickstart.md): 5-minute tutorial
+
+  ## API Reference
+
+  - [Authentication](api/auth.md): OAuth2 and API keys
+    - Chunks: 12 | Tokens: ~2,400 | Code blocks: 5
+  - [REST API](api/rest.md): Complete endpoint reference
+    - Chunks: 24 | Tokens: ~4,800 | Code blocks: 15
+
+  ## Optional
+
+  - [Changelog](changelog.md): Version history
+
+  Enriched with metadata! Still human-readable, but hints at chunking/token info.
+
+  ---
+  🔥 The Winner: Support ALL Formats
+
+  My recommendation:
+
+  # CLI should support multiple export targets
+  jot export --format llms-txt       # llms.txt index
+  jot export --format llms-full      # llms-full.txt single file
+  jot export --format rag            # JSON/JSONL for vector DBs
+  jot export --format markdown       # Enriched markdown
+  jot export --format openapi        # For API docs specifically
+
+  Why?
+
+  - llms.txt = Web standard, simple, widely adopted
+  - llms-full.txt = Direct paste into Claude/ChatGPT
+  - RAG format = Vector databases, semantic search
+  - Markdown = Local LLM tools, MCP servers
+
+  Different use cases = different optimal formats. Jot should be flexible and support them all.
+
+  ---
+  📊 Comparison Matrix
+
+  | Format         | Best For                 | Size           | Adoption      | Complexity |
+  |----------------|--------------------------|----------------|---------------|------------|
+  | llms.txt       | Web docs, human browsing | Tiny (~10KB)   | ⭐⭐⭐⭐⭐ High    | ⭐ Simple   |
+  | llms-full.txt  | Direct LLM paste         | Large (1-10MB) | ⭐⭐⭐⭐ Growing  | ⭐ Simple   |
+  | JSON (current) | RAG, vector DBs          | Medium         | ⭐⭐ Custom     | ⭐⭐⭐ Medium |
+  | JSONL          | Streaming RAG            | Medium         | ⭐⭐⭐⭐ Standard | ⭐⭐ Easy    |
+  | Markdown       | MCP servers, local tools | Large          | ⭐⭐⭐ Medium    | ⭐ Simple   |
+
+  ---
+  ✅ My Recommendation
+
+  Implement llms.txt as the PRIMARY export format for Jot, with others as options:
+
+  1. Default: jot build generates llms.txt + llms-full.txt automatically
+  2. Advanced: jot export --format rag for vector DB users
+  3. Flexible: Support multiple strategies via flags
+
+  This makes Jot:
+  - Modern (follows 2025 standards)
+  - Compatible (works with Claude, Cursor, etc.)
+  - Flexible (supports power users with RAG needs)
+
+  Would you like me to create an implementation plan for adding llms.txt support to Jot?
+
+> sure, lets do all of them - Your task is to take the provided natural language description of a process or task and transform it into clear, concise step-by-step directions that are logical, 
+sequential, and easy to follow. Use imperative language and begin each step with an action verb. Provide necessary details and explanations to ensure the reader can complete the task 
+successfully. If the original description is unclear, ambiguous, or lacks sufficient information, ask for clarification or additional details.
+
+# NO MORE than 1 task per file, NO MORE / NO LESS than 6-8 subtasks per task
+id: "" # sequential / in logical order
+task: "" # high-level objective/task
+entry: "" # datetime
+modified: "" # datetime
+priority: "" # H | M | S
+project: "" # name
+status: "" # done | review | inbox | todo
+uuid: "" # most applicable version
+urgency: "" # 1 - 10
+subtasks: # REMEMBER: no more than 6-8
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+  - desc: "" # describe the operation
+    agent: "" # name of assigned agent/subagent
+must_reference: [ # include but not limited to:
+  "this could be a documentation file",
+  "this could be the objectives dependency file(s)",
+  "this could be the projects reference to protocols, standards, etc. that must be followed during implementation"
+]
+
+# the purpose of this is to have 0 ambiguity for the implementation agents meant for speed and not reasoning models
+# drop each .yml file created into this folder `.tks/todo/*.yml` 
+
+⏺ I'll create a comprehensive implementation plan broken down into multiple task files. Let me organize this into logical, sequential tasks:
+
+  📋 Implementation Plan Overview
+
+  I'll break this into 8 core tasks, each with 6-8 subtasks:
+
+  1. Implement llms.txt export format (web standard)
+  2. Implement llms-full.txt export format (complete docs in one file)
+  3. Refactor existing LLM export with proper tokenization (fix current bugs)
+  4. Implement JSONL export format (RAG-optimized, streaming)
+  5. Implement markdown export format (enriched markdown)
+  6. Add chunking strategy system (semantic, header-based, recursive)
+  7. Integrate llms.txt into build command (auto-generation)
+  8. Update CLI with new export formats (flags, presets, validation)
+
+  ---
+  📄 Task Breakdown (YAML Format)
+
+  Task 1: Implement llms.txt Export Format
+
+  id: "jot-export-001"
+  task: "Implement llms.txt export format following llmstxt.org specification"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+  subtasks:
+    - desc: "Create internal/export/llmstxt.go with LLMSTxtExporter struct and NewLLMSTxtExporter constructor"
+      agent: "code-implementation"
+    - desc: "Implement ToLLMSTxt method to generate H1 project name from config and blockquote summary"
+      agent: "code-implementation"
+    - desc: "Add groupDocumentsBySection function to organize documents into hierarchical H2 sections based on directory structure"
+      agent: "code-implementation"
+    - desc: "Implement extractFirstParagraph helper to generate brief descriptions for each document link"
+      agent: "code-implementation"
+    - desc: "Format output as markdown list with [Title](url): description pattern for each document"
+      agent: "code-implementation"
+    - desc: "Add unit tests in internal/export/llmstxt_test.go covering project header, section grouping, and link formatting"
+      agent: "test-implementation"
+    - desc: "Validate output format against llmstxt.org specification using test fixtures"
+      agent: "test-implementation"
+    - desc: "Update internal/export/types.go with LLMSTxtOptions configuration struct for customization"
+      agent: "code-implementation"
+  must_reference:
+    - "https://llmstxt.org/ - Official llms.txt specification"
+    - "https://github.com/AnswerDotAI/llms-txt - Reference implementation"
+    - "internal/export/export.go - Existing exporter patterns"
+    - "internal/scanner/document.go - Document structure"
+
+  ---
+  Task 2: Implement llms-full.txt Export Format
+
+  id: "jot-export-002"
+  task: "Implement llms-full.txt export format with complete documentation concatenation"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+  subtasks:
+    - desc: "Add ToLLMSFullTxt method to LLMSTxtExporter in internal/export/llmstxt.go"
+      agent: "code-implementation"
+    - desc: "Implement document header generation with H1 project name and blockquote summary"
+      agent: "code-implementation"
+    - desc: "Concatenate all document content with --- horizontal rule separators between documents"
+      agent: "code-implementation"
+    - desc: "Preserve document titles as H1 headings and maintain original markdown formatting including code blocks and links"
+      agent: "code-implementation"
+    - desc: "Add sortDocumentsByImportance function to order documents logically with README first then by directory hierarchy"
+      agent: "code-implementation"
+    - desc: "Implement size estimation and warning when output exceeds 1MB to alert users about context window limits"
+      agent: "code-implementation"
+    - desc: "Create unit tests validating concatenation order, separator formatting, and size calculations"
+      agent: "test-implementation"
+    - desc: "Test with real documentation set ensuring output is valid markdown and human-readable"
+      agent: "test-implementation"
+  must_reference:
+    - "https://llmstxt.org/ - llms-full.txt specification"
+    - "https://docs.claude.com/llms-full.txt - Real-world example from Anthropic"
+    - "internal/scanner/document.go - Document content structure"
+    - "internal/export/llmstxt.go - Shared utilities"
+
+  ---
+  Task 3: Fix Current LLM Export with Proper Tokenization
+
+  id: "jot-export-003"
+  task: "Refactor existing LLM export to use token-based chunking instead of character-based"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 9
+  subtasks:
+    - desc: "Add dependency on github.com/pkoukk/tiktoken-go for OpenAI-compatible tokenization in go.mod"
+      agent: "dependency-management"
+    - desc: "Create internal/tokenizer/tokenizer.go with Tokenizer interface and NewTokenizer factory function"
+      agent: "code-implementation"
+    - desc: "Implement Encode and Count methods using tiktoken with cl100k_base encoding for GPT-4 compatibility"
+      agent: "code-implementation"
+    - desc: "Refactor chunkDocument in internal/export/export.go to accept maxTokens and overlapTokens instead of character counts"
+      agent: "code-implementation"
+    - desc: "Update chunking logic to use tokenizer.Count for boundary detection and preserve word boundaries at token level"
+      agent: "code-implementation"
+    - desc: "Add TokenCount field to Chunk struct in internal/export/types.go and populate during chunking"
+      agent: "code-implementation"
+    - desc: "Update ToLLMFormat to pass configurable token sizes with defaults chunk_size=512 overlap=128"
+      agent: "code-implementation"
+    - desc: "Create comprehensive tests comparing old character-based vs new token-based chunking with edge cases"
+      agent: "test-implementation"
+  must_reference:
+    - "internal/export/export.go:205-267 - Current buggy chunkDocument implementation"
+    - "internal/export/types.go - Chunk structure"
+    - "https://github.com/pkoukk/tiktoken-go - Tokenizer library"
+    - "internal/export/export_test.go:180-206 - Existing chunk tests to update"
+
+  ---
+  Task 4: Implement JSONL Export Format for RAG
+
+  id: "jot-export-004"
+  task: "Implement JSONL line-delimited JSON export format optimized for vector database ingestion"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 7
+  subtasks:
+    - desc: "Create internal/export/jsonl.go with JSONLExporter struct implementing streaming JSONL output"
+      agent: "code-implementation"
+    - desc: "Implement ToJSONL method that writes one JSON object per line for each document chunk"
+      agent: "code-implementation"
+    - desc: "Add ChunkMetadata struct with fields: doc_id, chunk_id, section_id, token_count, source, start_line, end_line"
+      agent: "code-implementation"
+    - desc: "Format each line as compact JSON without indentation following JSONL specification for streaming compatibility"
+      agent: "code-implementation"
+    - desc: "Include document relationships in metadata showing parent document and previous/next chunk IDs"
+      agent: "code-implementation"
+    - desc: "Add Vector field placeholder for embeddings with omitempty tag for optional embedding integration"
+      agent: "code-implementation"
+    - desc: "Create unit tests validating each line is valid JSON and entire file is valid JSONL"
+      agent: "test-implementation"
+    - desc: "Test streaming ingestion by reading file line-by-line without loading entire file into memory"
+      agent: "test-implementation"
+  must_reference:
+    - "https://jsonlines.org/ - JSONL specification"
+    - "internal/export/types.go - LLMDocument and Chunk structures"
+    - "https://www.pinecone.io/docs/ - Vector DB ingestion format examples"
+    - "internal/export/export.go - Existing JSON export for comparison"
+
+  ---
+  Task 5: Implement Enriched Markdown Export Format
+
+  id: "jot-export-005"
+  task: "Implement enriched markdown export format with YAML frontmatter metadata"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 6
+  subtasks:
+    - desc: "Create internal/export/markdown.go with MarkdownExporter for enriched markdown output"
+      agent: "code-implementation"
+    - desc: "Implement ToEnrichedMarkdown method generating YAML frontmatter with source, section, chunk_id, token_count metadata"
+      agent: "code-implementation"
+    - desc: "Add optional contextual enrichment using Anthropic contextual retrieval pattern with LLM-generated context comments"
+      agent: "code-implementation"
+    - desc: "Preserve original markdown formatting including headers, code blocks, lists, and links"
+      agent: "code-implementation"
+    - desc: "Generate separate file per document or single concatenated file based on configuration flag"
+      agent: "code-implementation"
+    - desc: "Add table of contents generation at beginning of concatenated output with anchor links"
+      agent: "code-implementation"
+    - desc: "Implement syntax highlighting hints in code blocks by detecting language from fenced code block info strings"
+      agent: "code-implementation"
+    - desc: "Create tests validating YAML frontmatter parsing, markdown structure preservation, and TOC generation"
+      agent: "test-implementation"
+  must_reference:
+    - "internal/scanner/document.go:191-208 - Existing frontmatter extraction"
+    - "internal/export/types.go - Document metadata"
+    - "https://www.anthropic.com/news/contextual-retrieval - Contextual enrichment pattern"
+    - "examples/ - Example markdown files for testing"
+
+  ---
+  Task 6: Implement Chunking Strategy System
+
+  id: "jot-export-006"
+  task: "Implement pluggable chunking strategy system with semantic, header-based, and recursive strategies"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+  subtasks:
+    - desc: "Create internal/chunking/strategy.go with ChunkStrategy interface defining Chunk method signature"
+      agent: "code-implementation"
+    - desc: "Implement FixedSizeStrategy in internal/chunking/fixed.go using token-based chunking with configurable overlap"
+      agent: "code-implementation"
+    - desc: "Implement MarkdownHeaderStrategy in internal/chunking/headers.go splitting on markdown headers with metadata preservation"
+      agent: "code-implementation"
+    - desc: "Implement RecursiveStrategy in internal/chunking/recursive.go using hierarchical separators paragraph-line-sentence-word"
+      agent: "code-implementation"
+    - desc: "Implement SemanticStrategy in internal/chunking/semantic.go using embedding similarity for boundary detection"
+      agent: "code-implementation"
+    - desc: "Create ChunkStrategyFactory in internal/chunking/factory.go for strategy selection by name with configuration options"
+      agent: "code-implementation"
+    - desc: "Add comprehensive unit tests for each strategy comparing output quality and chunk coherence"
+      agent: "test-implementation"
+    - desc: "Create benchmark tests measuring performance and memory usage of each chunking strategy"
+      agent: "test-implementation"
+  must_reference:
+    - "internal/export/export.go:205-267 - Current chunking implementation to replace"
+    - "internal/tokenizer/tokenizer.go - Tokenization for all strategies"
+    - "https://python.langchain.com/docs/how_to/markdown_header_metadata_splitter/ - Header splitting reference"
+    - "https://weaviate.io/blog/chunking-strategies-for-rag - Strategy comparisons"
+
+  ---
+  Task 7: Integrate llms.txt Generation into Build Command
+
+  id: "jot-export-007"
+  task: "Integrate automatic llms.txt and llms-full.txt generation into jot build command workflow"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 7
+  subtasks:
+    - desc: "Add generate_llms_txt boolean flag to BuildConfig struct in internal/compiler/compiler.go with default true"
+      agent: "code-implementation"
+    - desc: "Update jot.yml schema to include llms_txt configuration section with enabled and options fields"
+      agent: "config-implementation"
+    - desc: "Modify runBuild in cmd/jot/build.go to call llms.txt generation after HTML compilation completes"
+      agent: "code-implementation"
+    - desc: "Generate llms.txt and llms-full.txt files in output directory alongside index.html and other build artifacts"
+      agent: "code-implementation"
+    - desc: "Add build summary logging showing llms.txt generation status and file sizes with warnings for large files"
+      agent: "code-implementation"
+    - desc: "Implement --skip-llms-txt flag in build command to disable generation when not needed"
+      agent: "code-implementation"
+    - desc: "Update build tests to verify llms.txt files are created with correct content and format"
+      agent: "test-implementation"
+    - desc: "Add integration test building example project and validating llms.txt against specification"
+      agent: "test-implementation"
+  must_reference:
+    - "cmd/jot/build.go - Build command implementation"
+    - "internal/export/llmstxt.go - llms.txt export functions"
+    - "jot.yml - Configuration file schema"
+    - "examples/ - Test projects for integration tests"
+
+  ---
+  Task 8: Update CLI with New Export Formats and Flags
+
+  id: "jot-export-008"
+  task: "Update export command CLI with new formats, strategies, and preset configurations"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-export-formats"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+  subtasks:
+    - desc: "Update exportCmd flags in cmd/jot/export.go to support formats: llms-txt, llms-full, jsonl, markdown, json, yaml"
+      agent: "code-implementation"
+    - desc: "Add --strategy flag with options: fixed, semantic, markdown-headers, recursive, contextual for chunking strategy selection"
+      agent: "code-implementation"
+    - desc: "Implement --chunk-size and --chunk-overlap integer flags with validation and defaults 512 and 128 tokens"
+      agent: "code-implementation"
+    - desc: "Add preset flags --for-rag, --for-context, --for-training that configure optimal format and strategy combinations"
+      agent: "code-implementation"
+    - desc: "Implement format validation ensuring mutually exclusive options and providing helpful error messages"
+      agent: "code-implementation"
+    - desc: "Update runExport switch statement to handle all new formats routing to appropriate exporter implementations"
+      agent: "code-implementation"
+    - desc: "Add --include-embeddings flag for JSONL export with warning about API costs and processing time"
+      agent: "code-implementation"
+    - desc: "Update CLI help text and documentation with examples for each export format and strategy"
+      agent: "documentation"
+  must_reference:
+    - "cmd/jot/export.go:15-115 - Current export command"
+    - "internal/export/ - All exporter implementations"
+    - "internal/chunking/ - Chunking strategies"
+    - "README.md - CLI documentation to update"
+
+  ---
+  📁 File Structure
+
+  These YAML files will be created at:
+  .tks/todo/
+  ├── jot-export-001-llmstxt.yml
+  ├── jot-export-002-llmsfull.yml
+  ├── jot-export-003-tokenization.yml
+  ├── jot-export-004-jsonl.yml
+  ├── jot-export-005-markdown.yml
+  ├── jot-export-006-chunking.yml
+  ├── jot-export-007-build-integration.yml
+  └── jot-export-008-cli-updates.yml
+
+  ---
+  🎯 Implementation Order
+
+  Phase 1 (High Priority):
+  1. Task 3 - Fix tokenization (fixes current bugs)
+  2. Task 1 - llms.txt (industry standard)
+  3. Task 2 - llms-full.txt (completes standard)
+
+  Phase 2 (Core Features):
+  4. Task 6 - Chunking strategies (infrastructure)
+  5. Task 4 - JSONL export (RAG use case)
+
+  Phase 3 (Integration):
+  6. Task 7 - Build integration (automation)
+  7. Task 8 - CLI updates (user interface)
+
+  Phase 4 (Enhancement):
+  8. Task 5 - Markdown export (additional format)
+
+  ---
+  📊 Estimated Effort
+
+  - Total Tasks: 8
+  - Total Subtasks: 64 (8 per task)
+  - Estimated Time: 3-4 days for experienced Go developer
+  - Lines of Code: ~2,000-3,000 new/modified
+  - Test Coverage: ~40 new test cases
+
+  ---
+  Would you like me to proceed with creating these YAML task files in .tks/todo/?
+
+> yes - the more atomic the tasks / subtasks can be the better - no ambiguity as to who, what, when, where, or why 
+
+⏺ Perfect! I'll make these ultra-atomic with zero ambiguity. Each subtask will specify:
+  - Exact file paths
+  - Specific function/struct/variable names
+  - Clear acceptance criteria
+  - Single responsibility
+
+  Let me refine these to maximum atomicity:
+  ⎿  User rejected Claude's plan:
+     ╭──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+     │ Implementation Plan: Multi-Format Export System for Jot                                                                                                                                      │
+     │                                                                                                                                                                                              │
+     │ Overview                                                                                                                                                                                     │
+     │                                                                                                                                                                                              │
+     │ Add industry-standard export formats (llms.txt, llms-full.txt, JSONL, enriched markdown) and fix existing LLM export bugs. Implement pluggable chunking strategies (semantic, header-based,  │
+     │ recursive) with proper token-based chunking.                                                                                                                                                 │
+     │                                                                                                                                                                                              │
+     │ Phase 1: Fix Current Issues & Add Core Standards (Priority: CRITICAL)                                                                                                                        │
+     │                                                                                                                                                                                              │
+     │ Task 1: Implement llms.txt Export                                                                                                                                                            │
+     │ - Create internal/export/llmstxt.go with LLMSTxtExporter struct                                                                                                                              │
+     │ - Generate H1 project name + blockquote summary + H2 sections with document links                                                                                                            │
+     │ - Format: - [Title](url): description per llmstxt.org spec                                                                                                                                   │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-001-llmstxt.yml                                                                                                                                   │
+     │                                                                                                                                                                                              │
+     │ Task 2: Implement llms-full.txt Export                                                                                                                                                       │
+     │ - Add ToLLMSFullTxt() method to concatenate all docs with --- separators                                                                                                                     │
+     │ - Preserve markdown formatting, add size warnings for >1MB outputs                                                                                                                           │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-002-llmsfull.yml                                                                                                                                  │
+     │                                                                                                                                                                                              │
+     │ Task 3: Fix Token-Based Chunking (CRITICAL BUG FIX)                                                                                                                                          │
+     │ - Replace character-based chunking with tiktoken-go tokenizer                                                                                                                                │
+     │ - Update chunkDocument() in internal/export/export.go:205-267                                                                                                                                │
+     │ - Add TokenCount field to Chunk struct, default 512 tokens/128 overlap                                                                                                                       │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-003-tokenization.yml                                                                                                                              │
+     │                                                                                                                                                                                              │
+     │ Phase 2: Advanced Export Formats (Priority: HIGH)                                                                                                                                            │
+     │                                                                                                                                                                                              │
+     │ Task 4: Implement JSONL Export                                                                                                                                                               │
+     │ - Create internal/export/jsonl.go with streaming line-delimited JSON                                                                                                                         │
+     │ - One JSON object per chunk, include doc_id, chunk_id, section_id, token_count                                                                                                               │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-004-jsonl.yml                                                                                                                                     │
+     │                                                                                                                                                                                              │
+     │ Task 5: Implement Enriched Markdown Export                                                                                                                                                   │
+     │ - Create internal/export/markdown.go with YAML frontmatter metadata                                                                                                                          │
+     │ - Optional contextual enrichment via Anthropic pattern                                                                                                                                       │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-005-markdown.yml                                                                                                                                  │
+     │                                                                                                                                                                                              │
+     │ Phase 3: Chunking Strategy Infrastructure (Priority: HIGH)                                                                                                                                   │
+     │                                                                                                                                                                                              │
+     │ Task 6: Implement Chunking Strategy System                                                                                                                                                   │
+     │ - Create internal/chunking/ package with ChunkStrategy interface                                                                                                                             │
+     │ - Implement: Fixed, MarkdownHeader, Recursive, Semantic strategies                                                                                                                           │
+     │ - Factory pattern for strategy selection                                                                                                                                                     │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-006-chunking.yml                                                                                                                                  │
+     │                                                                                                                                                                                              │
+     │ Phase 4: Integration & CLI (Priority: MEDIUM)                                                                                                                                                │
+     │                                                                                                                                                                                              │
+     │ Task 7: Integrate llms.txt into Build Command                                                                                                                                                │
+     │ - Modify cmd/jot/build.go to auto-generate llms.txt + llms-full.txt                                                                                                                          │
+     │ - Add generate_llms_txt: true to jot.yml config                                                                                                                                              │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-007-build-integration.yml                                                                                                                         │
+     │                                                                                                                                                                                              │
+     │ Task 8: Update CLI with New Formats                                                                                                                                                          │
+     │ - Update cmd/jot/export.go with --format, --strategy, --chunk-size flags                                                                                                                     │
+     │ - Add presets: --for-rag, --for-context, --for-training                                                                                                                                      │
+     │ - 8 atomic subtasks → .tks/todo/jot-export-008-cli-updates.yml                                                                                                                               │
+     │                                                                                                                                                                                              │
+     │ Deliverables                                                                                                                                                                                 │
+     │                                                                                                                                                                                              │
+     │ - 8 YAML task files in .tks/todo/                                                                                                                                                            │
+     │ - 64 atomic subtasks total (8 per task)                                                                                                                                                      │
+     │ - Each subtask: exact file path + function name + single responsibility                                                                                                                      │
+     │ - Zero ambiguity on WHO/WHAT/WHERE/WHY                                                                                                                                                       │
+     │                                                                                                                                                                                              │
+     │ Implementation Order                                                                                                                                                                         │
+     │                                                                                                                                                                                              │
+     │ 1. Task 3 (fix critical bug)                                                                                                                                                                 │
+     │ 2. Tasks 1-2 (llms.txt standard)                                                                                                                                                             │
+     │ 3. Task 6 (chunking infrastructure)                                                                                                                                                          │
+     │ 4. Tasks 4-5 (additional formats)                                                                                                                                                            │
+     │ 5. Tasks 7-8 (integration)                                                                                                                                                                   │
+     │                                                                                                                                                                                              │
+     │ Estimated Effort                                                                                                                                                                             │
+     │                                                                                                                                                                                              │
+     │ - 3-4 days for experienced Go developer                                                                                                                                                      │
+     │ - ~2,500 LOC                                                                                                                                                                                 │
+     │ - 40+ test cases                                                                                                                                                                             │
+     │                                                                                                                                                                                              │
+     │ Ready to create ultra-atomic YAML task files with maximum specificity.                                                                                                                       │
+     ╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+> lets cross-reference the project again, ensuring we list and include the who, what, when, where, and why - look for opportunities to run in parallel 
+
+⏺ Excellent idea! Let me cross-reference the actual project structure to ensure maximum accuracy and identify parallel execution opportunities.
+
+⏺ Read(jot.yml)
+  ⎿  Read 53 lines
+
+⏺ Search(pattern: "internal/**/*.go")
+  ⎿  Found 18 files (ctrl+o to expand)
+
+⏺ Read(cmd/jot/build.go)
+  ⎿  Read 146 lines
+
+⏺ Read(cmd/jot/root.go)
+  ⎿  Read 77 lines
+
+⏺ Read(go.mod)
+  ⎿  Read 28 lines
+
+⏺ Read(internal/compiler/compiler.go)
+  ⎿  Read 50 lines
+
+⏺ Bash(ls -la /Users/macadelic/dusk-indust/shared/packages/jot/.tks/)
+  ⎿  total 0                                             
+     drwxr-xr-x   7 macadelic  staff  224 Oct 21 12:58 .
+     drwxr-xr-x  28 macadelic  staff  896 Oct 21 14:46 ..
+     … +5 lines (ctrl+o to expand)
+
+⏺ Bash(ls -la /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/ && ls -la /Users/macadelic/dusk-indust/shared/packages/jot/.tks/protocols/)
+  ⎿  total 0                                            
+     drwxr-xr-x  3 macadelic  staff   96 Oct 21 12:58 .
+     drwxr-xr-x  7 macadelic  staff  224 Oct 21 12:58 ..
+     … +6 lines (ctrl+o to expand)
+
+⏺ Bash(find /Users/macadelic/dusk-indust/shared/packages/jot/.tks -name "*.yml" -o -name "*.yaml" | head -5)
+  ⎿  (No content)
+
+⏺ Read(.tks/protocols/protodoc.md)
+  ⎿  Read 100 lines
+
+⏺ Bash(ls -la /Users/macadelic/dusk-indust/shared/packages/jot/.tks/support/)
+  ⎿  total 24                                            
+     drwxr-xr-x  4 macadelic  staff   128 Oct 21 14:46 .
+     drwxr-xr-x  7 macadelic  staff   224 Oct 21 12:58 ..
+     … +2 lines (ctrl+o to expand)
+
+⏺ Read(.tks/support/jot_integration_strategy.md)
+  ⎿  Read 169 lines
+
+⏺ Perfect! Now I have complete context. Let me create ultra-atomic task files with full cross-referencing and parallel execution mapping.
+
+  📊 PROJECT CROSS-REFERENCE SUMMARY
+
+  Current State
+
+  - Go Version: 1.22.3
+  - Config: jot.yml (already has llm.chunk_size: 512, llm.overlap: 128)
+  - Dependencies: blackfriday, cobra, viper, yaml.v3
+  - Packages: internal/{export,scanner,compiler,renderer,toc,search}
+  - CLI Pattern: Cobra commands + Viper config
+  - Build Flow: scan docs → generate TOC → compile HTML → copy assets
+
+  Existing Patterns to Follow
+
+  - Config Loading: loadBuildConfig() pattern in cmd/jot/build.go:120-145
+  - Exporter Pattern: internal/export/export.go with Exporter struct
+  - Testing Pattern: {package}_test.go with table-driven tests
+  - CLI Pattern: Cobra commands in cmd/jot/*.go
+
+  ---
+  🔀 PARALLEL EXECUTION MAP
+
+  PHASE 1 (Parallel Group A - No Dependencies):
+  ├─ Task 1: llms.txt export          ⚡ CAN RUN IN PARALLEL
+  ├─ Task 2: llms-full.txt export     ⚡ CAN RUN IN PARALLEL
+  └─ Task 5: Markdown export          ⚡ CAN RUN IN PARALLEL
+
+  PHASE 2 (Sequential Group B - Tokenizer Foundation):
+  ├─ Task 3: Tokenizer package        ⏱️ MUST COMPLETE FIRST
+  └─ Task 6: Chunking strategies      ⏱️ DEPENDS ON TASK 3
+
+  PHASE 3 (Group C - Advanced Exports):
+  └─ Task 4: JSONL export             ⏱️ DEPENDS ON TASK 6
+
+  PHASE 4 (Group D - Integration):
+  ├─ Task 7: Build integration        ⏱️ DEPENDS ON TASKS 1,2
+  └─ Task 8: CLI updates              ⏱️ DEPENDS ON ALL TASKS
+
+  ---
+  📋 ULTRA-ATOMIC TASK BREAKDOWN
+
+  I'll now create 8 YAML files with maximum atomicity. Each subtask will have:
+  - WHO: Specific agent type
+  - WHAT: Exact function/struct/file name
+  - WHERE: Absolute file path
+  - WHEN: Dependency prerequisites
+  - WHY: Acceptance criteria
+
+  Let me present the complete task structure:
+
+  ---
+  Task 1: Implement llms.txt Export Format
+
+  id: "jot-export-001"
+  task: "Implement llms.txt export format per llmstxt.org specification"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+
+  subtasks:
+    - desc: "Create file internal/export/llmstxt.go with package export declaration and LLMSTxtExporter struct containing no fields"
+      agent: "code-implementation"
+
+    - desc: "Implement NewLLMSTxtExporter() constructor function returning *LLMSTxtExporter in internal/export/llmstxt.go"
+      agent: "code-implementation"
+
+    - desc: "Implement ToLLMSTxt(documents []scanner.Document, config ProjectConfig) (string, error) method that generates H1 with config.Name and blockquote with config.Description"
+      agent: "code-implementation"
+
+    - desc: "Create groupDocumentsBySection(documents []scanner.Document) map[string][]scanner.Document function using filepath.Dir to group by directory"
+      agent: "code-implementation"
+
+    - desc: "Create extractFirstParagraph(content []byte) string helper function that extracts first non-header paragraph up to 100 chars"
+      agent: "code-implementation"
+
+    - desc: "Format output as markdown list with pattern '- [doc.Title](doc.RelativePath): description' for each document under H2 section headers"
+      agent: "code-implementation"
+
+    - desc: "Create internal/export/llmstxt_test.go with TestToLLMSTxt validating H1 format, blockquote format, H2 sections, and link format match llmstxt.org spec"
+      agent: "test-implementation"
+
+    - desc: "Add ProjectConfig struct to internal/export/types.go with Name and Description string fields for llms.txt header generation"
+      agent: "code-implementation"
+
+  must_reference:
+    - "https://llmstxt.org/ - Official llms.txt specification for format requirements"
+    - "https://github.com/AnswerDotAI/llms-txt - Reference implementation"
+    - "internal/export/export.go - Existing Exporter pattern to follow"
+    - "internal/scanner/document.go - Document struct with Title, RelativePath, Content fields"
+    - "jot.yml:3-6 - Project name and description config fields"
+
+  ---
+  Task 2: Implement llms-full.txt Export Format
+
+  id: "jot-export-002"
+  task: "Implement llms-full.txt export with complete documentation concatenation"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+
+  subtasks:
+    - desc: "Add ToLLMSFullTxt(documents []scanner.Document, config ProjectConfig) (string, error) method to LLMSTxtExporter in internal/export/llmstxt.go"
+      agent: "code-implementation"
+
+    - desc: "Generate header with H1 containing config.Name and blockquote containing config.Description using strings.Builder"
+      agent: "code-implementation"
+
+    - desc: "Implement sortDocumentsByImportance(documents []scanner.Document) []scanner.Document sorting README.md first then alphabetically by path"
+      agent: "code-implementation"
+
+    - desc: "Concatenate document content with '---' horizontal rule separator between each document preserving original markdown formatting"
+      agent: "code-implementation"
+
+    - desc: "Add H1 heading before each document content using '# ' + doc.Title to separate documents clearly"
+      agent: "code-implementation"
+
+    - desc: "Implement estimateSize(content string) int64 function returning byte count and log warning if total > 1048576 (1MB) about context limits"
+      agent: "code-implementation"
+
+    - desc: "Create TestToLLMSFullTxt in internal/export/llmstxt_test.go validating document order, separator presence, H1 format, and size estimation"
+      agent: "test-implementation"
+
+    - desc: "Test with real docs from examples/ directory ensuring output is parseable markdown and preserves code blocks and links"
+      agent: "test-implementation"
+
+  must_reference:
+    - "https://llmstxt.org/ - llms-full.txt specification"
+    - "https://docs.claude.com/llms-full.txt - Real-world reference (10MB file)"
+    - "internal/scanner/document.go:14-26 - Document struct fields"
+    - "internal/export/llmstxt.go - SharedLLMSTxtExporter from Task 1"
+    - "examples/ - Test documentation for integration testing"
+
+  ---
+  Task 3: Implement Token-Based Chunking
+
+  id: "jot-export-003"
+  task: "Replace character-based chunking with token-based using tiktoken-go tokenizer"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 10
+
+  subtasks:
+    - desc: "Run 'go get github.com/pkoukk/tiktoken-go' and add to go.mod dependencies for OpenAI tokenization"
+      agent: "dependency-management"
+
+    - desc: "Create internal/tokenizer/tokenizer.go with Tokenizer interface defining Encode(text string) []int and Count(text string) int methods"
+      agent: "code-implementation"
+
+    - desc: "Implement TikTokenizer struct in internal/tokenizer/tokenizer.go using tiktoken.GetEncoding('cl100k_base') for GPT-4 compatibility"
+      agent: "code-implementation"
+
+    - desc: "Create NewTokenizer() (*TikTokenizer, error) factory function in internal/tokenizer/tokenizer.go handling encoding initialization errors"
+      agent: "code-implementation"
+
+    - desc: "Refactor chunkDocument signature in internal/export/export.go:205 from (doc scanner.Document, maxSize, overlap int) to (doc scanner.Document, maxTokens, overlapTokens int, 
+  tokenizer tokenizer.Tokenizer)"
+      agent: "code-implementation"
+
+    - desc: "Replace len(content) checks with tokenizer.Count(text) in chunk boundary detection at internal/export/export.go:224-235 preserving word boundaries"
+      agent: "code-implementation"
+
+    - desc: "Add TokenCount int field to Chunk struct at internal/export/types.go:36 and populate with actual token count during chunking"
+      agent: "code-implementation"
+
+    - desc: "Update ToLLMFormat call at internal/export/export.go:68 to use viper.GetInt('llm.chunk_size') defaulting to 512 and viper.GetInt('llm.overlap') defaulting to 128"
+      agent: "code-implementation"
+
+  must_reference:
+    - "internal/export/export.go:205-267 - Current buggy chunkDocument using character counts"
+    - "internal/export/types.go:32-38 - Chunk struct to modify"
+    - "https://github.com/pkoukk/tiktoken-go - Tokenizer library documentation"
+    - "jot.yml:40-46 - Existing llm.chunk_size and llm.overlap config"
+    - "go.mod - Dependencies file to update"
+
+  ---
+  Task 4: Implement JSONL Export Format
+
+  id: "jot-export-004"
+  task: "Implement JSONL line-delimited JSON export for vector database ingestion"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 7
+
+  subtasks:
+    - desc: "Create internal/export/jsonl.go with JSONLExporter struct and NewJSONLExporter() constructor"
+      agent: "code-implementation"
+
+    - desc: "Implement ToJSONL(documents []scanner.Document, chunker chunking.ChunkStrategy) (string, error) method writing one JSON object per line"
+      agent: "code-implementation"
+
+    - desc: "Create ChunkMetadata struct in internal/export/types.go with fields: DocID string, ChunkID string, SectionID string, TokenCount int, Source string, StartLine int, EndLine int"
+      agent: "code-implementation"
+
+    - desc: "Format each chunk as compact JSON using json.Marshal without indentation appending newline after each object per JSONL spec"
+      agent: "code-implementation"
+
+    - desc: "Add PrevChunkID and NextChunkID string fields to ChunkMetadata for document navigation relationships"
+      agent: "code-implementation"
+
+    - desc: "Include Vector []float32 field with json omitempty tag in ChunkMetadata for optional embedding storage"
+      agent: "code-implementation"
+
+    - desc: "Create internal/export/jsonl_test.go with TestToJSONL validating each line parses as valid JSON and entire output is valid JSONL"
+      agent: "test-implementation"
+
+    - desc: "Add TestJSONLStreaming test that reads file line-by-line without loading entire file into memory validating streaming compatibility"
+      agent: "test-implementation"
+
+  must_reference:
+    - "https://jsonlines.org/ - JSONL specification for line-delimited JSON"
+    - "internal/export/types.go - LLMDocument and Chunk structures for reference"
+    - "internal/chunking/strategy.go - ChunkStrategy interface from Task 6"
+    - "https://www.pinecone.io/docs/ - Vector database ingestion format examples"
+    - "encoding/json - Go standard library for Marshal"
+
+  ---
+  Task 5: Implement Enriched Markdown Export
+
+  id: "jot-export-005"
+  task: "Implement enriched markdown export with YAML frontmatter metadata"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 6
+
+  subtasks:
+    - desc: "Create internal/export/markdown.go with MarkdownExporter struct and NewMarkdownExporter() constructor"
+      agent: "code-implementation"
+
+    - desc: "Implement ToEnrichedMarkdown(documents []scanner.Document) (string, error) generating YAML frontmatter with '---' delimiters"
+      agent: "code-implementation"
+
+    - desc: "Generate frontmatter fields: source (doc.RelativePath), section (doc.Sections[0].Title), chunk_id (doc.ID), token_count (calculated), modified (doc.ModTime.Format(RFC3339))"
+      agent: "code-implementation"
+
+    - desc: "Preserve original markdown content including headers, code blocks with language tags, lists, and links using string(doc.Content)"
+      agent: "code-implementation"
+
+    - desc: "Implement generateTableOfContents(documents []scanner.Document) string creating markdown TOC with anchor links using '## Table of Contents' header"
+      agent: "code-implementation"
+
+    - desc: "Add contextualEnrichment(doc scanner.Document, fullContext string) string method placeholder for optional Anthropic-style context injection as HTML comments"
+      agent: "code-implementation"
+
+    - desc: "Add separateFiles bool parameter to ToEnrichedMarkdown controlling single concatenated file vs directory of separate files"
+      agent: "code-implementation"
+
+    - desc: "Create internal/export/markdown_test.go with TestToEnrichedMarkdown validating YAML frontmatter parsing, markdown preservation, and TOC generation"
+      agent: "test-implementation"
+
+  must_reference:
+    - "internal/scanner/document.go:191-208 - Existing frontmatter extraction logic"
+    - "internal/export/types.go:14-28 - LLMDocument metadata fields"
+    - "https://www.anthropic.com/news/contextual-retrieval - Contextual enrichment pattern"
+    - "gopkg.in/yaml.v3 - YAML library already in go.mod"
+    - "examples/ - Sample markdown files for testing"
+
+  ---
+  Task 6: Implement Chunking Strategy System
+
+  id: "jot-export-006"
+  task: "Create pluggable chunking strategy system with multiple implementations"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+
+  subtasks:
+    - desc: "Create internal/chunking/strategy.go with ChunkStrategy interface defining Chunk(doc scanner.Document, maxTokens, overlapTokens int) ([]export.Chunk, error) method"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/fixed.go implementing FixedSizeStrategy struct using token-based chunking from internal/tokenizer calling tokenizer.Count()"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/headers.go implementing MarkdownHeaderStrategy splitting on '##' boundaries using regexp.MustCompile('^#{1,6}\\s+(.+)$')"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/recursive.go implementing RecursiveStrategy with separators []string{'\\n\\n', '\\n', ' ', ''} trying each until chunk size met"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/semantic.go implementing SemanticStrategy stub with TODO comment for embedding-based boundary detection"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/factory.go with NewChunkStrategy(name string, tokenizer tokenizer.Tokenizer) (ChunkStrategy, error) factory function mapping 'fixed', 'headers', 
+  'recursive', 'semantic'"
+      agent: "code-implementation"
+
+    - desc: "Create internal/chunking/strategy_test.go with table-driven tests for each strategy comparing chunk counts and boundary quality"
+      agent: "test-implementation"
+
+    - desc: "Create internal/chunking/benchmark_test.go with BenchmarkFixedStrategy, BenchmarkHeaderStrategy measuring performance and memory allocations"
+      agent: "test-implementation"
+
+  must_reference:
+    - "internal/export/export.go:205-267 - Current chunking to replace with strategy pattern"
+    - "internal/tokenizer/tokenizer.go - Tokenizer interface from Task 3"
+    - "https://python.langchain.com/docs/how_to/markdown_header_metadata_splitter/ - Header splitting reference"
+    - "internal/export/types.go:32-38 - Chunk struct output format"
+    - ".tks/protocols/protodoc.md - SOLID-CHECK for interface design"
+
+  ---
+  Task 7: Integrate llms.txt into Build Command
+
+  id: "jot-export-007"
+  task: "Auto-generate llms.txt and llms-full.txt during jot build workflow"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "M"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 7
+
+  subtasks:
+    - desc: "Add GenerateLLMSTxt bool field to BuildConfig struct in cmd/jot/build.go:111-116 defaulting to true"
+      agent: "code-implementation"
+
+    - desc: "Update loadBuildConfig in cmd/jot/build.go:120 to read viper.GetBool('features.llm_export') into GenerateLLMSTxt field"
+      agent: "config-implementation"
+
+    - desc: "Add llms_txt section to jot.yml:28-34 under features with enabled: true and auto_generate: true options"
+      agent: "config-implementation"
+
+    - desc: "Insert llms.txt generation after line 100 in cmd/jot/build.go before 'Summary' calling llmstxtExporter := export.NewLLMSTxtExporter()"
+      agent: "code-implementation"
+
+    - desc: "Write llms.txt to filepath.Join(config.OutputPath, 'llms.txt') and llms-full.txt to filepath.Join(config.OutputPath, 'llms-full.txt')"
+      agent: "code-implementation"
+
+    - desc: "Add build logging 'Generating llms.txt...' and size reporting 'Created llms.txt (15KB), llms-full.txt (2.3MB)' using formatted bytes"
+      agent: "code-implementation"
+
+    - desc: "Implement --skip-llms-txt boolean flag in buildCmd.Flags at cmd/jot/build.go:28 to disable generation when not needed"
+      agent: "code-implementation"
+
+    - desc: "Create TestBuildWithLLMSTxt integration test in cmd/jot/build_test.go verifying llms.txt files created and match spec"
+      agent: "test-implementation"
+
+  must_reference:
+    - "cmd/jot/build.go:33-107 - runBuild function to modify"
+    - "cmd/jot/build.go:111-116 - BuildConfig struct to extend"
+    - "jot.yml:28-34 - features section in config"
+    - "internal/export/llmstxt.go - LLMSTxtExporter from Tasks 1 and 2"
+    - ".tks/support/jot_integration_strategy.md - Build automation context"
+
+  ---
+  Task 8: Update CLI with Export Formats and Strategies
+
+  id: "jot-export-008"
+  task: "Update export command with new formats, strategies, and preset configurations"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+
+  subtasks:
+    - desc: "Update exportCmd.Flags().StringP('format') in cmd/jot/export.go:25 to accept: llms-txt, llms-full, jsonl, markdown, json, yaml with validation"
+      agent: "code-implementation"
+
+    - desc: "Add exportCmd.Flags().StringP('strategy', 's', 'fixed', 'chunking strategy: fixed, semantic, markdown-headers, recursive, contextual') at line 26"
+      agent: "code-implementation"
+
+    - desc: "Add exportCmd.Flags().IntP('chunk-size', '', 512, 'tokens per chunk') and exportCmd.Flags().IntP('chunk-overlap', '', 128, 'token overlap') with validation >0"
+      agent: "code-implementation"
+
+    - desc: "Implement --for-rag, --for-context, --for-training boolean flags that set preset combinations: rag=jsonl+semantic, context=markdown, training=jsonl+fixed"
+      agent: "code-implementation"
+
+    - desc: "Add validateExportFlags(cmd *cobra.Command) error function checking mutually exclusive formats and providing helpful error messages"
+      agent: "code-implementation"
+
+    - desc: "Update runExport switch statement at cmd/jot/export.go:76-91 adding cases for 'llms-txt', 'llms-full', 'jsonl', 'markdown' routing to exporters"
+      agent: "code-implementation"
+
+    - desc: "Add --include-embeddings boolean flag for JSONL format with warning log about API costs and processing time when enabled"
+      agent: "code-implementation"
+
+    - desc: "Update exportCmd.Long help text at cmd/jot/export.go:20 with examples for each format and strategy combination with real command examples"
+      agent: "documentation"
+
+  must_reference:
+    - "cmd/jot/export.go:15-115 - Existing export command to modify"
+    - "internal/export/llmstxt.go - llms.txt exporters from Tasks 1-2"
+    - "internal/export/jsonl.go - JSONL exporter from Task 4"
+    - "internal/export/markdown.go - Markdown exporter from Task 5"
+    - "internal/chunking/factory.go - Strategy factory from Task 6"
+    - "README.md - CLI documentation to update with new commands"
+
+  ---
+  📁 FILES TO CREATE
+
+  .tks/todo/
+  ├── jot-export-001-llmstxt.yml          # Task 1 - PARALLEL GROUP A
+  ├── jot-export-002-llmsfull.yml         # Task 2 - PARALLEL GROUP A
+  ├── jot-export-003-tokenization.yml     # Task 3 - SEQUENTIAL (FOUNDATION)
+  ├── jot-export-004-jsonl.yml            # Task 4 - DEPENDS ON TASK 6
+  ├── jot-export-005-markdown.yml         # Task 5 - PARALLEL GROUP A
+  ├── jot-export-006-chunking.yml         # Task 6 - DEPENDS ON TASK 3
+  ├── jot-export-007-build-integration.yml # Task 7 - DEPENDS ON TASKS 1,2
+  └── jot-export-008-cli-updates.yml      # Task 8 - DEPENDS ON ALL
+
+  ---
+  🎯 EXECUTION STRATEGY
+
+  Optimal Parallel Execution:
+
+  # PHASE 1: Start 3 parallel agents
+  Agent-A: Task 1 (llms.txt)
+  Agent-B: Task 2 (llms-full.txt)
+  Agent-C: Task 5 (markdown)
+
+  # PHASE 2: Sequential (foundation work)
+  Agent-D: Task 3 (tokenizer) → Task 6 (chunking)
+
+  # PHASE 3: After Phase 2 completes
+  Agent-E: Task 4 (JSONL with chunking strategies)
+
+  # PHASE 4: After Phases 1-3 complete
+  Agent-F: Task 7 (build integration with Tasks 1,2)
+  Agent-G: Task 8 (CLI with all formats)
+
+  Critical Path: Task 3 → Task 6 → Task 4 (Must be sequential)
+
+  Fast Track: Tasks 1, 2, 5 (Can complete independently)
+
+  ---
+  📊 EFFORT ESTIMATES
+
+  | Task | LOC  | Complexity | Time | Parallelizable     |
+  |------|------|------------|------|--------------------|
+  | 1    | ~150 | Low        | 2h   | ✅ Yes              |
+  | 2    | ~100 | Low        | 1.5h | ✅ Yes              |
+  | 3    | ~200 | High       | 4h   | ❌ Foundation       |
+  | 4    | ~180 | Medium     | 3h   | ⚠️ After Task 6    |
+  | 5    | ~160 | Medium     | 2.5h | ✅ Yes              |
+  | 6    | ~400 | High       | 5h   | ⚠️ After Task 3    |
+  | 7    | ~80  | Low        | 2h   | ⚠️ After Tasks 1,2 |
+  | 8    | ~120 | Medium     | 2.5h | ⚠️ After all       |
+
+  Total: ~1,390 LOC, ~22.5 hours sequential, ~14 hours with optimal parallelization
+
+  ---
+  Ready to create these 8 ultra-atomic YAML files in .tks/todo/?
+
+> how will the agents know when to run in parallel - and yes 
+
+⏺ Excellent question! I'll add explicit parallelization metadata to each YAML file so agents/orchestrators know exactly when they can run.
+
+  🔧 Enhanced YAML Schema with Parallel Execution
+
+  id: ""
+  task: ""
+  entry: ""
+  modified: ""
+  priority: ""
+  project: ""
+  status: ""
+  uuid: ""
+  urgency: ""
+
+  # NEW: Parallel execution metadata
+  dependencies: []       # Task IDs that MUST complete before this starts
+  parallel_group: ""     # Group identifier (A, B, C, etc.) - tasks in same group can run together
+  blocks: []            # Task IDs that depend on this completing
+  execution_phase: ""   # PHASE 1, PHASE 2, etc.
+  can_start_when: ""    # Human-readable condition
+
+  subtasks:
+    - desc: ""
+      agent: ""
+      depends_on_subtask: ""  # Optional: specific subtask dependency
+      parallel: true/false     # Can this subtask run in parallel with others in same task?
+
+  must_reference: []
+
+  📋 Orchestration Logic for Agents
+
+  An agent scheduler would read these fields:
+
+  # Pseudo-code for agent orchestration
+  def can_task_start(task):
+      # Check all dependencies are complete
+      if task.dependencies:
+          return all(is_complete(dep_id) for dep_id in task.dependencies)
+      return True
+
+  def get_parallel_batch():
+      # Find all tasks that can run now AND are in same parallel_group
+      ready_tasks = [t for t in tasks if can_task_start(t) and t.status == 'todo']
+
+      # Group by parallel_group
+      groups = {}
+      for task in ready_tasks:
+          group = task.parallel_group
+          if group not in groups:
+              groups[group] = []
+          groups[group].append(task)
+
+      # Return first available group to run in parallel
+      for group, task_list in groups.items():
+          if task_list:
+              return task_list
+
+      return []
+
+  🎯 Complete Task Files with Parallel Metadata
+
+  Let me show you how Task 1 would look with full parallelization info:
+
+  id: "jot-export-001"
+  task: "Implement llms.txt export format per llmstxt.org specification"
+  entry: "2025-10-21T00:00:00Z"
+  modified: "2025-10-21T00:00:00Z"
+  priority: "H"
+  project: "jot-llm-export"
+  status: "todo"
+  uuid: "v1.0.0"
+  urgency: 8
+
+  # Parallel execution metadata
+  dependencies: []                    # No dependencies - can start immediately
+  parallel_group: "A"                 # Group A = llms.txt exporters
+  blocks: ["jot-export-007"]          # Task 7 (build integration) needs this
+  execution_phase: "PHASE_1"          # First wave of parallel tasks
+  can_start_when: "Immediately - no dependencies"
+
+  subtasks:
+    - desc: "Create file internal/export/llmstxt.go with package export declaration and LLMSTxtExporter struct containing no fields"
+      agent: "code-implementation"
+      parallel: false
+      depends_on_subtask: null
+
+    - desc: "Implement NewLLMSTxtExporter() constructor function returning *LLMSTxtExporter in internal/export/llmstxt.go"
+      agent: "code-implementation"
+      parallel: false
+      depends_on_subtask: "subtask-1"
+
+    # ... rest of subtasks
+
+  must_reference:
+    - "https://llmstxt.org/ - Official llms.txt specification for format requirements"
+    - "https://github.com/AnswerDotAI/llms-txt - Reference implementation"
+    - "internal/export/export.go - Existing Exporter pattern to follow"
+    - "internal/scanner/document.go - Document struct with Title, RelativePath, Content fields"
+    - "jot.yml:3-6 - Project name and description config fields"
+
+  🗺️ Full Dependency Graph
+
+  Here's the complete dependency mapping for all 8 tasks:
+
+  # Task 1: llms.txt
+  id: jot-export-001
+  dependencies: []
+  parallel_group: "A"
+  blocks: [jot-export-007, jot-export-008]
+  execution_phase: "PHASE_1"
+
+  # Task 2: llms-full.txt  
+  id: jot-export-002
+  dependencies: []
+  parallel_group: "A"
+  blocks: [jot-export-007, jot-export-008]
+  execution_phase: "PHASE_1"
+
+  # Task 3: Tokenizer (CRITICAL PATH)
+  id: jot-export-003
+  dependencies: []
+  parallel_group: "B"  # Runs alone - foundation task
+  blocks: [jot-export-006, jot-export-008]
+  execution_phase: "PHASE_2"
+  can_start_when: "Immediately - but blocks Phase 3 tasks"
+
+  # Task 4: JSONL
+  id: jot-export-004
+  dependencies: [jot-export-006]  # Needs chunking strategies
+  parallel_group: "C"
+  blocks: [jot-export-008]
+  execution_phase: "PHASE_3"
+  can_start_when: "After Task 6 (chunking strategies) completes"
+
+  # Task 5: Markdown
+  id: jot-export-005
+  dependencies: []
+  parallel_group: "A"  # Can run with Tasks 1 & 2
+  blocks: [jot-export-008]
+  execution_phase: "PHASE_1"
+
+  # Task 6: Chunking (CRITICAL PATH)
+  id: jot-export-006
+  dependencies: [jot-export-003]  # Needs tokenizer
+  parallel_group: "B"
+  blocks: [jot-export-004, jot-export-008]
+  execution_phase: "PHASE_2"
+  can_start_when: "After Task 3 (tokenizer) completes"
+
+  # Task 7: Build Integration
+  id: jot-export-007
+  dependencies: [jot-export-001, jot-export-002]  # Needs llms.txt exporters
+  parallel_group: "D"
+  blocks: [jot-export-008]
+  execution_phase: "PHASE_4"
+  can_start_when: "After Tasks 1 and 2 complete"
+
+  # Task 8: CLI Updates (FINAL INTEGRATION)
+  id: jot-export-008
+  dependencies: [jot-export-001, jot-export-002, jot-export-003, jot-export-004, jot-export-005, jot-export-006, jot-export-007]
+  parallel_group: "E"  # Runs alone - final integration
+  blocks: []
+  execution_phase: "PHASE_5"
+  can_start_when: "After ALL other tasks complete"
+
+  🚀 Execution Timeline with Parallel Groups
+
+  START
+    │
+    ├──[PHASE 1: Group A - Parallel]──────────────────┐
+    │   ├── Task 1: llms.txt          (2h)            │
+    │   ├── Task 2: llms-full.txt     (1.5h)          │ Run together
+    │   └── Task 5: markdown          (2.5h)          │
+    │                                                  │
+    └──[PHASE 2: Group B - Sequential]────────────────┤
+        ├── Task 3: tokenizer         (4h)            │ Wait for Phase 1
+        │   └──> Task 6: chunking     (5h)            │ Sequential
+        │                                              │
+        └──[PHASE 3: Group C]─────────────────────────┤
+            └── Task 4: JSONL         (3h)            │ Wait for Task 6
+                                                       │
+        ┌──[PHASE 4: Group D]─────────────────────────┤
+        │   └── Task 7: build-integ   (2h)            │ Wait for Tasks 1,2
+        │                                              │
+        └──[PHASE 5: Group E - Final]─────────────────┤
+            └── Task 8: CLI updates   (2.5h)          │ Wait for ALL
+                                                       │
+  END ──────────────────────────────────────────────────┘
+
+  TOTAL TIME:
+  - Sequential: 22.5 hours
+  - With Parallelization: ~14 hours (38% reduction)
+
+  📊 Agent Assignment Strategy
+
+  # Recommended agent allocation
+  agents:
+    - id: agent-alpha
+      assigned: [jot-export-001]  # Task 1
+      parallel_with: [agent-beta, agent-gamma]
+
+    - id: agent-beta
+      assigned: [jot-export-002]  # Task 2
+      parallel_with: [agent-alpha, agent-gamma]
+
+    - id: agent-gamma
+      assigned: [jot-export-005]  # Task 5
+      parallel_with: [agent-alpha, agent-beta]
+
+    - id: agent-delta
+      assigned: [jot-export-003, jot-export-006]  # Tasks 3→6 (sequential)
+      parallel_with: []  # Runs alone - critical path
+
+    - id: agent-epsilon
+      assigned: [jot-export-004]  # Task 4
+      starts_after: [agent-delta]
+
+    - id: agent-zeta
+      assigned: [jot-export-007]  # Task 7
+      starts_after: [agent-alpha, agent-beta]
+
+    - id: agent-omega
+      assigned: [jot-export-008]  # Task 8 - final integration
+      starts_after: [all]
+
+  ✅ Ready to Create Files
+
+  I'll now create 8 YAML files with this enhanced schema. Each will include:
+
+  - ✅ WHO: Specific agent assignments
+  - ✅ WHAT: Exact file paths and function names
+  - ✅ WHEN: Dependencies and parallel groups
+  - ✅ WHERE: Absolute paths in project
+  - ✅ WHY: Acceptance criteria in must_reference
+
+  Proceeding with file creation using ExitPlanMode...
+                                                                                                                                                                                               
+⏺User approved Claude's plan:
+  ⎿  Implementation Plan: Multi-Format LLM Export System for Jot
+
+     Objective
+
+     Add industry-standard export formats (llms.txt, llms-full.txt, JSONL, enriched markdown) to Jot, fix existing token-based chunking bugs, and implement pluggable chunking strategies with 
+     explicit parallel execution orchestration.
+
+     Deliverables
+
+     Create 8 ultra-atomic YAML task files in .tks/todo/ with:
+     - Explicit parallel execution metadata (dependencies, parallel_group, blocks, execution_phase)
+     - Zero-ambiguity subtasks (exact file paths, function names, single responsibility)
+     - Complete cross-references (must_reference with URLs, file paths, line numbers)
+     - Agent orchestration instructions (WHO runs WHEN with WHAT dependencies)
+
+     Task Breakdown with Parallelization
+
+     PHASE 1 - Parallel Group A (No Dependencies)
+     - Task 1: llms.txt export (2h) - jot-export-001-llmstxt.yml
+     - Task 2: llms-full.txt export (1.5h) - jot-export-002-llmsfull.yml
+     - Task 5: Enriched markdown export (2.5h) - jot-export-005-markdown.yml
+     - Can run simultaneously by 3 agents
+
+     PHASE 2 - Sequential Group B (Foundation)
+     - Task 3: Token-based chunking fix (4h) - jot-export-003-tokenization.yml
+       - Blocks Task 6
+       - Critical path starts here
+     - Task 6: Chunking strategy system (5h) - jot-export-006-chunking.yml
+       - Depends on Task 3
+       - Blocks Task 4
+     - Must run sequentially by 1 agent
+
+     PHASE 3 - Group C (After Chunking)
+     - Task 4: JSONL export (3h) - jot-export-004-jsonl.yml
+       - Depends on Task 6 (needs chunking strategies)
+     - Runs alone after Phase 2
+
+     PHASE 4 - Group D (Build Integration)
+     - Task 7: Build integration (2h) - jot-export-007-build-integration.yml
+       - Depends on Tasks 1, 2 (needs llms.txt exporters)
+     - Runs alone after Tasks 1, 2 complete
+
+     PHASE 5 - Group E (Final Integration)
+     - Task 8: CLI updates (2.5h) - jot-export-008-cli-updates.yml
+       - Depends on ALL previous tasks
+     - Runs alone at end
+
+     Files to Create
+
+     .tks/todo/
+     ├── jot-export-001-llmstxt.yml          # Phase 1, Group A
+     ├── jot-export-002-llmsfull.yml         # Phase 1, Group A
+     ├── jot-export-003-tokenization.yml     # Phase 2, Group B (Foundation)
+     ├── jot-export-004-jsonl.yml            # Phase 3, Group C
+     ├── jot-export-005-markdown.yml         # Phase 1, Group A
+     ├── jot-export-006-chunking.yml         # Phase 2, Group B (Sequential)
+     ├── jot-export-007-build-integration.yml # Phase 4, Group D
+     └── jot-export-008-cli-updates.yml      # Phase 5, Group E (Final)
+
+     Enhanced YAML Schema
+
+     Each file includes:
+     - dependencies: [] - Task IDs required before start
+     - parallel_group: "" - Group identifier for concurrent execution
+     - blocks: [] - Task IDs waiting on this completion
+     - execution_phase: "" - Phase number for orchestration
+     - can_start_when: "" - Human-readable execution condition
+
+     Execution Strategy
+
+     - Sequential time: 22.5 hours (all tasks in series)
+     - Parallel time: ~14 hours (optimal agent allocation)
+     - Time savings: 38% reduction with parallelization
+     - Agent count: 3-7 agents depending on availability
+
+     Critical Path
+
+     Task 3 (Tokenizer) → Task 6 (Chunking) → Task 4 (JSONL) = 12 hours
+     All other tasks can run in parallel with critical path.
+
+     References
+
+     - Project config: jot.yml (has llm.chunk_size: 512, llm.overlap: 128)
+     - Existing patterns: internal/export/export.go, cmd/jot/build.go
+     - Standards: llmstxt.org, jsonlines.org, Anthropic contextual retrieval
+     - Protocols: .tks/protocols/protodoc.md (SOLID-CHECK, CLEAN, VET)
+
+     Post-Creation
+
+     After YAML files created, agents can:
+     1. Read dependency graph to determine execution order
+     2. Check parallel_group to find concurrent tasks
+     3. Start tasks when dependencies array is satisfied
+     4. Update status field as work progresses
+     5. Unblock tasks listed in blocks array upon completion
+
+     Ready to create 8 ultra-atomic task files with explicit parallelization metadata.
+  ⎿
+
+⏺ Perfect! Let me create the 8 ultra-atomic task files now. I'll start by creating them in the correct order.
+
+⏺ Write(.tks/todo/jot-export-001-llmstxt.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-001-llmstxt.yml                
+     id: "jot-export-001"
+     task: "Implement llms.txt export format per llmstxt.org specification"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "H"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 8
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-002-llmsfull.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-002-llmsfull.yml                         
+     id: "jot-export-002"
+     task: "Implement llms-full.txt export with complete documentation concatenation"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "H"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 8
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-003-tokenization.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-003-tokenization.yml                          
+     id: "jot-export-003"
+     task: "Replace character-based chunking with token-based using tiktoken-go tokenizer"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "H"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 10
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-004-jsonl.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-004-jsonl.yml                            
+     id: "jot-export-004"
+     task: "Implement JSONL line-delimited JSON export for vector database ingestion"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "M"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 7
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-005-markdown.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-005-markdown.yml                  
+     id: "jot-export-005"
+     task: "Implement enriched markdown export with YAML frontmatter metadata"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "M"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 6
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-006-chunking.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-006-chunking.yml                        
+     id: "jot-export-006"
+     task: "Create pluggable chunking strategy system with multiple implementations"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "H"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 8
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-007-build-integration.yml)
+  ⎿  Wrote 65 lines to .tks/todo/jot-export-007-build-integration.yml          
+     id: "jot-export-007"
+     task: "Auto-generate llms.txt and llms-full.txt during jot build workflow"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "M"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 7
+     … +55 lines (ctrl+o to expand)
+
+⏺ Write(.tks/todo/jot-export-008-cli-updates.yml)
+  ⎿  Wrote 67 lines to .tks/todo/jot-export-008-cli-updates.yml                           
+     id: "jot-export-008"
+     task: "Update export command with new formats, strategies, and preset configurations"
+     entry: "2025-10-21T00:00:00Z"
+     modified: "2025-10-21T00:00:00Z"
+     priority: "H"
+     project: "jot-llm-export"
+     status: "todo"
+     uuid: "v1.0.0"
+     urgency: 8
+     … +57 lines (ctrl+o to expand)
+
+⏺ Excellent! All 8 ultra-atomic task files have been created. Let me verify and provide you with the execution summary.
+
+⏺ Bash(ls -lh /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/*.yml)
+  ⎿  -rw-r--r--@ 1 macadelic  staff   2.7K Oct 21 15:36 /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/jot-export-001-llmstxt.yml     
+     -rw-r--r--@ 1 macadelic  staff   2.6K Oct 21 15:37 /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/jot-export-002-llmsfull.yml
+     -rw-r--r--@ 1 macadelic  staff   2.9K Oct 21 15:37 /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/jot-export-003-tokenization.yml
+     … +5 lines (ctrl+o to expand)
+
+⏺ Bash(find .tks/todo -name "jot-export-*.yml" -exec sh -c 'echo "=== {} ===" && head -15 "{}"' \;)
+  ⎿  === .tks/todo/jot-export-004-jsonl.yml ===                                      
+     id: "jot-export-004"
+     task: "Implement JSONL line-delimited JSON export for vector database ingestion"
+     … +125 lines (ctrl+o to expand)
+
+⏺ Perfect! All 8 ultra-atomic task files have been successfully created. Let me create an execution guide for the agents/orchestrator:
+
+⏺ Write(.tks/todo/EXECUTION_GUIDE.md)
+  ⎿  Wrote 285 lines to .tks/todo/EXECUTION_GUIDE.md                      
+     # LLM Export Implementation - Execution Guide
+     **Created:** 2025-10-21
+     **Total Tasks:** 8
+     **Total Subtasks:** 64
+     **Estimated Time:** 14 hours (parallelized) | 22.5 hours (sequential)
+     ---
+     ## 📊 Quick Reference: Task Dependencies
+     … +275 lines (ctrl+o to expand)
+
+⏺ Perfect! Now let me create a visual dependency graph diagram:
+
+⏺ Write(.tks/todo/DEPENDENCY_GRAPH.md)
+  ⎿  Wrote 217 lines to .tks/todo/DEPENDENCY_GRAPH.md  
+     # Task Dependency Graph - Jot LLM Export
+     ```mermaid
+     graph TD
+         START([Start]) --> P1A[PHASE 1 - Group A]
+         START --> P2B[PHASE 2 - Group B]
+         P1A --> T001[Task 001: llms.txt<br/>2h]
+         P1A --> T002[Task 002: llms-full.txt<br/>1.5h]
+         P1A --> T005[Task 005: markdown<br/>2.5h]
+     … +207 lines (ctrl+o to expand)
+
+⏺ Perfect! Let me create a final summary document:
+
+⏺ Bash(cat > /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/README.md << 'EOF'
+      # Jot LLM Export Implementation - Task Files…)
+  ⎿  # Jot LLM Export Implementation - Task Files
+
+     **Created:** 2025-10-21
+     … +269 lines (ctrl+o to expand)
+
+⏺ Perfect! Let me give you a final summary:
+
+⏺ Bash(ls -lh .tks/todo/ | grep -E "(yml|md)$" && echo "---" && wc -l .tks/todo/*.{yml,md} | tail -1)
+  ⎿  -rw-r--r--@ 1 macadelic  staff   5.3K Oct 21 15:40 DEPENDENCY_GRAPH.md       
+     -rw-r--r--@ 1 macadelic  staff   8.5K Oct 21 15:39 EXECUTION_GUIDE.md
+     -rw-r--r--@ 1 macadelic  staff   2.7K Oct 21 15:36 jot-export-001-llmstxt.yml
+     … +10 lines (ctrl+o to expand)
+
+⏺ ✅ COMPLETE! Ultra-Atomic Task Files Created
+
+  I've successfully created 11 files with 1,286 lines of ultra-detailed task specifications and documentation:
+
+  ---
+  📋 8 Task Files (YAML) - Ready for Parallel Execution
+
+  | File                                 | Task                  | Duration | Dependencies   | Can Run When    |
+  |--------------------------------------|-----------------------|----------|----------------|-----------------|
+  | jot-export-001-llmstxt.yml           | llms.txt export       | 2h       | None           | NOW ⚡           |
+  | jot-export-002-llmsfull.yml          | llms-full.txt export  | 1.5h     | None           | NOW ⚡           |
+  | jot-export-005-markdown.yml          | Enriched markdown     | 2.5h     | None           | NOW ⚡           |
+  | jot-export-003-tokenization.yml      | Token-based chunking  | 4h       | None           | NOW ⚠️ CRITICAL |
+  | jot-export-006-chunking.yml          | Chunking strategies   | 5h       | Task 003       | After 003 ⚠️    |
+  | jot-export-004-jsonl.yml             | JSONL export          | 3h       | Task 006       | After 006       |
+  | jot-export-007-build-integration.yml | Build integration     | 2h       | Tasks 001, 002 | After 001, 002  |
+  | jot-export-008-cli-updates.yml       | Final CLI integration | 2.5h     | ALL            | After ALL 🏁    |
+
+  ---
+  📚 3 Documentation Files
+
+  1. README.md (7.5KB) - Complete overview and quick start guide
+  2. EXECUTION_GUIDE.md (8.5KB) - Detailed execution instructions with timeline
+  3. DEPENDENCY_GRAPH.md (5.3KB) - Visual dependency graph + critical path analysis
+
+  ---
+  🎯 How Agents Know When to Run in Parallel
+
+  Each YAML file contains explicit metadata:
+
+  # Example from jot-export-001-llmstxt.yml
+  dependencies: []              # ← Empty = can start NOW
+  parallel_group: "A"           # ← Group A runs together
+  blocks: ["jot-export-007", "jot-export-008"]  # ← These wait for me
+  execution_phase: "PHASE_1"    # ← First wave
+  can_start_when: "Immediately - no dependencies. Can run in parallel with Tasks 2 and 5"
+
+  Orchestration Logic:
+  # Pseudo-code for agent scheduler
+  ready_tasks = [t for t in tasks if all_dependencies_complete(t)]
+  parallel_batch = group_by(ready_tasks, 'parallel_group')
+  run_concurrently(parallel_batch['A'])  # Tasks 1, 2, 5 together
+
+  ---
+  🚀 Execution Instructions
+
+  Start Immediately (3 Agents in Parallel):
+
+  # Agent Alpha
+  cd .tks/todo && open jot-export-001-llmstxt.yml
+
+  # Agent Beta  
+  cd .tks/todo && open jot-export-002-llmsfull.yml
+
+  # Agent Gamma
+  cd .tks/todo && open jot-export-005-markdown.yml
+
+  Critical Path (1 Agent, Sequential):
+
+  # Agent Delta - CRITICAL PATH
+  cd .tks/todo && open jot-export-003-tokenization.yml
+  # Wait for completion, then:
+  cd .tks/todo && open jot-export-006-chunking.yml
+
+  ---
+  📊 What Each Task File Contains
+
+  Every YAML has 8 ultra-atomic subtasks with:
+
+  ✅ WHO: Specific agent type (code-implementation, test-implementation, documentation)✅ WHAT: Exact file path + function name + single operation✅ WHERE: Absolute paths
+  (/Users/macadelic/dusk-indust/shared/packages/jot/internal/export/llmstxt.go)✅ WHEN: Dependencies + parallel execution flags✅ WHY: must_reference section with URLs, file paths, line numbers
+
+
+  Example subtask:
+  - desc: "Create file internal/export/llmstxt.go with package export declaration and LLMSTxtExporter struct containing no fields"
+    agent: "code-implementation"
+    parallel: false
+    depends_on_subtask: null
+
+  ---
+  ⏱️ Timeline with Optimal Parallelization
+
+  Hour 0  ├─ Alpha (001) ────────┐
+          ├─ Beta (002) ──────┐  │
+          └─ Gamma (005) ─────────┴─┐  ← Phase 1: 3 parallel agents
+                                    │
+  Hour 2.5 ─────────────────────────┘
+          ├─ Delta (003) ────────────┐  ← CRITICAL PATH starts
+                                     │
+  Hour 6.5 ──────────────────────────┘
+          ├─ Delta (006) ─────────────────┐  ← Chunking strategies
+          └─ Zeta (007) ─────┐           │
+                             │            │
+  Hour 11.5 ─────────────────┴────────────┘
+          └─ Epsilon (004) ───┐
+                              │
+  Hour 14.5 ──────────────────┘
+          └─ Omega (008) ──────┐  ← Final integration
+                               │
+  Hour 17 ─────────────────────┘  ✅ COMPLETE
+
+  Total: 17 hours wall-clock (vs 22.5 hours sequential) = 24% faster
+
+  ---
+  🎓 Key Features for Zero Ambiguity
+
+  1. Dependency Graph: Explicit dependencies: ["jot-export-XXX"] arrays
+  2. Parallel Groups: Tasks with same parallel_group can run together
+  3. Blocking Info: blocks: [] shows what's waiting on this task
+  4. Subtask Dependencies: Some subtasks can run in parallel within a task
+  5. Must Reference: Every file/URL/line number needed for context
+  6. Acceptance Criteria: Clear validation steps in each subtask
+
+  ---
+  📁 Where to Find Everything
+
+  .tks/todo/
+  ├── README.md                        ← Start here
+  ├── EXECUTION_GUIDE.md               ← Detailed instructions
+  ├── DEPENDENCY_GRAPH.md              ← Visual graph
+  ├── jot-export-001-llmstxt.yml       ← Phase 1, Group A
+  ├── jot-export-002-llmsfull.yml      ← Phase 1, Group A
+  ├── jot-export-003-tokenization.yml  ← Phase 2, CRITICAL ⚠️
+  ├── jot-export-004-jsonl.yml         ← Phase 3
+  ├── jot-export-005-markdown.yml      ← Phase 1, Group A
+  ├── jot-export-006-chunking.yml      ← Phase 2, CRITICAL ⚠️
+  ├── jot-export-007-build-integration.yml ← Phase 4
+  └── jot-export-008-cli-updates.yml   ← Phase 5, FINAL 🏁
+
+  ---
+  🎯 Next Steps
+
+  1. Read: .tks/todo/README.md for complete overview
+  2. Review: .tks/todo/DEPENDENCY_GRAPH.md for visual dependency map
+  3. Execute: Start with Phase 1 (Tasks 001, 002, 005 in parallel)
+  4. Monitor: Update status: "done" as tasks complete
+  5. Validate: Run tests after each phase
+
+  All tasks are ready for immediate execution with zero ambiguity! 🚀
+
+> which agents did you assign tasks too? 
+
+⏺ Great question! I need to clarify - I didn't actually assign tasks to real agents.
+
+  What I created were:
+
+  1️⃣ Agent TYPE assignments (in YAML subtasks)
+
+  Each subtask has an agent field specifying the TYPE of agent needed:
+
+  subtasks:
+    - desc: "Create file internal/export/llmstxt.go..."
+      agent: "code-implementation"  # ← Type, not a specific agent
+
+    - desc: "Create TestToLLMSTxt..."
+      agent: "test-implementation"  # ← Type, not a specific agent
+
+  Agent types used:
+  - code-implementation - For writing Go code
+  - test-implementation - For writing tests
+  - documentation - For updating docs
+  - dependency-management - For go.mod updates
+  - config-implementation - For YAML config changes
+
+  2️⃣ Hypothetical agent names (in documentation)
+
+  In the EXECUTION_GUIDE.md and README.md, I used example names to illustrate parallel execution:
+
+  Agent-Alpha → Task 001
+  Agent-Beta → Task 002
+  Agent-Gamma → Task 005
+  Agent-Delta → Tasks 003 → 006
+  Agent-Epsilon → Task 004
+  Agent-Zeta → Task 007
+  Agent-Omega → Task 008
+
+  These were just examples! Not real agent assignments.
+
+  ---
+  ✅ What Actually Needs to Happen
+
+  You (or your orchestration system) need to:
+
+  Option 1: Manual Assignment
+
+  # You decide which developers/agents work on what
+  Developer-John: "I'll take jot-export-001-llmstxt.yml"
+  Developer-Jane: "I'll handle jot-export-003-tokenization.yml"
+  AI-Agent-Claude: "I can do jot-export-005-markdown.yml"
+
+  Option 2: Orchestrator Reads Metadata
+
+  # Orchestration system reads YAML files
+  for task_file in glob(".tks/todo/jot-export-*.yml"):
+      task = yaml.load(task_file)
+
+      # Check if ready to start
+      if all_dependencies_complete(task['dependencies']):
+          # Assign to available agent
+          available_agent = find_agent_for_type(task['subtasks'][0]['agent'])
+          assign_task(available_agent, task)
+
+  Option 3: You Use the Task Tool
+
+  # If you have specialized agents available
+  Task(
+      description="Implement llms.txt export",
+      prompt=read_file("jot-export-001-llmstxt.yml"),
+      subagent_type="code-implementation"
+  )
+
+  ---
+  🤔 Did you want me to actually assign these to specific agents?
+
+  If so, I need to know:
+
+  1. What agents are available?
+    - Do you have specific developers?
+    - Are you using Claude Code agents?
+    - MCP servers with agents?
+    - Other AI agents?
+  2. How many concurrent agents?
+    - 1 agent (sequential)?
+    - 3 agents (balanced)?
+    - 7 agents (maximum speed)?
+  3. How should I assign them?
+    - Create a schedule/roster?
+    - Actually invoke the Task tool now?
+    - Add assignments to the YAML files?
+
+  ---
+  💡 What I Can Do Right Now
+
+  I can create an AGENT_ASSIGNMENTS.yml file that maps specific agents to tasks. Just tell me:
+
+  # Example - you tell me your agents
+  available_agents:
+    - name: "claude-code-1"
+      type: "general-purpose"
+      available: true
+
+    - name: "developer-john"
+      type: "human"
+      specialization: "go-backend"
+
+    - name: "ai-copilot"
+      type: "code-assistant"
+
+  # I can then create optimal assignments based on:
+  # - Dependencies
+  # - Agent capabilities  
+  # - Parallel groups
+  # - Critical path
+
+  Would you like me to:
+  - A) Create an assignment file for specific agents you name?
+  - B) Actually launch Task agents right now to start work?
+  - C) Just clarify that the tasks are ready but unassigned?
+
+> good, create them on the following path and use the exact template - 
+
+/Users/macadelic/dusk-indust/shared/packages/jot/.claude/agents/*.md
+
+give the agents a name that simply describes there job-description - e.g. doc-dev, test-dev, etc. etc.
+
+---
+name: agent-name
+description: Clear, action-oriented description. Use for [specific task types].
+tools: Read, Write, Bash, Grep, Glob
+model: sonnet
+---
+
+# Agent Name
+
+## Role and Purpose
+You are a [specialist type] with expertise in [domain areas]. Your primary responsibilities include:
+- [Responsibility 1]
+- [Responsibility 2]
+- [Responsibility 3]
+
+## Approach
+When invoked:
+1. [First step in your workflow]
+2. [Second step]
+3. [Continue with numbered steps]
+4. [Final step/deliverable]
+
+## Key Practices
+- [Specific practice or guideline]
+- [Quality standard to maintain]
+- [Important consideration]
+
+## Output Format
+[Describe how results should be presented] 
+
+⏺ Perfect! I'll create specialized agent files based on the task assignments. Let me create 9 agents that map to the parallel execution groups and task types.
+
+⏺ Bash(mkdir -p /Users/macadelic/dusk-indust/shared/packages/jot/.claude/agents)
+  ⎿  (No content)
+
+⏺ Write(.claude/agents/llms-txt-dev.md)
+  ⎿  Wrote 42 lines to .claude/agents/llms-txt-dev.md                                                               
+     ---
+     name: llms-txt-dev
+     description: Specialist in implementing llms.txt export format per llmstxt.org specification. Use for Task 001.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # LLMs.txt Export Developer
+     ## Role and Purpose
+     … +32 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/llms-full-dev.md)
+  ⎿  Wrote 42 lines to .claude/agents/llms-full-dev.md                                                                 
+     ---
+     name: llms-full-dev
+     description: Specialist in implementing llms-full.txt with complete documentation concatenation. Use for Task 002.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # LLMs-full.txt Export Developer
+     ## Role and Purpose
+     … +32 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/markdown-dev.md)
+  ⎿  Wrote 43 lines to .claude/agents/markdown-dev.md                                                     
+     ---
+     name: markdown-dev
+     description: Specialist in enriched markdown export with YAML frontmatter metadata. Use for Task 005.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # Enriched Markdown Export Developer
+     ## Role and Purpose
+     … +33 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/tokenizer-dev.md)
+  ⎿  Wrote 46 lines to .claude/agents/tokenizer-dev.md                                                                  
+     ---
+     name: tokenizer-dev
+     description: Critical path specialist for token-based chunking with tiktoken-go. Use for Task 003. BLOCKS Task 006.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # Tokenizer Developer (CRITICAL PATH)
+     ## Role and Purpose
+     … +36 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/chunking-dev.md)
+  ⎿  Wrote 49 lines to .claude/agents/chunking-dev.md                                                                    
+     ---
+     name: chunking-dev
+     description: Critical path specialist for pluggable chunking strategy system. Use for Task 006. DEPENDS on Task 003.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # Chunking Strategy Developer (CRITICAL PATH)
+     ## Role and Purpose
+     … +39 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/jsonl-dev.md)
+  ⎿  Wrote 46 lines to .claude/agents/jsonl-dev.md                                                                             
+     ---
+     name: jsonl-dev
+     description: Specialist in JSONL line-delimited JSON for vector database ingestion. Use for Task 004. DEPENDS on Task 006.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # JSONL Export Developer
+     ## Role and Purpose
+     … +36 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/build-dev.md)
+  ⎿  Wrote 46 lines to .claude/agents/build-dev.md                                                                   
+     ---
+     name: build-dev
+     description: Specialist in build system integration and automation. Use for Task 007. DEPENDS on Tasks 001, 002.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # Build Integration Developer
+     ## Role and Purpose
+     … +36 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/cli-dev.md)
+  ⎿  Wrote 52 lines to .claude/agents/cli-dev.md                                                                       
+     ---
+     name: cli-dev
+     description: Final integration specialist for CLI updates and UX. Use for Task 008. DEPENDS on ALL previous tasks.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # CLI Integration Developer (FINAL INTEGRATION)
+     ## Role and Purpose
+     … +42 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/test-dev.md)
+  ⎿  Wrote 48 lines to .claude/agents/test-dev.md                                                                               
+     ---
+     name: test-dev
+     description: Testing specialist supporting all implementation tasks. Use for test-implementation subtasks across all tasks.
+     tools: Read, Write, Edit, Bash, Grep, Glob
+     model: sonnet
+     ---
+     # Test Developer
+     ## Role and Purpose
+     … +38 lines (ctrl+o to expand)
+
+⏺ Write(.claude/agents/README.md)
+  ⎿  Wrote 236 lines to .claude/agents/README.md    
+     # Jot Export Implementation - Agent Assignments
+     **Created:** 2025-10-21
+     **Total Agents:** 9
+     **Project:** Multi-format LLM export system
+     ---
+     ## 🤖 Agent Roster
+     … +226 lines (ctrl+o to expand)
+
+⏺ Perfect! Let me verify all agents were created:
+
+⏺ Bash(ls -lh /Users/macadelic/dusk-indust/shared/packages/jot/.claude/agents/ && echo "---" && wc -l /Users/macadelic/dusk-indust/shared/packages/jot/.claude/agents/*…)
+  ⎿  total 88                                                          
+     -rw-r--r--@ 1 macadelic  staff   2.1K Oct 21 15:50 build-dev.md
+     -rw-r--r--@ 1 macadelic  staff   2.5K Oct 21 15:50 chunking-dev.md
+     … +10 lines (ctrl+o to expand)
+
+⏺ ✅ Complete! 9 Specialized Agents Created
+
+  I've successfully created 10 files (9 agents + README) with 640 lines of agent definitions at:
+
+  /Users/macadelic/dusk-indust/shared/packages/jot/.claude/agents/
+
+  ---
+  🤖 Agent Roster (by Phase)
+
+  Phase 1: Parallel Agents (Start Immediately)
+
+  | Agent         | Task | Role                            | Duration | Dependencies     |
+  |---------------|------|---------------------------------|----------|------------------|
+  | llms-txt-dev  | 001  | llms.txt export specialist      | 2h       | None - START NOW |
+  | llms-full-dev | 002  | llms-full.txt export specialist | 1.5h     | None - START NOW |
+  | markdown-dev  | 005  | Enriched markdown specialist    | 2.5h     | None - START NOW |
+
+  Phase 2: Critical Path (Sequential)
+
+  | Agent            | Task | Role                         | Duration | Dependencies           |
+  |------------------|------|------------------------------|----------|------------------------|
+  | tokenizer-dev ⚠️ | 003  | Tokenization specialist      | 4h       | None - START NOW       |
+  | chunking-dev ⚠️  | 006  | Chunking strategy specialist | 5h       | WAIT for tokenizer-dev |
+
+  Phase 3: After Chunking
+
+  | Agent     | Task | Role                    | Duration | Dependencies          |
+  |-----------|------|-------------------------|----------|-----------------------|
+  | jsonl-dev | 004  | JSONL export specialist | 3h       | WAIT for chunking-dev |
+
+  Phase 4: After llms.txt Exports
+
+  | Agent     | Task | Role                         | Duration | Dependencies                          |
+  |-----------|------|------------------------------|----------|---------------------------------------|
+  | build-dev | 007  | Build integration specialist | 2h       | WAIT for llms-txt-dev + llms-full-dev |
+
+  Phase 5: Final Integration
+
+  | Agent      | Task | Role              | Duration | Dependencies |
+  |------------|------|-------------------|----------|--------------|
+  | cli-dev 🏁 | 008  | CLI/UX specialist | 2.5h     | WAIT for ALL |
+
+  Support Agent (Works with All)
+
+  | Agent    | Task | Role               | Duration | Dependencies               |
+  |----------|------|--------------------|----------|----------------------------|
+  | test-dev | All  | Testing specialist | Embedded | Works alongside all agents |
+
+  ---
+  📋 Each Agent File Contains
+
+  ✅ Name: Descriptive job-based name✅ Description: Clear action-oriented description✅ Tools: Read, Write, Edit, Bash, Grep, Glob✅ Model: sonnet✅ Role and Purpose: Detailed expertise
+  areas✅ Approach: Step-by-step workflow (numbered)✅ Key Practices: Specific guidelines and standards✅ Output Format: Expected deliverables
+
+  ---
+  🚀 How to Use These Agents
+
+  Option 1: Claude Code Native Agents
+
+  If Claude Code supports agent invocation:
+  # Invoke agent by name
+  claude-code invoke llms-txt-dev
+
+  # Or with task context
+  claude-code invoke llms-txt-dev --task .tks/todo/jot-export-001-llmstxt.yml
+
+  Option 2: Manual Execution
+
+  # Read agent instructions
+  cat .claude/agents/llms-txt-dev.md
+
+  # Read task file
+  cat .tks/todo/jot-export-001-llmstxt.yml
+
+  # Execute subtasks following agent's "Approach" section
+
+  Option 3: Task Tool Integration
+
+  # In your code
+  Task(
+      description="Implement llms.txt export",
+      prompt=f"""
+      You are {agent_name} from .claude/agents/{agent_name}.md
+      Execute task from .tks/todo/jot-export-001-llmstxt.yml
+      Follow your Approach and Key Practices exactly.
+      """,
+      subagent_type="code-implementation"
+  )
+
+  ---
+  📊 Quick Start Guide
+
+  Step 1: Start Phase 1 (3 Parallel Agents)
+
+  # Agent 1
+  open .claude/agents/llms-txt-dev.md
+  open .tks/todo/jot-export-001-llmstxt.yml
+
+  # Agent 2
+  open .claude/agents/llms-full-dev.md
+  open .tks/todo/jot-export-002-llmsfull.yml
+
+  # Agent 3
+  open .claude/agents/markdown-dev.md
+  open .tks/todo/jot-export-005-markdown.yml
+
+  Step 2: Start Critical Path (1 Sequential Agent)
+
+  # Agent 4 - CRITICAL PATH
+  open .claude/agents/tokenizer-dev.md
+  open .tks/todo/jot-export-003-tokenization.yml
+
+  # After Task 003 completes:
+  open .claude/agents/chunking-dev.md
+  open .tks/todo/jot-export-006-chunking.yml
+
+  Step 3: Monitor Dependencies
+
+  # Check which tasks are complete
+  grep "^status:" .tks/todo/*.yml
+
+  # Find tasks ready to start
+  grep -B2 "dependencies: \[\]" .tks/todo/*.yml | grep "^id:"
+
+  ---
+  🎯 Critical Information
+
+  Dependencies Enforced in Agent Files:
+
+  tokenizer-dev says:
+  "This is CRITICAL PATH - Task 006 (chunking strategies) depends on this"
+
+  chunking-dev says:
+  "WAIT for Task 003 - Check that internal/tokenizer/tokenizer.go exists before starting"
+
+  jsonl-dev says:
+  "WAIT for Task 006 - Check that internal/chunking/strategy.go exists before starting"
+
+  cli-dev says:
+  "WAIT for ALL tasks 001-007 - Verify all exporters and strategies exist before starting"
+
+  ---
+  📁 Complete File Structure
+
+  .claude/agents/
+  ├── README.md                 # Agent roster and schedule
+  ├── llms-txt-dev.md          # Phase 1 - Task 001
+  ├── llms-full-dev.md         # Phase 1 - Task 002
+  ├── markdown-dev.md          # Phase 1 - Task 005
+  ├── tokenizer-dev.md         # Phase 2 - Task 003 ⚠️ CRITICAL
+  ├── chunking-dev.md          # Phase 2 - Task 006 ⚠️ CRITICAL
+  ├── jsonl-dev.md             # Phase 3 - Task 004
+  ├── build-dev.md             # Phase 4 - Task 007
+  ├── cli-dev.md               # Phase 5 - Task 008 🏁 FINAL
+  └── test-dev.md              # Support - All tasks
+
+  .tks/todo/
+  ├── README.md                # Overview
+  ├── EXECUTION_GUIDE.md       # Detailed instructions
+  ├── DEPENDENCY_GRAPH.md      # Visual graph
+  └── jot-export-*.yml         # 8 task files (64 subtasks)
+
+  ---
+  ✅ All Agents Are Ready!
+
+  Each agent knows:
+  - ✅ WHO they are (specialist role)
+  - ✅ WHAT to do (specific task with 8 subtasks)
+  - ✅ WHERE to work (exact file paths)
+  - ✅ WHEN to start (dependencies clearly stated)
+  - ✅ WHY (must_reference files to read)
+  - ✅ HOW (numbered approach steps)
+
+  You can now invoke any agent and they'll have complete context! 🚀
+
+> replace the current agent names in each .yml task file created earlier - with the ones just created - no ambiguity 
+
+⏺ Perfect! I'll update all 8 YAML task files to replace generic agent types with the specific agent names we just created.
+
+⏺ Read(.tks/todo/jot-export-001-llmstxt.yml)
+  ⎿  Read 65 lines
+
+⏺ Update(.tks/todo/jot-export-001-llmstxt.yml)
+  ⎿  Updated .tks/todo/jot-export-001-llmstxt.yml with 8 additions and 8 removals                                                                                              
+       17    
+       18    subtasks:
+       19      - desc: "Create file internal/export/llmstxt.go with package export declaration and LLMSTxtExporter struct containing no fields"
+       20 -      agent: "code-implementation"
+       20 +      agent: "llms-txt-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Implement NewLLMSTxtExporter() constructor function returning *LLMSTxtExporter in internal/export/llmstxt.go"
+       25 -      agent: "code-implementation"
+       25 +      agent: "llms-txt-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Implement ToLLMSTxt(documents []scanner.Document, config ProjectConfig) (string, error) method that generates H1 with config.Name and blockquote with 
+            config.Description"
+       30 -      agent: "code-implementation"
+       30 +      agent: "llms-txt-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-2"
+       33    
+       34      - desc: "Create groupDocumentsBySection(documents []scanner.Document) map[string][]scanner.Document function using filepath.Dir to group by directory"
+       35 -      agent: "code-implementation"
+       35 +      agent: "llms-txt-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-3"
+       38    
+       39      - desc: "Create extractFirstParagraph(content []byte) string helper function that extracts first non-header paragraph up to 100 chars"
+       40 -      agent: "code-implementation"
+       40 +      agent: "llms-txt-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-3"
+       43    
+       44      - desc: "Format output as markdown list with pattern '- [doc.Title](doc.RelativePath): description' for each document under H2 section headers"
+       45 -      agent: "code-implementation"
+       45 +      agent: "llms-txt-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-4"
+       48    
+       49      - desc: "Create internal/export/llmstxt_test.go with TestToLLMSTxt validating H1 format, blockquote format, H2 sections, and link format match llmstxt.org spec"
+       50 -      agent: "test-implementation"
+       50 +      agent: "test-dev"
+       51        parallel: true
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Add ProjectConfig struct to internal/export/types.go with Name and Description string fields for llms.txt header generation"
+       55 -      agent: "code-implementation"
+       55 +      agent: "llms-txt-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-2"
+       58    
+
+⏺ Update(.tks/todo/jot-export-002-llmsfull.yml)
+  ⎿  Updated .tks/todo/jot-export-002-llmsfull.yml with 8 additions and 8 removals                                                                                    
+       17    
+       18    subtasks:
+       19      - desc: "Add ToLLMSFullTxt(documents []scanner.Document, config ProjectConfig) (string, error) method to LLMSTxtExporter in internal/export/llmstxt.go"
+       20 -      agent: "code-implementation"
+       20 +      agent: "llms-full-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Generate header with H1 containing config.Name and blockquote containing config.Description using strings.Builder"
+       25 -      agent: "code-implementation"
+       25 +      agent: "llms-full-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Implement sortDocumentsByImportance(documents []scanner.Document) []scanner.Document sorting README.md first then alphabetically by path"
+       30 -      agent: "code-implementation"
+       30 +      agent: "llms-full-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-1"
+       33    
+       34      - desc: "Concatenate document content with '---' horizontal rule separator between each document preserving original markdown formatting"
+       35 -      agent: "code-implementation"
+       35 +      agent: "llms-full-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-3"
+       38    
+       39      - desc: "Add H1 heading before each document content using '# ' + doc.Title to separate documents clearly"
+       40 -      agent: "code-implementation"
+       40 +      agent: "llms-full-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-4"
+       43    
+       44      - desc: "Implement estimateSize(content string) int64 function returning byte count and log warning if total > 1048576 (1MB) about context limits"
+       45 -      agent: "code-implementation"
+       45 +      agent: "llms-full-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-5"
+       48    
+       49      - desc: "Create TestToLLMSFullTxt in internal/export/llmstxt_test.go validating document order, separator presence, H1 format, and size estimation"
+       50 -      agent: "test-implementation"
+       50 +      agent: "test-dev"
+       51        parallel: true
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Test with real docs from examples/ directory ensuring output is parseable markdown and preserves code blocks and links"
+       55 -      agent: "test-implementation"
+       55 +      agent: "test-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-6"
+       58    
+
+⏺ Update(.tks/todo/jot-export-003-tokenization.yml)
+  ⎿  Updated .tks/todo/jot-export-003-tokenization.yml with 8 additions and 8 removals                                                                                                        
+       17    
+       18    subtasks:
+       19      - desc: "Run 'go get github.com/pkoukk/tiktoken-go' from /Users/macadelic/dusk-indust/shared/packages/jot directory and verify it appears in go.mod dependencies"
+       20 -      agent: "dependency-management"
+       20 +      agent: "tokenizer-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Create internal/tokenizer/tokenizer.go with Tokenizer interface defining Encode(text string) []int and Count(text string) int methods"
+       25 -      agent: "code-implementation"
+       25 +      agent: "tokenizer-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Implement TikTokenizer struct in internal/tokenizer/tokenizer.go using tiktoken.GetEncoding('cl100k_base') for GPT-4 compatibility"
+       30 -      agent: "code-implementation"
+       30 +      agent: "tokenizer-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-2"
+       33    
+       34      - desc: "Create NewTokenizer() (*TikTokenizer, error) factory function in internal/tokenizer/tokenizer.go handling encoding initialization errors"
+       35 -      agent: "code-implementation"
+       35 +      agent: "tokenizer-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-3"
+       38    
+       39      - desc: "Refactor chunkDocument signature in internal/export/export.go:205 from (doc scanner.Document, maxSize, overlap int) to (doc scanner.Document, maxTokens, overlapTokens
+             int, tokenizer tokenizer.Tokenizer)"
+       40 -      agent: "code-implementation"
+       40 +      agent: "tokenizer-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-4"
+       43    
+       44      - desc: "Replace len(content) checks with tokenizer.Count(text) in chunk boundary detection at internal/export/export.go:224-235 preserving word boundaries"
+       45 -      agent: "code-implementation"
+       45 +      agent: "tokenizer-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-5"
+       48    
+       49      - desc: "Add TokenCount int field to Chunk struct at internal/export/types.go:36 and populate with actual token count during chunking"
+       50 -      agent: "code-implementation"
+       50 +      agent: "tokenizer-dev"
+       51        parallel: false
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Update ToLLMFormat call at internal/export/export.go:68 to use viper.GetInt('llm.chunk_size') defaulting to 512 and viper.GetInt('llm.overlap') defaulting to 128"
+       55 -      agent: "code-implementation"
+       55 +      agent: "tokenizer-dev"
+       56        parallel: false
+       57        depends_on_subtask: "subtask-7"
+       58    
+
+⏺ Update(.tks/todo/jot-export-004-jsonl.yml)
+  ⎿  Updated .tks/todo/jot-export-004-jsonl.yml with 8 additions and 8 removals                                                                                                            
+       17    
+       18    subtasks:
+       19      - desc: "Create internal/export/jsonl.go with JSONLExporter struct and NewJSONLExporter() constructor"
+       20 -      agent: "code-implementation"
+       20 +      agent: "jsonl-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Implement ToJSONL(documents []scanner.Document, chunker chunking.ChunkStrategy) (string, error) method writing one JSON object per line"
+       25 -      agent: "code-implementation"
+       25 +      agent: "jsonl-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Create ChunkMetadata struct in internal/export/types.go with fields: DocID string, ChunkID string, SectionID string, TokenCount int, Source string, StartLine int, 
+            EndLine int json tags"
+       30 -      agent: "code-implementation"
+       30 +      agent: "jsonl-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-1"
+       33    
+       34      - desc: "Format each chunk as compact JSON using json.Marshal without indentation appending newline character after each object per JSONL spec"
+       35 -      agent: "code-implementation"
+       35 +      agent: "jsonl-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-3"
+       38    
+       39      - desc: "Add PrevChunkID and NextChunkID string fields to ChunkMetadata for document navigation relationships with json tags"
+       40 -      agent: "code-implementation"
+       40 +      agent: "jsonl-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-3"
+       43    
+       44      - desc: "Include Vector []float32 field with json:vector,omitempty tag in ChunkMetadata for optional embedding storage"
+       45 -      agent: "code-implementation"
+       45 +      agent: "jsonl-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-3"
+       48    
+       49      - desc: "Create internal/export/jsonl_test.go with TestToJSONL validating each line parses as valid JSON using json.Unmarshal and entire output is valid JSONL"
+       50 -      agent: "test-implementation"
+       50 +      agent: "test-dev"
+       51        parallel: true
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Add TestJSONLStreaming test that reads file line-by-line using bufio.Scanner without loading entire file into memory validating streaming compatibility"
+       55 -      agent: "test-implementation"
+       55 +      agent: "test-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-6"
+       58    
+
+⏺ Update(.tks/todo/jot-export-005-markdown.yml)
+  ⎿  Updated .tks/todo/jot-export-005-markdown.yml with 8 additions and 8 removals                                                                                                            
+       17    
+       18    subtasks:
+       19      - desc: "Create internal/export/markdown.go with MarkdownExporter struct and NewMarkdownExporter() constructor"
+       20 -      agent: "code-implementation"
+       20 +      agent: "markdown-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Implement ToEnrichedMarkdown(documents []scanner.Document) (string, error) generating YAML frontmatter delimited by '---' at start and end"
+       25 -      agent: "code-implementation"
+       25 +      agent: "markdown-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Generate frontmatter fields: source (doc.RelativePath), section (doc.Sections[0].Title), chunk_id (doc.ID), token_count (calculated), modified 
+            (doc.ModTime.Format(time.RFC3339))"
+       30 -      agent: "code-implementation"
+       30 +      agent: "markdown-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-2"
+       33    
+       34      - desc: "Preserve original markdown content including headers, code blocks with language tags, lists, and links using string(doc.Content) after frontmatter"
+       35 -      agent: "code-implementation"
+       35 +      agent: "markdown-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-3"
+       38    
+       39      - desc: "Implement generateTableOfContents(documents []scanner.Document) string creating markdown TOC with anchor links using '## Table of Contents' header and bullet list"
+       40 -      agent: "code-implementation"
+       40 +      agent: "markdown-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-2"
+       43    
+       44      - desc: "Add contextualEnrichment(doc scanner.Document, fullContext string) string method placeholder for optional Anthropic-style context injection as HTML comments with TODO
+             marker"
+       45 -      agent: "code-implementation"
+       45 +      agent: "markdown-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-4"
+       48    
+       49      - desc: "Add separateFiles bool parameter to ToEnrichedMarkdown controlling single concatenated file vs directory of separate files with conditional logic"
+       50 -      agent: "code-implementation"
+       50 +      agent: "markdown-dev"
+       51        parallel: false
+       52        depends_on_subtask: "subtask-2"
+       53    
+       54      - desc: "Create internal/export/markdown_test.go with TestToEnrichedMarkdown validating YAML frontmatter parsing using yaml.Unmarshal, markdown preservation, and TOC 
+            generation"
+       55 -      agent: "test-implementation"
+       55 +      agent: "test-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-7"
+       58    
+
+⏺ Update(.tks/todo/jot-export-006-chunking.yml)
+  ⎿  Updated .tks/todo/jot-export-006-chunking.yml with 8 additions and 8 removals                                                                                                           
+       17    
+       18    subtasks:
+       19      - desc: "Create internal/chunking/strategy.go with ChunkStrategy interface defining Chunk(doc scanner.Document, maxTokens, overlapTokens int) ([]export.Chunk, error) method 
+            signature"
+       20 -      agent: "code-implementation"
+       20 +      agent: "chunking-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Create internal/chunking/fixed.go implementing FixedSizeStrategy struct with tokenizer field using token-based chunking from internal/tokenizer calling 
+            tokenizer.Count()"
+       25 -      agent: "code-implementation"
+       25 +      agent: "chunking-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Create internal/chunking/headers.go implementing MarkdownHeaderStrategy splitting on markdown header boundaries using regexp.MustCompile('^#{1,6}\\s+(.+)$')"
+       30 -      agent: "code-implementation"
+       30 +      agent: "chunking-dev"
+       31        parallel: false
+       32        depends_on_subtask: "subtask-1"
+       33    
+       34      - desc: "Create internal/chunking/recursive.go implementing RecursiveStrategy with separators []string{'\\n\\n', '\\n', ' ', ''} trying each hierarchically until chunk size 
+            met"
+       35 -      agent: "code-implementation"
+       35 +      agent: "chunking-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-1"
+       38    
+       39      - desc: "Create internal/chunking/semantic.go implementing SemanticStrategy struct with Chunk method returning error with TODO comment for embedding-based boundary detection"
+       40 -      agent: "code-implementation"
+       40 +      agent: "chunking-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-1"
+       43    
+       44      - desc: "Create internal/chunking/factory.go with NewChunkStrategy(name string, tokenizer tokenizer.Tokenizer) (ChunkStrategy, error) factory function mapping 'fixed', 
+            'headers', 'recursive', 'semantic' to implementations"
+       45 -      agent: "code-implementation"
+       45 +      agent: "chunking-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-5"
+       48    
+       49      - desc: "Create internal/chunking/strategy_test.go with table-driven tests TestFixedStrategy, TestHeaderStrategy, TestRecursiveStrategy comparing chunk counts and boundary 
+            quality"
+       50 -      agent: "test-implementation"
+       50 +      agent: "test-dev"
+       51        parallel: true
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Create internal/chunking/benchmark_test.go with BenchmarkFixedStrategy, BenchmarkHeaderStrategy, BenchmarkRecursiveStrategy measuring ns/op and B/op allocations"
+       55 -      agent: "test-implementation"
+       55 +      agent: "test-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-6"
+       58    
+
+⏺ Update(.tks/todo/jot-export-007-build-integration.yml)
+  ⎿  Updated .tks/todo/jot-export-007-build-integration.yml with 8 additions and 8 removals                                                                                        
+       17    
+       18    subtasks:
+       19      - desc: "Add GenerateLLMSTxt bool field to BuildConfig struct in cmd/jot/build.go:111-116 after Clean field"
+       20 -      agent: "code-implementation"
+       20 +      agent: "build-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Update loadBuildConfig in cmd/jot/build.go:121-145 to read viper.GetBool('features.llm_export') into config.GenerateLLMSTxt field with default true"
+       25 -      agent: "config-implementation"
+       25 +      agent: "build-dev"
+       26        parallel: false
+       27        depends_on_subtask: "subtask-1"
+       28    
+       29      - desc: "Add llm_export: true to features section in jot.yml:28-34 verifying it exists and is correctly indented"
+       30 -      agent: "config-implementation"
+       30 +      agent: "build-dev"
+       31        parallel: true
+       32        depends_on_subtask: null
+       33    
+       34      - desc: "Insert llms.txt generation block after line 100 in cmd/jot/build.go:100 before 'Summary' calling exporter := export.NewLLMSTxtExporter() with config check"
+       35 -      agent: "code-implementation"
+       35 +      agent: "build-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-2"
+       38    
+       39      - desc: "Write llms.txt to filepath.Join(config.OutputPath, 'llms.txt') and llms-full.txt to filepath.Join(config.OutputPath, 'llms-full.txt') with error handling"
+       40 -      agent: "code-implementation"
+       40 +      agent: "build-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-4"
+       43    
+       44      - desc: "Add build logging fmt.Println(' Generating llms.txt...') and size reporting with humanized bytes like 'Created llms.txt (15KB), llms-full.txt (2.3MB)'"
+       45 -      agent: "code-implementation"
+       45 +      agent: "build-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-5"
+       48    
+       49      - desc: "Implement --skip-llms-txt boolean flag in buildCmd.Flags at cmd/jot/build.go:28-30 to disable generation and update loadBuildConfig to read it"
+       50 -      agent: "code-implementation"
+       50 +      agent: "build-dev"
+       51        parallel: false
+       52        depends_on_subtask: "subtask-1"
+       53    
+       54      - desc: "Create TestBuildWithLLMSTxt integration test in new file cmd/jot/build_test.go verifying llms.txt and llms-full.txt files exist and contain valid content"
+       55 -      agent: "test-implementation"
+       55 +      agent: "test-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-6"
+       58    
+
+⏺ Update(.tks/todo/jot-export-008-cli-updates.yml)
+  ⎿  Updated .tks/todo/jot-export-008-cli-updates.yml with 8 additions and 8 removals                                                                                                        
+       17    
+       18    subtasks:
+       19      - desc: "Update exportCmd.Flags().StringP('format') in cmd/jot/export.go:25 to accept values: llms-txt, llms-full, jsonl, markdown, json, yaml with default 'json'"
+       20 -      agent: "code-implementation"
+       20 +      agent: "cli-dev"
+       21        parallel: false
+       22        depends_on_subtask: null
+       23    
+       24      - desc: "Add exportCmd.Flags().StringP('strategy', 's', 'fixed', 'chunking strategy: fixed, semantic, markdown-headers, recursive, contextual') at line 26"
+       25 -      agent: "code-implementation"
+       25 +      agent: "cli-dev"
+       26        parallel: false
+       27        depends_on_subtask: null
+       28    
+       29      - desc: "Add exportCmd.Flags().IntP('chunk-size', '', 512, 'tokens per chunk') and exportCmd.Flags().IntP('chunk-overlap', '', 128, 'token overlap') with validation >0 and 
+            <=2048"
+       30 -      agent: "code-implementation"
+       30 +      agent: "cli-dev"
+       31        parallel: false
+       32        depends_on_subtask: null
+       33    
+       34      - desc: "Implement --for-rag, --for-context, --for-training boolean flags setting preset combinations: rag=jsonl+semantic+512, context=markdown+headers+1024, 
+            training=jsonl+fixed+256"
+       35 -      agent: "code-implementation"
+       35 +      agent: "cli-dev"
+       36        parallel: false
+       37        depends_on_subtask: "subtask-1"
+       38    
+       39      - desc: "Add validateExportFlags(cmd *cobra.Command) error function checking mutually exclusive formats, preset conflicts, and providing helpful error messages with examples"
+       40 -      agent: "code-implementation"
+       40 +      agent: "cli-dev"
+       41        parallel: false
+       42        depends_on_subtask: "subtask-4"
+       43    
+       44      - desc: "Update runExport switch statement at cmd/jot/export.go:76-91 adding cases 'llms-txt', 'llms-full', 'jsonl', 'markdown' routing to appropriate exporters with error 
+            handling"
+       45 -      agent: "code-implementation"
+       45 +      agent: "cli-dev"
+       46        parallel: false
+       47        depends_on_subtask: "subtask-5"
+       48    
+       49      - desc: "Add --include-embeddings boolean flag for JSONL format with fmt.Printf warning log about API costs and processing time when enabled before exporting"
+       50 -      agent: "code-implementation"
+       50 +      agent: "cli-dev"
+       51        parallel: false
+       52        depends_on_subtask: "subtask-6"
+       53    
+       54      - desc: "Update exportCmd.Long help text at cmd/jot/export.go:20 with examples: 'jot export --format llms-txt', 'jot export --for-rag --output docs.jsonl', 'jot export 
+            --format markdown --strategy headers'"
+       55 -      agent: "documentation"
+       55 +      agent: "cli-dev"
+       56        parallel: true
+       57        depends_on_subtask: "subtask-7"
+       58    
+
+⏺ Perfect! All 8 task files have been updated. Let me verify the changes:
+
+⏺ Bash(grep -h "agent:" /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/jot-export-*.yml | sort | uniq -c | sort -rn)
+  ⎿     9     agent: "test-dev"     
+        8     agent: "tokenizer-dev"
+        8     agent: "cli-dev"
+     … +6 lines (ctrl+o to expand)
+
+⏺ Excellent! Let me create a summary showing the complete mapping:
+
+⏺ Bash(cat > /Users/macadelic/dusk-indust/shared/packages/jot/.tks/todo/AGENT_MAPPING.md << 'EOF'
+      # Agent Name Mapping - Complete Reference…)
+  ⎿  # Agent Name Mapping - Complete Reference
+
+     **Last Updated:** 2025-10-21
+     … +192 lines (ctrl+o to expand)
+
+⏺ ✅ COMPLETE! All Agent Names Updated
+
+  I've successfully replaced all generic agent types with specific agent names across all 8 task files.
+
+  ---
+  📊 Changes Summary
+
+  Updated 8 YAML Task Files:
+
+  | File                                 | Generic → Specific Replacements                                                                               |
+  |--------------------------------------|---------------------------------------------------------------------------------------------------------------|
+  | jot-export-001-llmstxt.yml           | code-implementation → llms-txt-dev (7x)test-implementation → test-dev (1x)                                    |
+  | jot-export-002-llmsfull.yml          | code-implementation → llms-full-dev (6x)test-implementation → test-dev (2x)                                   |
+  | jot-export-003-tokenization.yml      | dependency-management → tokenizer-dev (1x)code-implementation → tokenizer-dev (7x)                            |
+  | jot-export-004-jsonl.yml             | code-implementation → jsonl-dev (6x)test-implementation → test-dev (2x)                                       |
+  | jot-export-005-markdown.yml          | code-implementation → markdown-dev (7x)test-implementation → test-dev (1x)                                    |
+  | jot-export-006-chunking.yml          | code-implementation → chunking-dev (6x)test-implementation → test-dev (2x)                                    |
+  | jot-export-007-build-integration.yml | code-implementation → build-dev (5x)config-implementation → build-dev (2x)test-implementation → test-dev (1x) |
+  | jot-export-008-cli-updates.yml       | code-implementation → cli-dev (7x)documentation → cli-dev (1x)                                                |
+
+  ---
+  🎯 Agent Usage Statistics
+
+  Agent Name         Subtask Count   Tasks
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  test-dev           9               All (testing support)
+  tokenizer-dev      8               003 (CRITICAL PATH)
+  cli-dev            8               008 (FINAL)
+  llms-txt-dev       7               001
+  markdown-dev       7               005
+  build-dev          7               007
+  llms-full-dev      6               002
+  jsonl-dev          6               004
+  chunking-dev       6               006 (CRITICAL PATH)
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  TOTAL              64 subtasks     8 tasks
+
+  ---
+  ✅ Zero Ambiguity Achieved
+
+  Every single subtask now has a specific agent assignment:
+
+  Before:
+
+  - desc: "Create file internal/export/llmstxt.go..."
+    agent: "code-implementation"  # Generic - who is this?
+
+  After:
+
+  - desc: "Create file internal/export/llmstxt.go..."
+    agent: "llms-txt-dev"  # Specific - exact agent with defined role
+
+  ---
+  📁 Complete File Structure
+
+  /Users/macadelic/dusk-indust/shared/packages/jot/
+
+  .claude/agents/                    # 9 agent definition files
+  ├── llms-txt-dev.md               # → Task 001
+  ├── llms-full-dev.md              # → Task 002
+  ├── tokenizer-dev.md              # → Task 003 ⚠️
+  ├── jsonl-dev.md                  # → Task 004
+  ├── markdown-dev.md               # → Task 005
+  ├── chunking-dev.md               # → Task 006 ⚠️
+  ├── build-dev.md                  # → Task 007
+  ├── cli-dev.md                    # → Task 008 🏁
+  ├── test-dev.md                   # → All tasks (support)
+  └── README.md                     # Agent roster
+
+  .tks/todo/                         # 8 task files + 4 docs
+  ├── jot-export-001-llmstxt.yml    # Uses: llms-txt-dev, test-dev
+  ├── jot-export-002-llmsfull.yml   # Uses: llms-full-dev, test-dev
+  ├── jot-export-003-tokenization.yml # Uses: tokenizer-dev
+  ├── jot-export-004-jsonl.yml      # Uses: jsonl-dev, test-dev
+  ├── jot-export-005-markdown.yml   # Uses: markdown-dev, test-dev
+  ├── jot-export-006-chunking.yml   # Uses: chunking-dev, test-dev
+  ├── jot-export-007-build-integration.yml # Uses: build-dev, test-dev
+  ├── jot-export-008-cli-updates.yml # Uses: cli-dev
+  ├── README.md                     # Overview
+  ├── EXECUTION_GUIDE.md            # Instructions
+  ├── DEPENDENCY_GRAPH.md           # Visual graph
+  └── AGENT_MAPPING.md              # Agent mapping (NEW)
+
+  ---
+  🚀 Ready to Execute
+
+  All files are now production-ready with:
+
+  ✅ Specific agent names in every subtask✅ Agent definition files in .claude/agents/✅ Task files in .tks/todo/✅ Documentation explaining everything✅ Zero ambiguity - every agent knows
+  exactly what to do
+
+  You can now invoke agents by name and they'll have complete context! 🎯
+
+
+

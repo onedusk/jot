@@ -1,0 +1,64 @@
+id: "jot-export-001"
+task: "Implement llms.txt export format per llmstxt.org specification"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "H"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 8
+
+# Parallel execution metadata
+dependencies: []
+parallel_group: "A"
+blocks: ["jot-export-007", "jot-export-008"]
+execution_phase: "PHASE_1"
+can_start_when: "Immediately - no dependencies. Can run in parallel with Tasks 2 and 5 (Group A)"
+
+subtasks:
+  - desc: "Create file internal/export/llmstxt.go with package export declaration and LLMSTxtExporter struct containing no fields"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Implement NewLLMSTxtExporter() constructor function returning *LLMSTxtExporter in internal/export/llmstxt.go"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Implement ToLLMSTxt(documents []scanner.Document, config ProjectConfig) (string, error) method that generates H1 with config.Name and blockquote with config.Description"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Create groupDocumentsBySection(documents []scanner.Document) map[string][]scanner.Document function using filepath.Dir to group by directory"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Create extractFirstParagraph(content []byte) string helper function that extracts first non-header paragraph up to 100 chars"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Format output as markdown list with pattern '- [doc.Title](doc.RelativePath): description' for each document under H2 section headers"
+    agent: "llms-txt-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Create internal/export/llmstxt_test.go with TestToLLMSTxt validating H1 format, blockquote format, H2 sections, and link format match llmstxt.org spec"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Add ProjectConfig struct to internal/export/types.go with Name and Description string fields for llms.txt header generation"
+    agent: "llms-txt-dev"
+    parallel: true
+    depends_on_subtask: "subtask-2"
+
+must_reference:
+  - "https://llmstxt.org/ - Official llms.txt specification for format requirements"
+  - "https://github.com/AnswerDotAI/llms-txt - Reference implementation"
+  - "internal/export/export.go - Existing Exporter pattern to follow"
+  - "internal/scanner/document.go:14-26 - Document struct with Title, RelativePath, Content fields"
+  - "jot.yml:3-6 - Project name and description config fields"

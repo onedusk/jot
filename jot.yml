@@ -1,28 +1,28 @@
 # Jot Configuration File
 version: 1.0
 project:
-  name: 'Jot Documentation'
-  description: 'Modern documentation generator'
-  author: 'Thrive Team'
+  name: "Jot Documentation"
+  description: "Modern documentation generator"
+  author: "Thrive Team"
 
 input:
   paths:
-    - '.'
+    - "docs"
   ignore:
-    - '**/_*.md'
-    - '**/drafts/**'
-    - '**/.git/**'
-    - '**/node_modules/**'
-    - '**/vendor/**'
-    - '**/.roo/**'
-    - '**/.claude/**'
-    - '**/dist/**'
-    - '**/.roomodes'
+    - "**/_*.md"
+    - "**/drafts/**"
+    - "**/.git/**"
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/.roo/**"
+    - "**/.claude/**"
+    - "**/dist/**"
+    - "**/.roomodes"
 
 output:
-  path: './dist'
-  format: 'html'
-  theme: 'default'
+  path: "./dist"
+  format: "html"
+  theme: "default"
   clean: true
 
 features:
@@ -47,6 +47,6 @@ llm:
 
 search:
   enable: true
-  index_path: './dist/search-index.json'
+  index_path: "./dist/search-index.json"
   fuzzy: true
   highlight: true

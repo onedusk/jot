@@ -1,0 +1,64 @@
+id: "jot-export-005"
+task: "Implement enriched markdown export with YAML frontmatter metadata"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "M"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 6
+
+# Parallel execution metadata
+dependencies: []
+parallel_group: "A"
+blocks: ["jot-export-008"]
+execution_phase: "PHASE_1"
+can_start_when: "Immediately - no dependencies. Can run in parallel with Tasks 1 and 2 (Group A)"
+
+subtasks:
+  - desc: "Create internal/export/markdown.go with MarkdownExporter struct and NewMarkdownExporter() constructor"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Implement ToEnrichedMarkdown(documents []scanner.Document) (string, error) generating YAML frontmatter delimited by '---' at start and end"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Generate frontmatter fields: source (doc.RelativePath), section (doc.Sections[0].Title), chunk_id (doc.ID), token_count (calculated), modified (doc.ModTime.Format(time.RFC3339))"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Preserve original markdown content including headers, code blocks with language tags, lists, and links using string(doc.Content) after frontmatter"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Implement generateTableOfContents(documents []scanner.Document) string creating markdown TOC with anchor links using '## Table of Contents' header and bullet list"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Add contextualEnrichment(doc scanner.Document, fullContext string) string method placeholder for optional Anthropic-style context injection as HTML comments with TODO marker"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Add separateFiles bool parameter to ToEnrichedMarkdown controlling single concatenated file vs directory of separate files with conditional logic"
+    agent: "markdown-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Create internal/export/markdown_test.go with TestToEnrichedMarkdown validating YAML frontmatter parsing using yaml.Unmarshal, markdown preservation, and TOC generation"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-7"
+
+must_reference:
+  - "internal/scanner/document.go:191-208 - Existing frontmatter extraction logic"
+  - "internal/export/types.go:14-28 - LLMDocument metadata fields"
+  - "https://www.anthropic.com/news/contextual-retrieval - Contextual enrichment pattern"
+  - "gopkg.in/yaml.v3 - YAML library already in go.mod:9"
+  - "examples/ - Sample markdown files for testing"

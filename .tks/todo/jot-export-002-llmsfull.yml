@@ -1,0 +1,64 @@
+id: "jot-export-002"
+task: "Implement llms-full.txt export with complete documentation concatenation"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "H"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 8
+
+# Parallel execution metadata
+dependencies: []
+parallel_group: "A"
+blocks: ["jot-export-007", "jot-export-008"]
+execution_phase: "PHASE_1"
+can_start_when: "Immediately - no dependencies. Can run in parallel with Tasks 1 and 5 (Group A)"
+
+subtasks:
+  - desc: "Add ToLLMSFullTxt(documents []scanner.Document, config ProjectConfig) (string, error) method to LLMSTxtExporter in internal/export/llmstxt.go"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Generate header with H1 containing config.Name and blockquote containing config.Description using strings.Builder"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Implement sortDocumentsByImportance(documents []scanner.Document) []scanner.Document sorting README.md first then alphabetically by path"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Concatenate document content with '---' horizontal rule separator between each document preserving original markdown formatting"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Add H1 heading before each document content using '# ' + doc.Title to separate documents clearly"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Implement estimateSize(content string) int64 function returning byte count and log warning if total > 1048576 (1MB) about context limits"
+    agent: "llms-full-dev"
+    parallel: false
+    depends_on_subtask: "subtask-5"
+
+  - desc: "Create TestToLLMSFullTxt in internal/export/llmstxt_test.go validating document order, separator presence, H1 format, and size estimation"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Test with real docs from examples/ directory ensuring output is parseable markdown and preserves code blocks and links"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+must_reference:
+  - "https://llmstxt.org/ - llms-full.txt specification"
+  - "https://docs.claude.com/llms-full.txt - Real-world reference (10MB file)"
+  - "internal/scanner/document.go:14-26 - Document struct fields"
+  - "internal/export/llmstxt.go - Shared LLMSTxtExporter from Task 1"
+  - "examples/ - Test documentation for integration testing"

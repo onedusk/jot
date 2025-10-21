@@ -52,9 +52,10 @@ coverage.out
 scripts/ghub.sh;
 docs/internal
 docs/.maps
-.ctxt/
 docs/strategies/
 
 # Generated TOC files
 toc.xml
 toc.json
+docs-llm.json
+jot.yml

@@ -1,0 +1,64 @@
+id: "jot-export-004"
+task: "Implement JSONL line-delimited JSON export for vector database ingestion"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "M"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 7
+
+# Parallel execution metadata
+dependencies: ["jot-export-006"]
+parallel_group: "C"
+blocks: ["jot-export-008"]
+execution_phase: "PHASE_3"
+can_start_when: "After Task 6 (chunking strategies) completes - needs ChunkStrategy interface"
+
+subtasks:
+  - desc: "Create internal/export/jsonl.go with JSONLExporter struct and NewJSONLExporter() constructor"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Implement ToJSONL(documents []scanner.Document, chunker chunking.ChunkStrategy) (string, error) method writing one JSON object per line"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create ChunkMetadata struct in internal/export/types.go with fields: DocID string, ChunkID string, SectionID string, TokenCount int, Source string, StartLine int, EndLine int json tags"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Format each chunk as compact JSON using json.Marshal without indentation appending newline character after each object per JSONL spec"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Add PrevChunkID and NextChunkID string fields to ChunkMetadata for document navigation relationships with json tags"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Include Vector []float32 field with json:vector,omitempty tag in ChunkMetadata for optional embedding storage"
+    agent: "jsonl-dev"
+    parallel: false
+    depends_on_subtask: "subtask-3"
+
+  - desc: "Create internal/export/jsonl_test.go with TestToJSONL validating each line parses as valid JSON using json.Unmarshal and entire output is valid JSONL"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+  - desc: "Add TestJSONLStreaming test that reads file line-by-line using bufio.Scanner without loading entire file into memory validating streaming compatibility"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+must_reference:
+  - "https://jsonlines.org/ - JSONL specification for line-delimited JSON"
+  - "internal/export/types.go:14-28 - LLMDocument and Chunk structures for reference"
+  - "internal/chunking/strategy.go - ChunkStrategy interface from Task 6"
+  - "https://www.pinecone.io/docs/ - Vector database ingestion format examples"
+  - "encoding/json - Go standard library for Marshal"

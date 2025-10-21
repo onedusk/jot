@@ -1,0 +1,64 @@
+id: "jot-export-007"
+task: "Auto-generate llms.txt and llms-full.txt during jot build workflow"
+entry: "2025-10-21T00:00:00Z"
+modified: "2025-10-21T00:00:00Z"
+priority: "M"
+project: "jot-llm-export"
+status: "todo"
+uuid: "v1.0.0"
+urgency: 7
+
+# Parallel execution metadata
+dependencies: ["jot-export-001", "jot-export-002"]
+parallel_group: "D"
+blocks: ["jot-export-008"]
+execution_phase: "PHASE_4"
+can_start_when: "After Tasks 1 and 2 (llms.txt exporters) complete - needs LLMSTxtExporter implementation"
+
+subtasks:
+  - desc: "Add GenerateLLMSTxt bool field to BuildConfig struct in cmd/jot/build.go:111-116 after Clean field"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: null
+
+  - desc: "Update loadBuildConfig in cmd/jot/build.go:121-145 to read viper.GetBool('features.llm_export') into config.GenerateLLMSTxt field with default true"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Add llm_export: true to features section in jot.yml:28-34 verifying it exists and is correctly indented"
+    agent: "build-dev"
+    parallel: true
+    depends_on_subtask: null
+
+  - desc: "Insert llms.txt generation block after line 100 in cmd/jot/build.go:100 before 'Summary' calling exporter := export.NewLLMSTxtExporter() with config check"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: "subtask-2"
+
+  - desc: "Write llms.txt to filepath.Join(config.OutputPath, 'llms.txt') and llms-full.txt to filepath.Join(config.OutputPath, 'llms-full.txt') with error handling"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: "subtask-4"
+
+  - desc: "Add build logging fmt.Println(' Generating llms.txt...') and size reporting with humanized bytes like 'Created llms.txt (15KB), llms-full.txt (2.3MB)'"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: "subtask-5"
+
+  - desc: "Implement --skip-llms-txt boolean flag in buildCmd.Flags at cmd/jot/build.go:28-30 to disable generation and update loadBuildConfig to read it"
+    agent: "build-dev"
+    parallel: false
+    depends_on_subtask: "subtask-1"
+
+  - desc: "Create TestBuildWithLLMSTxt integration test in new file cmd/jot/build_test.go verifying llms.txt and llms-full.txt files exist and contain valid content"
+    agent: "test-dev"
+    parallel: true
+    depends_on_subtask: "subtask-6"
+
+must_reference:
+  - "cmd/jot/build.go:33-107 - runBuild function to modify"
+  - "cmd/jot/build.go:111-116 - BuildConfig struct to extend"
+  - "jot.yml:28-34 - features section in config"
+  - "internal/export/llmstxt.go - LLMSTxtExporter from Tasks 1 and 2"
+  - ".tks/support/jot_integration_strategy.md - Build automation context and integration strategy"
