@@ -59,3 +59,5 @@ toc.xml
 toc.json
 docs-llm.json
 jot.yml
+.ctxt/
+.arc/
