@@ -12,7 +12,7 @@
           <chapter id="shared-packages-jot-readme" path="shared/packages/jot/README.md" modified="2025-10-22T16:09:49Z" size="11089" words="1463" readTime="5min" hash="sha256:31a25fdb03cc52f0">
             <title>Jot</title>
             <summary>Jot [![CI](https://github.com/onedusk/jot/actions/workflows/ci.yml/badge.svg)](https://github.com/onedusk/jot/actions/workflows/ci.yml) [![Go Report Card](https://goreportcard.com/badge/github.com/...</summary>
-            <keywords>**enriched, header, structure, during, being, index, presets, flag, export, verify</keywords>
+            <keywords>weaviate, code, markdown, context, automatically, size, theme, multiple, installation, github-flavored</keywords>
           </chapter>
         </section>
       </section>
