@@ -1,0 +1,30 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-examples">
+            <title>Examples</title>
+            <section id="shared-packages-jot-examples-advanced">
+              <title>Advanced</title>
+              <section id="shared-packages-jot-examples-advanced-api">
+                <title>Api</title>
+                <chapter id="shared-packages-jot-examples-advanced-api-reference" path="shared/packages/jot/examples/advanced/api/reference.md" modified="2025-10-13T19:39:01Z" size="137" words="22" readTime="1min" hash="sha256:f1f58e1e55a37f89">
+                  <title>API Reference</title>
+                  <summary>API Reference This is the API reference located in the api directory. ## Endpoints API documentation from a separate source folder.</summary>
+                  <keywords>reference</keywords>
+                </chapter>
+              </section>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

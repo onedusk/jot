@@ -1,0 +1,27 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-docs">
+            <title>Docs</title>
+            <section id="shared-packages-jot-docs-release">
+              <title>Release</title>
+              <chapter id="shared-packages-jot-docs-release-release-v0-1-0" path="shared/packages/jot/docs/release/RELEASE-v0.1.0.md" modified="2025-10-15T19:23:25Z" size="3317" words="447" readTime="1min" hash="sha256:40e20c1006b01bdb">
+                <title>Jot v0.1.0 Release</title>
+                <summary>Jot v0.1.0 Release ## Release Overview ## New Features in v0.1.0 ### 2. **Mermaid Diagram Support** - Automatic detection and rendering of Mermaid diagrams - Supports flowcharts, sequence diagra...</summary>
+                <keywords>code, languages, theme, more, project, render, link, serve, diagram, detection</keywords>
+              </chapter>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

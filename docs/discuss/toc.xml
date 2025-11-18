@@ -1,0 +1,50 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>6</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-docs">
+            <title>Docs</title>
+            <section id="shared-packages-jot-docs-discuss">
+              <title>Discuss</title>
+              <chapter id="shared-packages-jot-docs-discuss-doc-writing" path="shared/packages/jot/docs/discuss/doc_writing.md" modified="2025-10-01T11:36:24Z" size="2586" words="381" readTime="1min" hash="sha256:366981123501a23b">
+                <title>Untitled</title>
+                <summary>due to jetbrains deprecating the Writerside IDE, then turning it into a plugin, of which, is buggy as shit... going to (in its most simple form) create a new concept project in hopes that it is not a...</summary>
+                <keywords>initial, design, system, line, following, created, simple, global, structure, documents</keywords>
+              </chapter>
+              <chapter id="shared-packages-jot-docs-discuss-index" path="shared/packages/jot/docs/discuss/index.md" modified="2025-10-01T11:36:24Z" readTime="1min" hash="sha256:e3b0c44298fc1c14">
+                <title>Untitled</title>
+              </chapter>
+              <chapter id="shared-packages-jot-docs-discuss-jot-implementation-roadmap" path="shared/packages/jot/docs/discuss/jot-implementation-roadmap.md" modified="2025-10-01T11:36:24Z" size="2769" words="374" readTime="1min" hash="sha256:46dae1a54d887323">
+                <title>Jot Implementation Roadmap</title>
+                <summary>Jot Implementation Roadmap ## Quick Start Guide ### Week 1: Project Bootstrap ```bash # Create project structure mkdir -p jot/{cmd,internal,pkg,web/templates,docs,examples} cd jot go mod init gith...</summary>
+                <keywords>community, project, implementation, github, scanner, templates, theme, create, search, testing</keywords>
+              </chapter>
+              <chapter id="shared-packages-jot-docs-discuss-jot-llm-features-spec" path="shared/packages/jot/docs/discuss/jot-llm-features-spec.md" modified="2025-10-01T11:36:24Z" size="7712" words="838" readTime="3min" hash="sha256:5ce5fd3d73d0f009">
+                <title>Jot LLM/Agent Integration Specification</title>
+                <summary>Jot LLM/Agent Integration Specification ## Overview This document details how Jot makes documentation maximally useful for LLMs, agents, and AI systems through structured data, semantic markup, an...</summary>
+                <keywords>search, large, generation, markup, rest, structured, apis, features, integration, **rate</keywords>
+              </chapter>
+              <chapter id="shared-packages-jot-docs-discuss-jot-mvp-draft" path="shared/packages/jot/docs/discuss/jot-mvp-draft.md" modified="2025-10-15T19:23:59Z" size="6459" words="842" readTime="3min" hash="sha256:57dce6c4b7847418">
+                <title>Jot - Documentation Tool MVP Design Document</title>
+                <summary>Jot - Documentation Tool MVP Design Document ## Executive Summary Jot is a modern documentation generation tool designed to replace JetBrains&apos; deprecated Writerside IDE. Built with Go and Gin fram...</summary>
+                <keywords>core, content, build, contents, writerside, alternative, **build, search, path, theme</keywords>
+              </chapter>
+              <chapter id="shared-packages-jot-docs-discuss-maybe-marketing" path="shared/packages/jot/docs/discuss/maybe_marketing?.md" modified="2025-10-01T11:36:24Z" size="7757" words="972" readTime="3min" hash="sha256:2cc44dc0ca2644e6">
+                <title>Untitled</title>
+                <summary>Marketing and Outreach Strategy ### Target Audience Segmentation #### Primary Segments 1. **Career Changers (35% of market)** - Demographics: Ages 25-45, diverse backgrounds - Pain Points:...</summary>
+                <keywords>content, ages, pain, keywords, student, workforce, target, educational, rates, **delivery**</keywords>
+              </chapter>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

@@ -1,0 +1,27 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-docs">
+            <title>Docs</title>
+            <section id="shared-packages-jot-docs-roadmaps">
+              <title>Roadmaps</title>
+              <chapter id="shared-packages-jot-docs-roadmaps-rmap-01" path="shared/packages/jot/docs/roadmaps/rmap_01.md" modified="2025-10-15T19:23:37Z" size="3630" words="540" readTime="2min" hash="sha256:a7a17d49ddfb138d">
+                <title>Roadmap</title>
+                <summary>Roadmap ## Current Version: 1.0 ### ✅ Completed Features - [x] Markdown to HTML compilation - [x] XML Table of Contents generation - [x] Multi-format export (JSON, YAML, LLM) - [x] **Local devel...</summary>
+                <keywords>**search, document, file, markdown, features, time, *timeline, |-----------|------------|------------|---------|, issues](https://github.com/onedusk/jot/issues), path</keywords>
+              </chapter>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

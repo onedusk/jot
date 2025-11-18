@@ -1,0 +1,30 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-tks">
+            <title>.tks</title>
+            <section id="shared-packages-jot-tks-done">
+              <title>Done</title>
+              <section id="shared-packages-jot-tks-done-2025-25-09">
+                <title>2025 25 09</title>
+                <chapter id="shared-packages-jot-tks-done-2025-25-09-toc-searchability-improvements" path="shared/packages/jot/.tks/done/2025-25-09/toc_searchability_improvements.md" modified="2025-10-22T16:09:49Z" size="3478" words="402" readTime="1min" hash="sha256:5f72f7a02bb78390">
+                  <title>TOC Searchability Improvements for Scale</title>
+                  <summary>TOC Searchability Improvements for Scale ## Current Rating: 65/100 ## Target Rating: 90+/100 ## Quick Wins (Implement in jot) ### 1. Add Metadata Attributes (+15 points) ```xml &lt;chapter id=&quot;...&quot; ...</summary>
+                  <keywords>context, points), index, docs, (+10, scale, metadata, build, documents, load</keywords>
+                </chapter>
+              </section>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

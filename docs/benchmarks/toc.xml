@@ -1,0 +1,27 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-docs">
+            <title>Docs</title>
+            <section id="shared-packages-jot-docs-benchmarks">
+              <title>Benchmarks</title>
+              <chapter id="shared-packages-jot-docs-benchmarks-stripe-docs-test" path="shared/packages/jot/docs/benchmarks/stripe-docs-test.md" modified="2025-10-09T15:40:54Z" size="477" words="63" readTime="1min" hash="sha256:0b34a1177a57d54d">
+                <title>Benchmarks</title>
+                <summary>Benchmarks ## Stripe Documentation **Test Date:** 2025-01-15 **Dataset:** Stripe&apos;s documentation **FIles:** 2,679 markdown files ## Results ``` ❯❯ jotdoc build ✓ Scanning for markdown file...</summary>
+                <keywords>documentation</keywords>
+              </chapter>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

@@ -1,0 +1,30 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-examples">
+            <title>Examples</title>
+            <section id="shared-packages-jot-examples-basic">
+              <title>Basic</title>
+              <section id="shared-packages-jot-examples-basic-docs">
+                <title>Docs</title>
+                <chapter id="shared-packages-jot-examples-basic-docs-getting-started" path="shared/packages/jot/examples/basic/docs/getting-started.md" modified="2025-10-13T19:38:30Z" size="277" words="41" readTime="1min" hash="sha256:18875d247a3dd075">
+                  <title>Getting Started</title>
+                  <summary>Getting Started Welcome to the basic example project! ## Installation Follow the installation instructions in the main README. ## Your First Build Run the following command: ```bash jot build ...</summary>
+                  <keywords>installation</keywords>
+                </chapter>
+              </section>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

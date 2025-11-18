@@ -1,0 +1,27 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-examples">
+            <title>Examples</title>
+            <section id="shared-packages-jot-examples-advanced">
+              <title>Advanced</title>
+              <chapter id="shared-packages-jot-examples-advanced-readme" path="shared/packages/jot/examples/advanced/README.md" modified="2025-10-13T19:39:01Z" size="509" words="71" readTime="1min" hash="sha256:c9b4b14a9f72b528">
+                <title>Advanced Example</title>
+                <summary>Advanced Example This example demonstrates advanced Jot features including: - Multiple input directories (`docs/` and `api/`) - Custom ignore patterns - LLM-optimized export - Full-text search ##...</summary>
+                <keywords>example, features, multiple, advanced, directories</keywords>
+              </chapter>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

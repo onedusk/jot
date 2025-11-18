@@ -1,0 +1,30 @@
+<toc version="1.0" llm-optimized="true">
+  <metadata>
+    <totalDocs>1</totalDocs>
+  </metadata>
+  <sections>
+    <section id="shared">
+      <title>Shared</title>
+      <section id="shared-packages">
+        <title>Packages</title>
+        <section id="shared-packages-jot">
+          <title>Jot</title>
+          <section id="shared-packages-jot-examples">
+            <title>Examples</title>
+            <section id="shared-packages-jot-examples-advanced">
+              <title>Advanced</title>
+              <section id="shared-packages-jot-examples-advanced-docs">
+                <title>Docs</title>
+                <chapter id="shared-packages-jot-examples-advanced-docs-guide" path="shared/packages/jot/examples/advanced/docs/guide.md" modified="2025-10-13T19:39:01Z" size="147" words="25" readTime="1min" hash="sha256:8508d73bb8815d6c">
+                  <title>User Guide</title>
+                  <summary>User Guide This is the main user guide located in the docs directory. ## Features Multiple features are documented here from the docs folder.</summary>
+                  <keywords>guide, features, docs, user</keywords>
+                </chapter>
+              </section>
+            </section>
+          </section>
+        </section>
+      </section>
+    </section>
+  </sections>
+</toc>

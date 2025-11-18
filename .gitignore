@@ -53,11 +53,6 @@ scripts/ghub.sh;
 docs/internal
 docs/.maps
 docs/strategies/
-
-# Generated TOC files
-toc.xml
-toc.json
 docs-llm.json
-jot.yml
 .ctxt/
 .arc/
