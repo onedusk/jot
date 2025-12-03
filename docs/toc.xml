@@ -14,22 +14,22 @@
             <chapter id="shared-packages-jot-docs-changelog" path="shared/packages/jot/docs/CHANGELOG.md" modified="2025-10-22T16:09:49Z" size="10194" words="1365" readTime="5min" hash="sha256:0ecc92377d4f6fcd">
               <title>Changelog</title>
               <summary>Changelog All notable changes to Jot will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Version...</summary>
-              <keywords>document, modern, context, client-side, packages, organization, endpoints, using, smooth, (jsonl</keywords>
+              <keywords>live, highlighting, generation, boundary, format**, enhanced, client-side, server, architecture, integration</keywords>
             </chapter>
             <chapter id="shared-packages-jot-docs-code-of-conduct" path="shared/packages/jot/docs/CODE_OF_CONDUCT.md" modified="2025-10-22T16:09:49Z" size="1607" words="222" readTime="1min" hash="sha256:02050a3e48cab7f6">
               <title>Code of Conduct</title>
               <summary>Code of Conduct ## Our Pledge We pledge to make participation in our project a harassment-free experience for everyone, regardless of age, body size, disability, ethnicity, sex characteristics, ge...</summary>
-              <keywords>identity, pledge, examples, unacceptable, conduct, project, personal, code, behavior, other</keywords>
+              <keywords>private, behavior, identity, spaces, conduct, examples, other, unacceptable, project, standards</keywords>
             </chapter>
             <chapter id="shared-packages-jot-docs-contributing" path="shared/packages/jot/docs/CONTRIBUTING.md" modified="2025-10-22T16:09:49Z" size="1309" words="204" readTime="1min" hash="sha256:04221b38b8c67ffb">
               <title>Contributing to Jot</title>
               <summary>Contributing to Jot Thank you for your interest in contributing to Jot! This document provides guidelines for contributing to the project. ## Getting Started 1. Fork the repository 2. Clone your ...</summary>
-              <keywords>changes, review, maintainers, fork, functions, write, commit, ensure, contributing, pull</keywords>
+              <keywords>tests, contributing, fork, commit, messages, functions, maintainers, ensure, review, changes</keywords>
             </chapter>
             <chapter id="shared-packages-jot-docs-install" path="shared/packages/jot/docs/INSTALL.md" modified="2025-10-22T16:09:49Z" size="3675" words="533" readTime="2min" hash="sha256:ac5687e73e54aa97">
               <title>Installing Jot</title>
               <summary>Installing Jot There are several ways to install Jot on your system. Choose the method that works best for your setup. ## Prerequisites - Go 1.19 or later (for building from source) - Git (for cl...</summary>
-              <keywords>installed, ensure, permission, command, require, verify, shell, method, using, build</keywords>
+              <keywords>using, installs, binary, method, ensure, choose, later, appropriate, profile, command</keywords>
             </chapter>
           </section>
         </section>

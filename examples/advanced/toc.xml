@@ -16,7 +16,7 @@
               <chapter id="shared-packages-jot-examples-advanced-readme" path="shared/packages/jot/examples/advanced/README.md" modified="2025-10-13T19:39:01Z" size="509" words="71" readTime="1min" hash="sha256:c9b4b14a9f72b528">
                 <title>Advanced Example</title>
                 <summary>Advanced Example This example demonstrates advanced Jot features including: - Multiple input directories (`docs/` and `api/`) - Custom ignore patterns - LLM-optimized export - Full-text search ##...</summary>
-                <keywords>multiple, example, features, directories, advanced</keywords>
+                <keywords>example, features, advanced, directories, multiple</keywords>
               </chapter>
             </section>
           </section>
