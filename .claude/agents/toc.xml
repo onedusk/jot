@@ -16,52 +16,52 @@
               <chapter id="shared-packages-jot-claude-agents-readme" path="shared/packages/jot/.claude/agents/README.md" modified="2025-10-22T16:09:49Z" size="6811" words="783" readTime="3min" hash="sha256:e9e46ce91044ee5d">
                 <title>Jot Export Implementation - Agent Assignments</title>
                 <summary>Jot Export Implementation - Agent Assignments **Created:** 2025-10-21 **Total Agents:** 9 **Project:** Multi-format LLM export system --- ## 🤖 Agent Roster ### Phase 1 Agents (Parallel - Star...</summary>
-                <keywords>code, chunking, start, **option, export, tokenizer-dev, **role:**, start:**, jsonl-dev, cli-dev</keywords>
+                <keywords>immediately, markdown-dev, agent, cli-dev, build-dev, path, **priority:**, **blocks:**, critical, chunking</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-build-dev" path="shared/packages/jot/.claude/agents/build-dev.md" modified="2025-10-22T16:09:49Z" size="1978" words="258" readTime="1min" hash="sha256:4b773a4eb68ee954">
                 <title>Build Integration Developer</title>
                 <summary># Build Integration Developer ## Role and Purpose You are a Go backend developer specializing in build automation and CLI integration with expertise in Cobra/Viper configuration. Your primary respo...</summary>
-                <keywords>automation, read, developer, config, output, existing, test, modified, file, integration</keywords>
+                <keywords>llms.txt, file, output, integration, automation, read, field, build, developer, test</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-chunking-dev" path="shared/packages/jot/.claude/agents/chunking-dev.md" modified="2025-10-22T16:09:49Z" size="2371" words="290" readTime="1min" hash="sha256:921260e65cee83bb">
                 <title>Chunking Strategy Developer (CRITICAL PATH)</title>
                 <summary># Chunking Strategy Developer (CRITICAL PATH) ## Role and Purpose You are a Go backend developer specializing in design patterns and text processing with expertise in strategy pattern implementatio...</summary>
-                <keywords>pattern, pluggable, implementations, strategy, factory, should, complete, stub, regex, tests</keywords>
+                <keywords>strategy, write, strategies, should, regex, comprehensive, tests, factory, stub, pattern</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-cli-dev" path="shared/packages/jot/.claude/agents/cli-dev.md" modified="2025-10-22T16:09:49Z" size="2367" words="319" readTime="1min" hash="sha256:b309eafc1359432f">
                 <title>CLI Integration Developer (FINAL INTEGRATION)</title>
                 <summary># CLI Integration Developer (FINAL INTEGRATION) ## Role and Purpose You are a Go backend developer specializing in CLI/UX design with expertise in Cobra flag management and user experience. Your pr...</summary>
-                <keywords>flags, switch, ensure, format, exporters, statement, help, documentation, text, **final:**</keywords>
+                <keywords>format, update, error, strategies, helpful, validation, help, flag, examples, options</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-jsonl-dev" path="shared/packages/jot/.claude/agents/jsonl-dev.md" modified="2025-10-22T16:09:49Z" size="1988" words="259" readTime="1min" hash="sha256:6bc6dbb285fd27a0">
                 <title>JSONL Export Developer</title>
                 <summary># JSONL Export Developer ## Role and Purpose You are a Go backend developer specializing in vector database integration with expertise in JSONL format and streaming data. Your primary responsibilit...</summary>
-                <keywords>without, format, document, developer, relationship, validating, reading, struct, chunk, database</keywords>
+                <keywords>compatibility, include, without, validating, task, write, export, vector, streaming, reading</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-llms-full-dev" path="shared/packages/jot/.claude/agents/llms-full-dev.md" modified="2025-10-22T16:09:49Z" size="1724" words="230" readTime="1min" hash="sha256:3f5f2da401bc89ae">
                 <title>LLMs-full.txt Export Developer</title>
                 <summary># LLMs-full.txt Export Developer ## Role and Purpose You are a Go backend developer specializing in large-scale documentation concatenation with expertise in markdown preservation and file handling...</summary>
-                <keywords>markdown, documentation, first, document, output, using, file, warnings, export, documents</keywords>
+                <keywords>estimation, document, warnings, method, formatting, markdown, llms-full.txt, separators, format, using</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-llms-txt-dev" path="shared/packages/jot/.claude/agents/llms-txt-dev.md" modified="2025-10-22T16:09:49Z" size="1718" words="214" readTime="1min" hash="sha256:29ca1700ad70eb89">
                 <title>LLMs.txt Export Developer</title>
                 <summary># LLMs.txt Export Developer ## Role and Purpose You are a Go backend developer specializing in export format implementation with expertise in markdown generation and documentation standards. Your p...</summary>
-                <keywords>markdown, output, specification, comprehensive, implement, blockquote, create, export, helper, llmstxt.org</keywords>
+                <keywords>patterns, create, unit, developer, export, llms.txt, struct, llmstxt.org, format, comprehensive</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-markdown-dev" path="shared/packages/jot/.claude/agents/markdown-dev.md" modified="2025-10-22T16:09:49Z" size="1804" words="228" readTime="1min" hash="sha256:75d1785d80e05061">
                 <title>Enriched Markdown Export Developer</title>
                 <summary># Enriched Markdown Export Developer ## Role and Purpose You are a Go backend developer specializing in markdown processing and YAML frontmatter with expertise in document metadata and content pres...</summary>
-                <keywords>frontmatter, metadata, anchor, tests, content, implement, generating, preserve, preservation, yaml</keywords>
+                <keywords>original, preserve, frontmatter, metadata, markdown, generate, output, links, preservation, tests</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-test-dev" path="shared/packages/jot/.claude/agents/test-dev.md" modified="2025-10-22T16:09:49Z" size="1848" words="258" readTime="1min" hash="sha256:2cee524a34dc4219">
                 <title>Test Developer</title>
                 <summary># Test Developer ## Role and Purpose You are a Go testing specialist with expertise in table-driven tests, benchmarks, and integration testing. Your primary responsibilities include: - Writing comp...</summary>
-                <keywords>create, validate, output, writing, tests, performance-critical, write, tested, testing, edge</keywords>
+                <keywords>being, unit, what&apos;s, tests, write, cases, end-to-end, table-driven, edge, functions</keywords>
               </chapter>
               <chapter id="shared-packages-jot-claude-agents-tokenizer-dev" path="shared/packages/jot/.claude/agents/tokenizer-dev.md" modified="2025-10-22T16:09:49Z" size="2039" words="265" readTime="1min" hash="sha256:e33511689edb72a6">
                 <title>Tokenizer Developer (CRITICAL PATH)</title>
                 <summary># Tokenizer Developer (CRITICAL PATH) ## Role and Purpose You are a Go backend developer specializing in NLP tokenization and dependency management with expertise in OpenAI token counting. Your pri...</summary>
-                <keywords>critical, encoding, compatibility, dependency, task, tests, counts, chunking, read, implementation</keywords>
+                <keywords>using, updated, developer, read, chunking, functionality, field, config, tests, tokenization</keywords>
               </chapter>
             </section>
           </section>

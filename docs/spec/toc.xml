@@ -16,17 +16,17 @@
               <chapter id="shared-packages-jot-docs-spec-architecture" path="shared/packages/jot/docs/spec/architecture.md" modified="2025-10-15T19:23:48Z" size="6577" words="759" readTime="3min" hash="sha256:6f97809a68423c6c">
                 <title>System Architecture</title>
                 <summary>System Architecture ## 1. High-Level Architecture ``` Core Engine Engine Control Export ## 2. Component Architecture ### 2.1 CLI Layer (`cmd/jot/`)...</summary>
-                <keywords>theme, documentation, page, example, output, plugin, string, build, name, core</keywords>
+                <keywords>model, page, example, copy, core, architecture, yaml, build, documentation, string</keywords>
               </chapter>
               <chapter id="shared-packages-jot-docs-spec-pseudocode" path="shared/packages/jot/docs/spec/pseudocode.md" modified="2025-10-09T15:40:54Z" size="12734" words="1031" readTime="4min" hash="sha256:545fdd301c3181aa">
                 <title>Pseudocode Design</title>
                 <summary>Pseudocode Design ## 1. Main Application Flow ```pseudocode PROGRAM Jot INITIALIZE: config = LoadConfiguration() logger = SetupLogging() MAIN: command = ParseCLIArguments() SWIT...</summary>
-                <keywords>pseudocode, algorithm, implementation, design</keywords>
+                <keywords>pseudocode, design, implementation, algorithm</keywords>
               </chapter>
               <chapter id="shared-packages-jot-docs-spec-requirements" path="shared/packages/jot/docs/spec/requirements.md" modified="2025-10-09T15:40:54Z" size="5506" words="814" readTime="3min" hash="sha256:eb8766a17bb332db">
                 <title>Requirements Spec.</title>
                 <summary>Requirements Spec. ## 1. Executive Summary Jot is a modern documentation generator designed to replace JetBrains&apos; deprecated Writerside IDE. It provides a fast, simple, and platform-independent so...</summary>
-                <keywords>time, helpful, compliant, server, content, cobra, binary, highlighting, first, changes</keywords>
+                <keywords>file, projects, dependencies, build, interface, user, compliant, code, configurable, reload</keywords>
               </chapter>
             </section>
           </section>

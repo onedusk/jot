@@ -18,7 +18,7 @@
                 <chapter id="shared-packages-jot-examples-advanced-docs-guide" path="shared/packages/jot/examples/advanced/docs/guide.md" modified="2025-10-13T19:39:01Z" size="147" words="25" readTime="1min" hash="sha256:8508d73bb8815d6c">
                   <title>User Guide</title>
                   <summary>User Guide This is the main user guide located in the docs directory. ## Features Multiple features are documented here from the docs folder.</summary>
-                  <keywords>guide, docs, features, user</keywords>
+                  <keywords>user, docs, guide, features</keywords>
                 </chapter>
               </section>
             </section>
