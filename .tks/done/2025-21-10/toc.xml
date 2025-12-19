@@ -18,22 +18,22 @@
                 <chapter id="shared-packages-jot-tks-done-2025-21-10-agent-mapping" path="shared/packages/jot/.tks/done/2025-21-10/AGENT_MAPPING.md" modified="2025-10-22T16:09:49Z" size="4780" words="638" readTime="2min" hash="sha256:fcda8c317eaf6c7d">
                   <title>Agent Name Mapping - Complete Reference</title>
                   <summary>Agent Name Mapping - Complete Reference **Last Updated:** 2025-10-21 All generic agent types in YAML task files have been replaced with specific agent names from `.claude/agents/`. --- ## Agent ...</summary>
-                  <keywords>agent, subtask, **total, **support, every, **total:**, names, test-dev, ⚠️, export</keywords>
+                  <keywords>files, agent, name, none, every, chunking, integration, subtasks), (critical), specialist</keywords>
                 </chapter>
                 <chapter id="shared-packages-jot-tks-done-2025-21-10-dependency-graph" path="shared/packages/jot/.tks/done/2025-21-10/DEPENDENCY_GRAPH.md" modified="2025-10-22T16:09:49Z" size="5394" words="843" readTime="3min" hash="sha256:4444633bc2ab4289">
                   <title>Task Dependency Graph - Jot LLM Export</title>
                   <summary>Task Dependency Graph - Jot LLM Export ```mermaid graph TD START([Start]) --&gt; P1A[PHASE 1 - Group A] START --&gt; P2B[PHASE 2 - Group B] P1A --&gt; T001[Task 001: llms.txt&lt;br/&gt;2h] P1A --...</summary>
-                  <keywords>(waiting, (wait, issues, dependency, critical, final, bottleneck:**, agents**, (idle), **after</keywords>
+                  <keywords>depends, **after, work, dependency, agents, agents**, risk:**, analysis, issues, export</keywords>
                 </chapter>
                 <chapter id="shared-packages-jot-tks-done-2025-21-10-execution-guide" path="shared/packages/jot/.tks/done/2025-21-10/EXECUTION_GUIDE.md" modified="2025-10-22T16:09:49Z" size="8696" words="978" readTime="3min" hash="sha256:1de7b018de164a18">
                   <title>LLM Export Implementation - Execution Guide</title>
                   <summary>LLM Export Implementation - Execution Guide **Created:** 2025-10-21 **Total Tasks:** 8 **Total Subtasks:** 64 **Estimated Time:** 14 hours (parallelized) | 22.5 hours (sequential) --- ## 📊 Qui...</summary>
-                  <keywords>when:**, start, optimal, duration, tasks, ensure, delta**, marked, path, export</keywords>
+                  <keywords>execution, time:**, completes, **⏱️, finishes, marked, file, ~2.5, phase, complete**</keywords>
                 </chapter>
                 <chapter id="shared-packages-jot-tks-done-2025-21-10-readme" path="shared/packages/jot/.tks/done/2025-21-10/README.md" modified="2025-10-22T16:09:49Z" size="7629" words="1012" readTime="4min" hash="sha256:694e76983be17cbe">
                   <title>Jot LLM Export Implementation - Task Files</title>
                   <summary>Jot LLM Export Implementation - Task Files **Created:** 2025-10-21 **Status:** Ready for execution **Total Tasks:** 8 (64 subtasks) **Estimated Duration:** 14.5 hours (parallelized) | 22.5 ho...</summary>
-                  <keywords>update, ready, requires, hours, strategies, execute, exact, build, phase, step</keywords>
+                  <keywords>execution, subtask, chunking, build, export, llms.txt, tests, update, implementation, path</keywords>
                 </chapter>
               </section>
             </section>
