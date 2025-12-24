@@ -14,7 +14,7 @@
             <chapter id="shared-packages-jot-claude-readme" path="shared/packages/jot/.claude/README.md" modified="2025-10-09T15:40:54Z" size="5475" words="706" readTime="2min" hash="sha256:508c24006fc4583e">
               <title>Oober Claude Code Integration</title>
               <summary>Oober Claude Code Integration This directory contains Claude Code hooks that integrate `oober` for efficient bulk code transformations. ## Overview These hooks intelligently detect when bulk oper...</summary>
-              <keywords>edits, mode, learns, uses, (default, available, similar, pattern, operations, detects</keywords>
+              <keywords>hook, todo, thresholds, bulk, would, user, claude, edit/multiedit, **what, code</keywords>
             </chapter>
           </section>
         </section>
