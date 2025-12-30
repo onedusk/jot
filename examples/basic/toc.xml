@@ -16,7 +16,7 @@
               <chapter id="shared-packages-jot-examples-basic-readme" path="shared/packages/jot/examples/basic/README.md" modified="2025-10-15T19:23:08Z" size="337" words="52" readTime="1min" hash="sha256:579892d910516a9c">
                 <title>Basic Example</title>
                 <summary>Basic Example This is a minimal Jot documentation project demonstrating basic usage. ## Getting Started 1. Install jot 2. Run `jot build` in this directory 3. Open `dist/index.html` in your brows...</summary>
-                <keywords>basic, documentation, project</keywords>
+                <keywords>documentation, basic, project</keywords>
               </chapter>
             </section>
           </section>
