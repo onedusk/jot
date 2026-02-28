@@ -5,6 +5,42 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-02-27
+
+### Added
+
+#### UI Design Parity
+- **Full-bleed layout**: Replaced floating rounded panels with flush sidebar and content areas matching Protocol reference design
+- **Always-visible navigation**: Sidebar nav sections render expanded by default instead of collapsed accordions
+- **Header search bar**: Centered search input in header with keyboard shortcut badge (Cmd+K)
+- **Configurable branding**: Logo text, header nav links driven from `project.name` in `jot.yml` via new `SiteConfig` struct
+- **Sign In button**: Green accent button in header nav
+- **Previous/Next navigation**: Bottom-of-page links to adjacent documents, computed from TOC tree
+- **Footer**: Copyright line and project branding at page bottom
+- **Feedback widget**: "Was this page helpful? Yes / No" interactive buttons
+- **Callout boxes**: Auto-detection of `> **Note:**` and `> **Warning:**` blockquotes into styled callout components
+- **Inline dropdown search**: Client-side full-text search with results dropdown beneath header search bar
+  - Keyboard navigation (arrow keys, Enter, Escape)
+  - Query highlighting with `<mark>` tags
+  - Scored results (title +10, headings +5, keywords +3, content +1)
+  - Search index embedded as JS for file:// protocol compatibility
+
+### Changed
+- **Layout**: Removed animated gradient orbs background, replaced with subtle top-glow
+- **Body scroll**: Removed viewport-locking (`position: fixed`) for natural page scrolling
+- **Active nav style**: Changed from green accent to white text with subtle background highlight
+- **Content width**: Increased from 900px to 1100px
+- **Sidebar width**: Increased from 240px to 260px
+- **Header height**: Increased from 56px to 60px
+- **Search index output**: Now generates both `search-index.json` and `search-index.js` (global variable) for universal compatibility
+- **Config plumbing**: `SiteConfig` flows from `build.go` → `compiler.go` → `renderer.go` with `ProjectName` and `NavLinks`
+- **Release script**: Replaced Ruby gem build/push logic with `make build` / `make release`
+
+### Technical Details
+- **New types**: `SiteConfig`, `NavLink`, `PageLink` in renderer package
+- **New functions**: `flattenTOC()`, `computeAdjacentPages()`, `processCallouts()` in renderer
+- **Modified files**: `renderer.go`, `template.go`, `style.css`, `search.js`, `compiler.go`, `build.go`, `indexer.go`, `g.sh`
+
 ## [0.1.0] - 2025-10-21
 
 ### Added

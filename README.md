@@ -6,6 +6,8 @@
 
 Jot is a documentation generator that converts markdown files into modern, searchable documentation websites. Built as a replacement for JetBrains deprecated Writerside IDE.
 
+![Jot Doc Preview](docs/jot_preview.png)
+
 ## Features
 
 - **Automatic TOC Generation** - Hierarchical table of contents from your file structure

@@ -18,14 +18,16 @@ import (
 type Compiler struct {
 	outputPath string
 	renderer   *renderer.HTMLRenderer
+	siteConfig renderer.SiteConfig
 }
 
 // NewCompiler creates a new documentation compiler. It takes the output path
-// where the compiled documentation will be stored.
-func NewCompiler(outputPath string) *Compiler {
+// where the compiled documentation will be stored and a site configuration.
+func NewCompiler(outputPath string, siteConfig renderer.SiteConfig) *Compiler {
 	return &Compiler{
 		outputPath: outputPath,
 		renderer:   renderer.NewHTMLRenderer(),
+		siteConfig: siteConfig,
 	}
 }
 
@@ -68,7 +70,7 @@ func (c *Compiler) Compile(documents []scanner.Document, tableOfContents *toc.Ta
 // using the HTML renderer and writes the output to the appropriate file.
 func (c *Compiler) compileDocument(doc scanner.Document, toc *toc.TableOfContents) error {
 	// Render the page
-	html, err := c.renderer.RenderPage(doc, toc)
+	html, err := c.renderer.RenderPage(doc, toc, c.siteConfig)
 	if err != nil {
 		return err
 	}

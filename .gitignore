@@ -50,9 +50,10 @@ coverage.out
 .env.*.local
 
 scripts/ghub.sh;
-docs/internal
+
 docs/.maps
 docs/strategies/
 docs-llm.json
 .ctxt/
 .arc/
+dist

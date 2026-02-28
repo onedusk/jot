@@ -215,7 +215,9 @@ func (idx *Indexer) cleanContent(content string) string {
 	return strings.TrimSpace(content)
 }
 
-// SaveIndex serializes the search index to a JSON file in the specified output path.
+// SaveIndex serializes the search index to both a JSON file and a JS file
+// in the specified output path. The JS file sets a global variable so search
+// works without fetch (including file:// protocol).
 func (idx *Indexer) SaveIndex(index *Index) error {
 	// Ensure output directory exists
 	outputDir := filepath.Join(idx.outputPath, "assets")
@@ -229,10 +231,17 @@ func (idx *Indexer) SaveIndex(index *Index) error {
 		return fmt.Errorf("failed to marshal index: %w", err)
 	}
 
-	// Write to file
+	// Write JSON file
 	indexPath := filepath.Join(outputDir, "search-index.json")
 	if err := os.WriteFile(indexPath, data, 0644); err != nil {
 		return fmt.Errorf("failed to write index: %w", err)
+	}
+
+	// Write JS file (works with file:// protocol)
+	jsContent := "window.__searchIndex = " + string(data) + ";"
+	jsPath := filepath.Join(outputDir, "search-index.js")
+	if err := os.WriteFile(jsPath, []byte(jsContent), 0644); err != nil {
+		return fmt.Errorf("failed to write search index JS: %w", err)
 	}
 
 	return nil

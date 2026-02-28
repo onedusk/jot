@@ -123,7 +123,8 @@ func TestHTMLRenderer_RenderPage(t *testing.T) {
 	}
 
 	renderer := NewHTMLRenderer()
-	page, err := renderer.RenderPage(doc, &toc.TableOfContents{Root: tocRoot})
+	config := SiteConfig{ProjectName: "Test Docs"}
+	page, err := renderer.RenderPage(doc, &toc.TableOfContents{Root: tocRoot}, config)
 	if err != nil {
 		t.Fatalf("RenderPage() error = %v", err)
 	}
@@ -133,7 +134,7 @@ func TestHTMLRenderer_RenderPage(t *testing.T) {
 		"<!DOCTYPE html>",
 		"<html",
 		"<head>",
-		"<title>Test Page | Jot Documentation</title>",
+		"<title>Test Page | Test Docs</title>",
 		"<body>",
 		"<nav", // Navigation
 		"<main",

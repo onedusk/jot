@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/onedusk/jot/internal/compiler"
 	"github.com/onedusk/jot/internal/export"
+	"github.com/onedusk/jot/internal/renderer"
 	"github.com/onedusk/jot/internal/scanner"
 	"github.com/onedusk/jot/internal/toc"
 )
@@ -94,7 +95,18 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Compile to HTML
 	fmt.Println(" Compiling to HTML...")
-	comp := compiler.NewCompiler(config.OutputPath)
+	siteConfig := renderer.SiteConfig{
+		ProjectName: config.ProjectName,
+		NavLinks: []renderer.NavLink{
+			{Label: "API", Href: "#"},
+			{Label: "Documentation", Href: "#"},
+			{Label: "Support", Href: "#"},
+		},
+	}
+	if siteConfig.ProjectName == "" {
+		siteConfig.ProjectName = "Documentation"
+	}
+	comp := compiler.NewCompiler(config.OutputPath, siteConfig)
 	if err := comp.Compile(allDocs, tableOfContents); err != nil {
 		return fmt.Errorf("failed to compile documents: %w", err)
 	}
