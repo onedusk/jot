@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/onedusk/jot/internal/export"
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/export"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // exportCmd provides the command for exporting documentation into various formats
@@ -284,7 +284,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 	case "llm":
 		// Legacy format - keep for backward compatibility
 		fmt.Println(" Exporting for LLM consumption (legacy format)...")
-		llmData, llmErr := exporter.ToLLMFormat(allDocs)
+		llmData, llmErr := exporter.ToLLMFormat(allDocs, chunkSize, chunkOverlap)
 		if llmErr != nil {
 			err = llmErr
 		} else {

@@ -2,8 +2,8 @@
 package chunking
 
 import (
-	"github.com/onedusk/jot/internal/export"
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/export"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // ChunkStrategy defines the interface for document chunking strategies.

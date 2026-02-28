@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // LLMSTxtExporter handles exporting documents to llms.txt format.

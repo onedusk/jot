@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
-	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/pkg/tokenizer"
 	"gopkg.in/yaml.v3"
 )
 

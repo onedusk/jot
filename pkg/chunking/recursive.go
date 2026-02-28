@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/onedusk/jot/internal/export"
-	"github.com/onedusk/jot/internal/scanner"
-	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/onedusk/jot/pkg/export"
+	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/pkg/tokenizer"
 )
 
 // RecursiveStrategy implements hierarchical text splitting using multiple separators.

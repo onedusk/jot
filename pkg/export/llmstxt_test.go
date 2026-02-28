@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // TestToLLMSTxt tests the llms.txt export format generation.

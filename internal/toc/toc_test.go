@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // TestNewBuilder tests the creation of a new Builder.

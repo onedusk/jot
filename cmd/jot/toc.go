@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/onedusk/jot/internal/toc"
 	"github.com/spf13/cobra"
 )

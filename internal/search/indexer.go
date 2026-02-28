@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // Index represents the top-level structure of the search index. It contains a list

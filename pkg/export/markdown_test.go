@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 	"gopkg.in/yaml.v3"
 )
 

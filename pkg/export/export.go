@@ -8,9 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
-	"github.com/onedusk/jot/internal/tokenizer"
-	"github.com/spf13/viper"
+	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/pkg/tokenizer"
 	"gopkg.in/yaml.v3"
 )
 
@@ -50,20 +49,17 @@ func (e *Exporter) ToYAML(documents []scanner.Document) (string, error) {
 
 // ToLLMFormat exports documents to a structure optimized for consumption by Large Language Models.
 // This format includes chunking, sectioning, and metadata extraction.
-func (e *Exporter) ToLLMFormat(documents []scanner.Document) (*LLMExport, error) {
+func (e *Exporter) ToLLMFormat(documents []scanner.Document, chunkSize, overlap int) (*LLMExport, error) {
 	// Initialize tokenizer for accurate token-based chunking
 	tok, err := tokenizer.NewTokenizer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize tokenizer: %w", err)
 	}
 
-	// Read chunking configuration from viper with sensible defaults
-	chunkSize := viper.GetInt("llm.chunk_size")
 	if chunkSize == 0 {
 		chunkSize = 512
 	}
 
-	overlap := viper.GetInt("llm.overlap")
 	if overlap == 0 {
 		overlap = 128
 	}

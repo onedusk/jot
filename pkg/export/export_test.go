@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
-	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/pkg/tokenizer"
 	"gopkg.in/yaml.v3"
 )
 
@@ -149,7 +149,7 @@ func TestExporter_ToLLMFormat(t *testing.T) {
 	}
 
 	exporter := NewExporter()
-	llmData, err := exporter.ToLLMFormat(docs)
+	llmData, err := exporter.ToLLMFormat(docs, 512, 128)
 	if err != nil {
 		t.Fatalf("ToLLMFormat() error = %v", err)
 	}

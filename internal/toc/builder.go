@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // Builder is responsible for constructing a TableOfContents from a slice of documents.

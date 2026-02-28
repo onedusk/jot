@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/onedusk/jot/internal/scanner"
-	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/pkg/tokenizer"
 )
 
 // TestFixedStrategy tests the FixedSizeStrategy implementation.

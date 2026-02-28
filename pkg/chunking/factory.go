@@ -3,7 +3,7 @@ package chunking
 import (
 	"fmt"
 
-	"github.com/onedusk/jot/internal/tokenizer"
+	"github.com/onedusk/jot/pkg/tokenizer"
 )
 
 // NewChunkStrategy creates a ChunkStrategy based on the given strategy name.

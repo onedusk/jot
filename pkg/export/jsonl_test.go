@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // TestNewJSONLExporter tests the creation of a new JSONLExporter.

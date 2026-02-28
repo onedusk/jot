@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/russross/blackfriday/v2"
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/onedusk/jot/internal/toc"
 )
 

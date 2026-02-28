@@ -10,9 +10,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/onedusk/jot/internal/compiler"
-	"github.com/onedusk/jot/internal/export"
+	"github.com/onedusk/jot/pkg/export"
 	"github.com/onedusk/jot/internal/renderer"
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/onedusk/jot/internal/toc"
 )
 

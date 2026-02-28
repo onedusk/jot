@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/onedusk/jot/internal/scanner"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // TestNewIndexer tests the creation of a new Indexer.
