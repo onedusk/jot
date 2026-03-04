@@ -5,6 +5,7 @@ package renderer
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"path/filepath"
@@ -181,6 +182,8 @@ func (r *HTMLRenderer) RenderPage(doc scanner.Document, tableOfContents *toc.Tab
 		NavLinks:       config.NavLinks,
 		PrevPage:       prevPage,
 		NextPage:       nextPage,
+		MarkdownSource: base64.StdEncoding.EncodeToString(doc.Content),
+		MarkdownPath:   doc.RelativePath,
 	}
 
 	// Render using template
@@ -393,6 +396,8 @@ type PageData struct {
 	NavLinks       []NavLink
 	PrevPage       *PageLink
 	NextPage       *PageLink
+	MarkdownSource string // base64-encoded raw markdown for clipboard copy
+	MarkdownPath   string // relative .md file path for "Open Markdown" link
 }
 
 // BreadcrumbItem represents a single item in a breadcrumb navigation trail.

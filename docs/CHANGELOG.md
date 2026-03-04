@@ -5,7 +5,17 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-02-27
+## [Unreleased] - 2026-03-04
+
+### Added
+
+- **Page export menu**: Split button with dropdown on every rendered page for copying and exporting content
+  - "Copy page" copies rendered page text to clipboard
+  - "Copy page as Markdown" copies raw markdown source to clipboard (base64-encoded and embedded in page)
+  - "Open Markdown" opens the source `.md` file in a new browser tab
+  - Dropdown closes on outside click, "Copied!" feedback with emerald accent state
+  - Mobile responsive: collapses to icon-only at 768px breakpoint
+- **Markdown source files in output**: Source `.md` files are now copied alongside `.html` files in the build output directory
 
 ### Changed
 

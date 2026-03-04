@@ -512,6 +512,103 @@ pre:hover .copy-button {
     background: rgba(16, 185, 129, 0.1);
 }
 
+/* Page Actions Split Button */
+.page-actions {
+    float: right;
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+    margin: 0 0 1rem 1rem;
+}
+
+.page-actions-btn,
+.page-actions-chevron {
+    padding: 0.375rem 0.625rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--color-border);
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 200ms ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.page-actions-btn {
+    border-radius: 6px 0 0 6px;
+    border-right: none;
+}
+
+.page-actions-chevron {
+    border-radius: 0 6px 6px 0;
+    padding: 0.375rem 0.375rem;
+}
+
+.page-actions-btn:hover,
+.page-actions-chevron:hover {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--color-text);
+    border-color: rgba(14, 165, 233, 0.3);
+}
+
+.page-actions-btn.copied {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.page-actions-chevron.copied {
+    border-color: var(--color-accent);
+}
+
+.page-actions-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    min-width: 200px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.page-actions-dropdown.open {
+    display: block;
+}
+
+.page-actions-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    text-align: left;
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    transition: all 150ms ease;
+    box-sizing: border-box;
+}
+
+.page-actions-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--color-text);
+}
+
+.page-actions-item.copied {
+    color: var(--color-accent);
+}
+
 /* Tables */
 table {
     width: 100%;
@@ -721,6 +818,10 @@ blockquote {
 
     .header-avatar,
     .header-signin {
+        display: none;
+    }
+
+    .page-actions-btn span {
         display: none;
     }
 

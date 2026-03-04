@@ -72,6 +72,19 @@ const htmlTemplate = `<!DOCTYPE html>
             <div class="content">
                 <!-- Article Content -->
                 <article>
+                    <div class="page-actions">
+                        <button class="page-actions-btn" id="copy-page-btn" title="Copy page text">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            <span>Copy page</span>
+                        </button>
+                        <button class="page-actions-chevron" id="copy-page-chevron" title="More actions">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="page-actions-dropdown" id="copy-page-dropdown">
+                            <button class="page-actions-item" id="copy-md-btn">Copy page as Markdown</button>
+                            <a class="page-actions-item" href="{{.RelativePrefix}}{{.MarkdownPath}}" target="_blank">Open Markdown</a>
+                        </div>
+                    </div>
                     {{.Content}}
                 </article>
 
@@ -140,9 +153,62 @@ const htmlTemplate = `<!DOCTYPE html>
                 };
                 pre.appendChild(button);
             });
+
+            // Page actions split button
+            (function() {
+                var chevron = document.getElementById('copy-page-chevron');
+                var dropdown = document.getElementById('copy-page-dropdown');
+                var copyPageBtn = document.getElementById('copy-page-btn');
+                var copyMdBtn = document.getElementById('copy-md-btn');
+
+                if (!chevron || !dropdown) return;
+
+                chevron.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                });
+
+                document.addEventListener('click', function() {
+                    dropdown.classList.remove('open');
+                });
+                dropdown.addEventListener('click', function(e) { e.stopPropagation(); });
+
+                function flashCopied(btn, originalText) {
+                    var span = btn.querySelector('span');
+                    if (span) { span.textContent = 'Copied!'; }
+                    btn.classList.add('copied');
+                    setTimeout(function() {
+                        if (span) { span.textContent = originalText; }
+                        btn.classList.remove('copied');
+                    }, 2000);
+                }
+
+                copyPageBtn.addEventListener('click', function() {
+                    var text = document.querySelector('article').innerText;
+                    navigator.clipboard.writeText(text).then(function() {
+                        flashCopied(copyPageBtn, 'Copy page');
+                    });
+                });
+
+                copyMdBtn.addEventListener('click', function() {
+                    var encoded = JSON.parse(document.getElementById('jot-md-source').textContent);
+                    var md = atob(encoded);
+                    navigator.clipboard.writeText(md).then(function() {
+                        var orig = copyMdBtn.textContent;
+                        copyMdBtn.textContent = 'Copied!';
+                        copyMdBtn.classList.add('copied');
+                        setTimeout(function() {
+                            copyMdBtn.textContent = orig;
+                            copyMdBtn.classList.remove('copied');
+                        }, 2000);
+                        dropdown.classList.remove('open');
+                    });
+                });
+            })();
         });
 
     </script>
+    <script id="jot-md-source" type="application/json">"{{.MarkdownSource}}"</script>
     <script>window.__jotPrefix = "{{.RelativePrefix}}";</script>
     <script src="{{.RelativePrefix}}assets/search-index.js"></script>
     <script src="{{.RelativePrefix}}assets/search.js"></script>

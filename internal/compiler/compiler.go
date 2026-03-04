@@ -85,7 +85,17 @@ func (c *Compiler) compileDocument(doc scanner.Document, toc *toc.TableOfContent
 	}
 
 	// Write HTML file
-	return os.WriteFile(outputPath, []byte(html), 0644)
+	if err := os.WriteFile(outputPath, []byte(html), 0644); err != nil {
+		return err
+	}
+
+	// Copy source markdown file for "Open Markdown" feature
+	mdOutputPath := filepath.Join(c.outputPath, doc.RelativePath)
+	mdOutputDir := filepath.Dir(mdOutputPath)
+	if err := os.MkdirAll(mdOutputDir, 0755); err != nil {
+		return err
+	}
+	return os.WriteFile(mdOutputPath, doc.Content, 0644)
 }
 
 // getOutputPath converts a markdown file's relative path to its corresponding HTML output path.

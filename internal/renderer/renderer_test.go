@@ -2,6 +2,7 @@
 package renderer
 
 import (
+	"encoding/base64"
 	"strings"
 	"testing"
 
@@ -149,6 +150,68 @@ func TestHTMLRenderer_RenderPage(t *testing.T) {
 		if !strings.Contains(page, elem) {
 			t.Errorf("RenderPage() missing expected element: %s", elem)
 		}
+	}
+}
+
+// TestRenderPage_MarkdownSource tests that RenderPage populates MarkdownSource and MarkdownPath correctly.
+func TestRenderPage_MarkdownSource(t *testing.T) {
+	markdownContent := "# Hello World\n\nSome **bold** content with `code`."
+	doc := scanner.Document{
+		Title:        "Hello World",
+		RelativePath: "guides/hello.md",
+		Content:      []byte(markdownContent),
+	}
+
+	tocRoot := &toc.TOCNode{
+		ID:    "root",
+		Title: "Table of Contents",
+		Children: []*toc.TOCNode{
+			{
+				ID:    "guides",
+				Title: "Guides",
+				Children: []*toc.TOCNode{
+					{
+						ID:    "hello",
+						Title: "Hello World",
+						Path:  "guides/hello.md",
+					},
+				},
+			},
+		},
+	}
+
+	r := NewHTMLRenderer()
+	config := SiteConfig{ProjectName: "Test Docs"}
+	page, err := r.RenderPage(doc, &toc.TableOfContents{Root: tocRoot}, config)
+	if err != nil {
+		t.Fatalf("RenderPage() error = %v", err)
+	}
+
+	// Verify base64-encoded markdown source is embedded
+	expectedB64 := base64.StdEncoding.EncodeToString([]byte(markdownContent))
+	if !strings.Contains(page, expectedB64) {
+		t.Error("RenderPage() missing base64-encoded markdown source")
+	}
+
+	// Verify jot-md-source script tag is present
+	if !strings.Contains(page, `id="jot-md-source"`) {
+		t.Error("RenderPage() missing jot-md-source script tag")
+	}
+
+	// Verify page-actions div is present
+	if !strings.Contains(page, `class="page-actions"`) {
+		t.Error("RenderPage() missing page-actions div")
+	}
+
+	// Verify Copy page button
+	if !strings.Contains(page, `id="copy-page-btn"`) {
+		t.Error("RenderPage() missing copy-page-btn")
+	}
+
+	// Verify Open Markdown link points to correct path with relative prefix
+	// For guides/hello.md, relativePrefix is "../"
+	if !strings.Contains(page, `href="../guides/hello.md"`) {
+		t.Error("RenderPage() missing correct Open Markdown link")
 	}
 }
 
