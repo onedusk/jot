@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Dropdown closes on outside click, "Copied!" feedback with emerald accent state
   - Mobile responsive: collapses to icon-only at 768px breakpoint
 - **Markdown source files in output**: Source `.md` files are now copied alongside `.html` files in the build output directory
+- **Continuous integration**: GitHub Actions workflow (`.github/workflows/ci.yml`) checks formatting, module tidiness, `go vet`, build, and `go test -race` on every push and pull request
 
 ### Changed
 
