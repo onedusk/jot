@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Duplicated error output**: Errors were printed twice (by Cobra and by `main`), and runtime failures such as "no markdown files found" were followed by the full usage text. Errors now print once, without usage
 - **Pages missing from navigation**: A document and a directory with the same title (for example `guides.md` next to `guides/`), or directories whose names differ only in separators (`my-dir/` and `my_dir/`), were merged into one table of contents node. Documents under the merged directory disappeared from the sidebar. Directories are now matched by name, and only against other directories
 - **Timestamps labeled UTC but in local time**: `modified` values in `toc.xml` and the search index appended a literal `Z` to the local wall-clock time. They are now converted to UTC first
+- **Unescaped titles in navigation**: Document and directory titles and link paths were inserted into the sidebar HTML verbatim, so a title such as `Using <T> generics` or `Q&A` broke the markup on every page. They are now HTML-escaped. The `path` attribute in `toc.xml` is now XML-escaped as well
 
 ## [0.2.0] - 2026-02-27
 

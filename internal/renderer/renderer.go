@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"html"
 	"html/template"
 	"path/filepath"
 	"regexp"
@@ -302,7 +303,7 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 		}
 
 		buf.WriteString(fmt.Sprintf(`<li class="nav-item"><a href="%s%s" class="nav-link%s">%s</a></li>`,
-			relativePrefix, htmlPath, activeClass, node.Title))
+			relativePrefix, html.EscapeString(htmlPath), activeClass, html.EscapeString(node.Title)))
 
 		if depth == 1 {
 			buf.WriteString(`</ul></div>`)
@@ -310,7 +311,7 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 	} else {
 		// This is a directory - render as a section
 		buf.WriteString(`<div class="nav-section">`)
-		buf.WriteString(fmt.Sprintf(`<div class="nav-section-title">%s</div>`, node.Title))
+		buf.WriteString(fmt.Sprintf(`<div class="nav-section-title">%s</div>`, html.EscapeString(node.Title)))
 		buf.WriteString(`<ul class="nav-list">`)
 
 		// Render children
@@ -322,7 +323,7 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 					activeClass = " active"
 				}
 				buf.WriteString(fmt.Sprintf(`<li class="nav-item"><a href="%s%s" class="nav-link%s">%s</a></li>`,
-					relativePrefix, htmlPath, activeClass, child.Title))
+					relativePrefix, html.EscapeString(htmlPath), activeClass, html.EscapeString(child.Title)))
 			} else {
 				// Nested directory
 				r.renderNavSection(buf, child, currentPath, relativePrefix, depth+1)

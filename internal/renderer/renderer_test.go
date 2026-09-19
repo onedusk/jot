@@ -350,3 +350,39 @@ func TestHTMLRenderer_GenerateNavigation(t *testing.T) {
 		t.Error("GenerateNavigation() missing active class for current page")
 	}
 }
+
+// TestHTMLRenderer_GenerateNavigationEscapesTitles verifies that titles and
+// paths are HTML-escaped in the navigation tree.
+func TestHTMLRenderer_GenerateNavigationEscapesTitles(t *testing.T) {
+	tocRoot := &toc.TOCNode{
+		ID: "root",
+		Children: []*toc.TOCNode{
+			{ID: "generics", Title: "Using <T> generics", Path: "generics.md"},
+			{
+				ID:    "q-a",
+				Title: "Q&A <Section>",
+				Children: []*toc.TOCNode{
+					{ID: "faq", Title: `The "FAQ"`, Path: "q&a/faq.md"},
+				},
+			},
+		},
+	}
+
+	nav := NewHTMLRenderer().GenerateNavigation(tocRoot, "", "")
+
+	for _, want := range []string{
+		"Using &lt;T&gt; generics",
+		"Q&amp;A &lt;Section&gt;",
+		"The &#34;FAQ&#34;",
+		`href="q&amp;a/faq.html"`,
+	} {
+		if !strings.Contains(nav, want) {
+			t.Errorf("GenerateNavigation() missing %s in:\n%s", want, nav)
+		}
+	}
+	for _, unwanted := range []string{"<T>", "<Section>"} {
+		if strings.Contains(nav, unwanted) {
+			t.Errorf("GenerateNavigation() contains unescaped %s", unwanted)
+		}
+	}
+}

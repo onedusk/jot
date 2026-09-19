@@ -152,6 +152,17 @@ func TestToXML_ModifiedIsUTC(t *testing.T) {
 	}
 }
 
+// TestToXML_EscapesPathAttribute verifies that document paths are escaped in
+// the path attribute.
+func TestToXML_EscapesPathAttribute(t *testing.T) {
+	docs := []scanner.Document{{RelativePath: `q&a/"faq".md`, Title: "FAQ"}}
+
+	xml := NewBuilder().Build(docs).ToXML()
+	if want := `path="q&amp;a/&quot;faq&quot;.md"`; !strings.Contains(xml, want) {
+		t.Errorf("ToXML() missing %s:\n%s", want, xml)
+	}
+}
+
 // TestTOCNode_AddChild tests adding a child to a TOCNode.
 func TestTOCNode_AddChild(t *testing.T) {
 	parent := &TOCNode{

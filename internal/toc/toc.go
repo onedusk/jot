@@ -76,9 +76,9 @@ func (t *TableOfContents) nodeToXML(builder *strings.Builder, node *TOCNode, dep
 		// Chapter node (has a path) with enhanced metadata
 		builder.WriteString(indent)
 		builder.WriteString(`<chapter id="`)
-		builder.WriteString(node.ID)
+		builder.WriteString(escapeXML(node.ID))
 		builder.WriteString(`" path="`)
-		builder.WriteString(node.Path)
+		builder.WriteString(escapeXML(node.Path))
 		builder.WriteString(`"`)
 
 		// Add metadata attributes
