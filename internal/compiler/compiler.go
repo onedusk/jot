@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -227,23 +226,26 @@ func (c *Compiler) copyAssets() error {
 		return err
 	}
 
-	entries, err := fs.ReadDir(web.Assets, web.AssetsDir)
+	assets, err := fs.Sub(web.Assets, web.AssetsDir)
 	if err != nil {
 		return fmt.Errorf("failed to read embedded assets: %w", err)
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			continue
-		}
-		content, err := fs.ReadFile(web.Assets, path.Join(web.AssetsDir, entry.Name()))
+	return fs.WalkDir(assets, ".", func(name string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return fmt.Errorf("failed to read embedded asset %s: %w", entry.Name(), err)
+			return fmt.Errorf("failed to read embedded assets: %w", err)
 		}
-		if err := os.WriteFile(filepath.Join(assetsDir, entry.Name()), content, 0644); err != nil {
-			return fmt.Errorf("failed to write asset %s: %w", entry.Name(), err)
+		target := filepath.Join(assetsDir, filepath.FromSlash(name))
+		if d.IsDir() {
+			return os.MkdirAll(target, 0755)
 		}
-	}
-
-	return nil
+		content, err := fs.ReadFile(assets, name)
+		if err != nil {
+			return fmt.Errorf("failed to read embedded asset %s: %w", name, err)
+		}
+		if err := os.WriteFile(target, content, 0644); err != nil {
+			return fmt.Errorf("failed to write asset %s: %w", name, err)
+		}
+		return nil
+	})
 }

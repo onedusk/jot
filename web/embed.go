@@ -5,9 +5,10 @@ package web
 import "embed"
 
 // Assets contains the CSS and JavaScript copied into every generated site,
-// rooted at templates/assets.
+// rooted at templates/assets. Embedding the directory rather than a glob
+// leaves out dotfiles such as .DS_Store.
 //
-//go:embed templates/assets/*
+//go:embed templates/assets
 var Assets embed.FS
 
 // AssetsDir is the directory within Assets that holds the asset files.
