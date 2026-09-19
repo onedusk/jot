@@ -346,6 +346,42 @@ func TestE2ERuntimeErrorNotPrintedByCobra(t *testing.T) {
 	}
 }
 
+func TestE2EVerboseConfigMessageNotOnStdout(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{"jot.yml": "input:\n  paths: [\"docs\"]\n"})
+	verbose = true
+	t.Cleanup(func() { verbose = false })
+
+	out, _ := captureStdout(t, func() error {
+		enterFixture(t, dir)
+		return nil
+	})
+	if out != "" {
+		t.Errorf("config discovery wrote to stdout with --verbose: %q", out)
+	}
+}
+
+func TestE2EExportToStdoutEndsWithOneNewline(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\"]\n",
+		"docs/index.md": "# Home\n\nWelcome.\n\n\n",
+	})
+	enterFixture(t, dir)
+	if err := exportCmd.Flags().Set("format", "llms-full"); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { exportCmd.Flags().Set("format", "json") })
+
+	out, err := captureStdout(t, func() error { return runExport(exportCmd, nil) })
+	if err != nil {
+		t.Fatalf("export failed: %v", err)
+	}
+	if !strings.HasSuffix(out, "\n") || strings.HasSuffix(out, "\n\n") {
+		t.Errorf("stdout should end with exactly one newline, got %q", out[max(0, len(out)-10):])
+	}
+}
+
 func TestE2EInitThenBuild(t *testing.T) {
 	// The project `jot init` creates must build without errors.
 	dir := t.TempDir()

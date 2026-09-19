@@ -3,6 +3,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -73,7 +74,8 @@ func initConfig() {
 	// Read config file
 	if err := viper.ReadInConfig(); err == nil {
 		if verbose {
-			fmt.Println("Using config file:", viper.ConfigFileUsed())
+			// Diagnostics go to stderr so they never mix with exported data on stdout
+			fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 		}
 	}
 }

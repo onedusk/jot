@@ -322,10 +322,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 		fmt.Fprintf(os.Stderr, " Exported to %s\n", outputFile)
 	} else {
 		// Write to stdout, ending with exactly one newline
-		if !strings.HasSuffix(output, "\n") {
-			output += "\n"
-		}
-		fmt.Print(output)
+		fmt.Print(strings.TrimRight(output, "\n") + "\n")
 	}
 
 	return nil
