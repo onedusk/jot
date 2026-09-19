@@ -5,7 +5,7 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-03-04
+## [Unreleased] - 2026-09-18
 
 ### Added
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Public package restructuring**: Moved `scanner`, `tokenizer`, `export`, and `chunking` from `internal/` to `pkg/` to enable external module imports (e.g. from the planned `mlpipe` package)
 - **Decoupled viper from export package**: `ToLLMFormat()` now accepts `chunkSize, overlap int` parameters instead of reading from `viper.GetInt()`, removing the CLI framework dependency from the library layer
 - Updated 28 import paths across all consumer files
+- **Formatting**: Applied `gofmt` to all Go sources (no behavior change)
 
 ## [0.2.0] - 2026-02-27
 

@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/spf13/cobra"
 	"github.com/onedusk/jot/pkg/export"
 	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/spf13/cobra"
 )
 
 // exportCmd provides the command for exporting documentation into various formats

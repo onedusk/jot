@@ -309,7 +309,7 @@ func TestSortDocumentsByImportance(t *testing.T) {
 // TestSortDocumentsByImportance_CaseInsensitive tests README detection is case-insensitive.
 func TestSortDocumentsByImportance_CaseInsensitive(t *testing.T) {
 	testCases := []struct {
-		name     string
+		name       string
 		readmePath string
 	}{
 		{"lowercase", "readme.md"},

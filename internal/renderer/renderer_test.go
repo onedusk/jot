@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/onedusk/jot/internal/toc"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // TestNewHTMLRenderer tests the creation of a new HTMLRenderer.

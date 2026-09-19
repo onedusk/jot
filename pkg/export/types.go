@@ -80,14 +80,14 @@ type SemanticIndex struct {
 // This structure is used for JSONL export and includes navigation fields for document relationships.
 // Compatible with vector databases like Pinecone, Weaviate, and Qdrant.
 type ChunkMetadata struct {
-	DocID       string    `json:"doc_id"`                // Unique identifier of the parent document
-	ChunkID     string    `json:"chunk_id"`              // Unique identifier for this chunk
-	Text        string    `json:"text"`                  // The actual text content of the chunk
-	TokenCount  int       `json:"token_count"`           // Number of tokens in this chunk
-	Source      string    `json:"source"`                // Source file path (relative)
-	StartPos    int       `json:"start_pos"`             // Starting position in the document
-	EndPos      int       `json:"end_pos"`               // Ending position in the document
+	DocID       string    `json:"doc_id"`                  // Unique identifier of the parent document
+	ChunkID     string    `json:"chunk_id"`                // Unique identifier for this chunk
+	Text        string    `json:"text"`                    // The actual text content of the chunk
+	TokenCount  int       `json:"token_count"`             // Number of tokens in this chunk
+	Source      string    `json:"source"`                  // Source file path (relative)
+	StartPos    int       `json:"start_pos"`               // Starting position in the document
+	EndPos      int       `json:"end_pos"`                 // Ending position in the document
 	PrevChunkID string    `json:"prev_chunk_id,omitempty"` // ID of the previous chunk for navigation
 	NextChunkID string    `json:"next_chunk_id,omitempty"` // ID of the next chunk for navigation
-	Vector      []float32 `json:"vector,omitempty"`      // Optional embedding vector for similarity search
+	Vector      []float32 `json:"vector,omitempty"`        // Optional embedding vector for similarity search
 }

@@ -4,8 +4,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/spf13/cobra"
 )
 
 // debugCmd provides a command for debugging the document scanning process.

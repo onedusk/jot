@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/onedusk/jot/internal/renderer"
-	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/onedusk/jot/internal/search"
 	"github.com/onedusk/jot/internal/toc"
+	"github.com/onedusk/jot/pkg/scanner"
 )
 
 // Compiler orchestrates the documentation build process. It handles file processing,

@@ -221,9 +221,9 @@ func TestNewChunkStrategy(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
+		name         string
 		strategyName string
-		wantErr     bool
+		wantErr      bool
 	}{
 		{"fixed strategy", "fixed", false},
 		{"headers strategy", "headers", false},

@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/onedusk/jot/internal/compiler"
+	"github.com/onedusk/jot/internal/renderer"
+	"github.com/onedusk/jot/internal/toc"
+	"github.com/onedusk/jot/pkg/export"
+	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/onedusk/jot/internal/compiler"
-	"github.com/onedusk/jot/pkg/export"
-	"github.com/onedusk/jot/internal/renderer"
-	"github.com/onedusk/jot/pkg/scanner"
-	"github.com/onedusk/jot/internal/toc"
 )
 
 // buildCmd represents the command for building the documentation.

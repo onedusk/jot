@@ -51,7 +51,8 @@ func (s *SemanticStrategy) Chunk(doc scanner.Document, maxTokens, overlapTokens 
 // TODO: Implement this function to detect semantic boundaries using embeddings.
 //
 // Expected signature:
-//   func (s *SemanticStrategy) semanticBoundaryDetection(sentences []string) ([]int, error)
+//
+//	func (s *SemanticStrategy) semanticBoundaryDetection(sentences []string) ([]int, error)
 //
 // Expected behavior:
 //   - Input: List of sentences or paragraphs
