@@ -227,8 +227,9 @@ func runExport(cmd *cobra.Command, args []string) error {
 	if len(allDocs) == 0 {
 		return fmt.Errorf("no markdown files found")
 	}
-	if err := checkDuplicatePaths(allDocs); err != nil {
-		return err
+	allDocs, dupErr := dedupeDocuments(allDocs)
+	if dupErr != nil {
+		return dupErr
 	}
 
 	fmt.Fprintf(os.Stderr, "  Found %d markdown files\n\n", len(allDocs))

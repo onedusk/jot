@@ -40,18 +40,6 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	// Load configuration
 	config := loadBuildConfig(cmd)
 
-	// Clean output directory if requested
-	if config.Clean {
-		if err := os.RemoveAll(config.OutputPath); err != nil {
-			return fmt.Errorf("failed to clean output directory: %w", err)
-		}
-	}
-
-	// Create output directory
-	if err := os.MkdirAll(config.OutputPath, 0755); err != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
-	}
-
 	fmt.Println(" Scanning for markdown files...")
 
 	var allDocs []scanner.Document
@@ -84,8 +72,20 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	if len(allDocs) == 0 {
 		return fmt.Errorf("no markdown files found")
 	}
-	if err := checkDuplicatePaths(allDocs); err != nil {
+	allDocs, err := dedupeDocuments(allDocs)
+	if err != nil {
 		return err
+	}
+
+	// Touch the output directory only once the input is known to be valid, so a
+	// failed build leaves the previous output in place
+	if config.Clean {
+		if err := os.RemoveAll(config.OutputPath); err != nil {
+			return fmt.Errorf("failed to clean output directory: %w", err)
+		}
+	}
+	if err := os.MkdirAll(config.OutputPath, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	fmt.Printf("  Found %d markdown files\n\n", len(allDocs))
@@ -178,19 +178,35 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// checkDuplicatePaths returns an error if two documents share a relative path.
-// Paths are relative to each input root, so files from different roots can
-// collide and would otherwise overwrite each other in the output.
-func checkDuplicatePaths(docs []scanner.Document) error {
-	seen := make(map[string]string, len(docs))
+// dedupeDocuments drops repeat scans of the same source file (an input path
+// listed twice, or a file that is also inside another input path) and returns
+// an error if two different files would be written to the same output path.
+// Relative paths are computed per input root, so files from different roots can
+// collide. They are compared case-insensitively because on the default macOS
+// and Windows filesystems README.md and readme.md are the same file.
+func dedupeDocuments(docs []scanner.Document) ([]scanner.Document, error) {
+	unique := make([]scanner.Document, 0, len(docs))
+	seenSource := make(map[string]bool, len(docs))
+	seenOutput := make(map[string]scanner.Document, len(docs))
 	for _, doc := range docs {
-		if first, ok := seen[doc.RelativePath]; ok {
-			return fmt.Errorf("%s and %s both map to %s in the output; rename one of them or remove one of the input paths",
-				displayPath(first), displayPath(doc.Path), doc.RelativePath)
+		if seenSource[doc.Path] {
+			continue
 		}
-		seen[doc.RelativePath] = doc.Path
+		seenSource[doc.Path] = true
+
+		key := strings.ToLower(doc.RelativePath)
+		if first, ok := seenOutput[key]; ok {
+			msg := fmt.Sprintf("%s and %s both map to %s in the output",
+				displayPath(first.Path), displayPath(doc.Path), first.RelativePath)
+			if first.RelativePath != doc.RelativePath {
+				msg += " (paths that differ only in case collide on case-insensitive filesystems)"
+			}
+			return nil, fmt.Errorf("%s; rename one of them or remove one of the input paths", msg)
+		}
+		seenOutput[key] = doc
+		unique = append(unique, doc)
 	}
-	return nil
+	return unique, nil
 }
 
 // displayPath returns path relative to the working directory when possible.

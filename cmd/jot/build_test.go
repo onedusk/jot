@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -230,6 +231,59 @@ features:
 	llmsFullTxtPath := filepath.Join(outputDir, "llms-full.txt")
 	if _, err := os.Stat(llmsFullTxtPath); !os.IsNotExist(err) {
 		t.Errorf("llms-full.txt should not be created when --skip-llms-txt is set")
+	}
+}
+
+// TestDedupeDocuments verifies duplicate source and output path handling.
+func TestDedupeDocuments(t *testing.T) {
+	doc := func(path, rel string) scanner.Document {
+		return scanner.Document{Path: path, RelativePath: rel}
+	}
+
+	tests := []struct {
+		name      string
+		docs      []scanner.Document
+		wantCount int
+		wantErr   string
+	}{
+		{
+			name:      "same basename in different directories",
+			docs:      []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/guide/README.md", "guide/README.md")},
+			wantCount: 2,
+		},
+		{
+			name:      "same file scanned through two input paths",
+			docs:      []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/README.md", "README.md")},
+			wantCount: 1,
+		},
+		{
+			name:    "different files with the same output path",
+			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/README.md", "README.md")},
+			wantErr: "both map to README.md",
+		},
+		{
+			name:    "output paths differing only in case",
+			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
+			wantErr: "differ only in case",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := dedupeDocuments(tt.docs)
+			if tt.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+					t.Fatalf("dedupeDocuments() error = %v, want it to contain %q", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("dedupeDocuments() unexpected error: %v", err)
+			}
+			if len(got) != tt.wantCount {
+				t.Errorf("dedupeDocuments() returned %d documents, want %d", len(got), tt.wantCount)
+			}
+		})
 	}
 }
 

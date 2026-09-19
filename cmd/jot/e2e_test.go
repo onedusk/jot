@@ -180,15 +180,19 @@ func TestE2EInPlaceBuildKeepsSources(t *testing.T) {
 }
 
 func TestE2EDuplicateOutputPathsFail(t *testing.T) {
-	// This is the input layout `jot init` generates.
+	// This is the input layout and clean setting `jot init` generates.
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{
-		"jot.yml":        "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: dist\n",
-		"README.md":      "# Root\n",
-		"docs/README.md": "# Docs\n",
+		"jot.yml":   "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: dist\n  clean: true\n",
+		"README.md": "# Root\n",
 	})
 	enterFixture(t, dir)
 
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("first build failed: %v", err)
+	}
+
+	writeFixture(t, dir, map[string]string{"docs/README.md": "# Docs\n"})
 	err := runBuild(newTestBuildCmd(), nil)
 	if err == nil {
 		t.Fatal("expected an error for two documents mapping to README.html")
@@ -197,8 +201,24 @@ func TestE2EDuplicateOutputPathsFail(t *testing.T) {
 	if !strings.Contains(msg, filepath.Join("docs", "README.md")) {
 		t.Errorf("error should name docs/README.md: %v", err)
 	}
-	if _, statErr := os.Stat(filepath.Join(dir, "dist", "README.html")); statErr == nil {
-		t.Error("build should fail before writing any pages")
+	page, readErr := os.ReadFile(filepath.Join(dir, "dist", "README.html"))
+	if readErr != nil || !strings.Contains(string(page), "Root") {
+		t.Errorf("failed build should leave the previous output in place: %v", readErr)
+	}
+}
+
+func TestE2EOverlappingInputPathsBuild(t *testing.T) {
+	// One file reached through two input paths is not a collision.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":   "input:\n  paths: [\".\", \"README.md\", \"./docs/\", \"docs\"]\noutput:\n  path: dist\n",
+		"README.md": "# Root\n",
+		"docs/a.md": "# A\n",
+	})
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
 	}
 }
 
