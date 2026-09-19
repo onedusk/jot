@@ -149,8 +149,6 @@ func TestE2ERebuildDoesNotIngestOutput(t *testing.T) {
 }
 
 func TestE2EDuplicateOutputPathsFail(t *testing.T) {
-	t.Skip("A3: documents from different input roots can map to the same output path")
-
 	// This is the input layout `jot init` generates.
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{
@@ -167,6 +165,28 @@ func TestE2EDuplicateOutputPathsFail(t *testing.T) {
 	msg := err.Error()
 	if !strings.Contains(msg, filepath.Join("docs", "README.md")) {
 		t.Errorf("error should name docs/README.md: %v", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(dir, "dist", "README.html")); statErr == nil {
+		t.Error("build should fail before writing any pages")
+	}
+}
+
+func TestE2EInitThenBuild(t *testing.T) {
+	// The project `jot init` creates must build without errors.
+	dir := t.TempDir()
+	enterFixture(t, dir)
+
+	if err := runInit(initCmd, nil); err != nil {
+		t.Fatalf("init failed: %v", err)
+	}
+	viper.Reset()
+	initConfig()
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build of a freshly initialized project failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "dist", "README.html")); err != nil {
+		t.Errorf("expected dist/README.html: %v", err)
 	}
 }
 

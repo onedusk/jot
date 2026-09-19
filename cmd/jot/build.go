@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/onedusk/jot/internal/compiler"
@@ -82,6 +83,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	if len(allDocs) == 0 {
 		return fmt.Errorf("no markdown files found")
+	}
+	if err := checkDuplicatePaths(allDocs); err != nil {
+		return err
 	}
 
 	fmt.Printf("  Found %d markdown files\n\n", len(allDocs))
@@ -172,6 +176,34 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	fmt.Printf(" Build completed in %.2fs\n", elapsed.Seconds())
 
 	return nil
+}
+
+// checkDuplicatePaths returns an error if two documents share a relative path.
+// Paths are relative to each input root, so files from different roots can
+// collide and would otherwise overwrite each other in the output.
+func checkDuplicatePaths(docs []scanner.Document) error {
+	seen := make(map[string]string, len(docs))
+	for _, doc := range docs {
+		if first, ok := seen[doc.RelativePath]; ok {
+			return fmt.Errorf("%s and %s both map to %s in the output; rename one of them or remove one of the input paths",
+				displayPath(first), displayPath(doc.Path), doc.RelativePath)
+		}
+		seen[doc.RelativePath] = doc.Path
+	}
+	return nil
+}
+
+// displayPath returns path relative to the working directory when possible.
+func displayPath(path string) string {
+	wd, err := os.Getwd()
+	if err != nil {
+		return path
+	}
+	rel, err := filepath.Rel(wd, path)
+	if err != nil || strings.HasPrefix(rel, "..") {
+		return path
+	}
+	return rel
 }
 
 // BuildConfig holds the configuration settings for the build process,

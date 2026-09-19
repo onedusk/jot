@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unstyled sites from installed binaries**: CSS and JavaScript assets were read from `web/templates/assets/` relative to the current directory, so `jot build` run anywhere other than the jot source tree produced pages with no styles, search, or syntax highlighting, and silently skipped the missing files. Assets are now embedded in the binary with `go:embed`, and a failure to write one fails the build
 - **Build summary**: `jot build` no longer reports creating `assets/styles.css`, a file that was never written
 - **Rebuilds reading their own output**: The markdown copies written to the output directory were scanned as source on the next build whenever the output directory sat inside an input path (the default: input `.`, output `./dist`), so every rebuild doubled the page count and nested `dist/dist/...`. The output directory is now always excluded from scanning in `build`, `export`, `toc`, and `debug`. New `Scanner.Exclude` method in `pkg/scanner`
+- **Pages silently overwritten across input roots**: Document paths are relative to each input root, so with the input paths `jot init` generates (`docs` and `README.md`), `docs/README.md` and `README.md` both wrote `README.html` and one page was lost while the build reported both as generated. `build` and `export` now fail with an error naming both source files
 
 ## [0.2.0] - 2026-02-27
 
