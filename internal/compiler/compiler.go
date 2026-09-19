@@ -49,8 +49,15 @@ func (c *Compiler) Compile(documents []scanner.Document, tableOfContents *toc.Ta
 		}
 	}
 
-	// Generate index page if not present
-	if !c.hasIndexPage(documents) {
+	// Static hosts serve index.html at the site root, so make sure it exists
+	switch {
+	case c.hasDocument(documents, "index.md"):
+		// Already written as index.html
+	case c.hasDocument(documents, "README.md"):
+		if err := c.copyPage("README.html", "index.html"); err != nil {
+			return fmt.Errorf("failed to write index page: %w", err)
+		}
+	default:
 		if err := c.generateIndexPage(tableOfContents); err != nil {
 			return fmt.Errorf("failed to generate index page: %w", err)
 		}
@@ -110,14 +117,23 @@ func (c *Compiler) getOutputPath(relativePath string) string {
 	return filepath.Join(c.outputPath, htmlPath)
 }
 
-// hasIndexPage checks if the list of documents includes an index page (index.md or README.md).
-func (c *Compiler) hasIndexPage(documents []scanner.Document) bool {
+// hasDocument checks if the list of documents includes one at the given relative path.
+func (c *Compiler) hasDocument(documents []scanner.Document, relativePath string) bool {
 	for _, doc := range documents {
-		if doc.RelativePath == "index.md" || doc.RelativePath == "README.md" {
+		if doc.RelativePath == relativePath {
 			return true
 		}
 	}
 	return false
+}
+
+// copyPage copies an already-written page to another path within the output directory.
+func (c *Compiler) copyPage(from, to string) error {
+	content, err := os.ReadFile(filepath.Join(c.outputPath, from))
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filepath.Join(c.outputPath, to), content, 0644)
 }
 
 // generateIndexPage creates a default index page if one is not found in the documents.

@@ -191,8 +191,6 @@ func TestE2EInitThenBuild(t *testing.T) {
 }
 
 func TestE2EIndexFromRootReadme(t *testing.T) {
-	t.Skip("A4: README.md suppresses the generated index but is written as README.html")
-
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{
 		"jot.yml":        "input:\n  paths: [\"docs\"]\noutput:\n  path: dist\n",
@@ -204,7 +202,15 @@ func TestE2EIndexFromRootReadme(t *testing.T) {
 	if err := runBuild(newTestBuildCmd(), nil); err != nil {
 		t.Fatalf("build failed: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, "dist", "index.html")); err != nil {
-		t.Errorf("expected dist/index.html: %v", err)
+	index, err := os.ReadFile(filepath.Join(dir, "dist", "index.html"))
+	if err != nil {
+		t.Fatalf("expected dist/index.html: %v", err)
+	}
+	readme, err := os.ReadFile(filepath.Join(dir, "dist", "README.html"))
+	if err != nil {
+		t.Fatalf("expected dist/README.html to remain: %v", err)
+	}
+	if string(index) != string(readme) {
+		t.Error("index.html should be the rendered README page")
 	}
 }
