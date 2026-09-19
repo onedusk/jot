@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Mobile responsive: collapses to icon-only at 768px breakpoint
 - **Markdown source files in output**: Source `.md` files are now copied alongside `.html` files in the build output directory
 - **Continuous integration**: GitHub Actions workflow (`.github/workflows/ci.yml`) checks formatting, module tidiness, `go vet`, build, and `go test -race` on every push and pull request
+- **End-to-end build tests**: `cmd/jot/e2e_test.go` runs full builds from a temporary directory outside the repository, the way an installed binary is used
 
 ### Changed
 
