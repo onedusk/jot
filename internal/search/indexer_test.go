@@ -143,6 +143,22 @@ func TestIndexer_ProcessDocument(t *testing.T) {
 	}
 }
 
+// TestIndexer_ModifiedIsUTC verifies that modification times are converted to
+// UTC rather than labeled as UTC.
+func TestIndexer_ModifiedIsUTC(t *testing.T) {
+	edt := time.FixedZone("EDT", -4*60*60)
+	doc := scanner.Document{
+		RelativePath: "a.md",
+		Content:      []byte("# A"),
+		ModTime:      time.Date(2026, 9, 18, 19, 37, 47, 0, edt),
+	}
+
+	got := NewIndexer("/tmp/test").processDocument(doc).Modified
+	if want := "2026-09-18T23:37:47Z"; got != want {
+		t.Errorf("Modified = %q, want %q", got, want)
+	}
+}
+
 // TestIndexer_ExtractHeadings tests the heading extraction logic.
 func TestIndexer_ExtractHeadings(t *testing.T) {
 	tests := []struct {

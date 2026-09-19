@@ -135,6 +135,23 @@ func TestBuilder_DocumentAndDirectoryWithSameTitle(t *testing.T) {
 	}
 }
 
+// TestToXML_ModifiedIsUTC verifies that modification times are converted to
+// UTC rather than labeled as UTC.
+func TestToXML_ModifiedIsUTC(t *testing.T) {
+	edt := time.FixedZone("EDT", -4*60*60)
+	docs := []scanner.Document{{
+		RelativePath: "a.md",
+		Title:        "A",
+		Content:      []byte("# A"),
+		ModTime:      time.Date(2026, 9, 18, 19, 37, 47, 0, edt),
+	}}
+
+	xml := NewBuilder().Build(docs).ToXML()
+	if want := `modified="2026-09-18T23:37:47Z"`; !strings.Contains(xml, want) {
+		t.Errorf("ToXML() missing %s:\n%s", want, xml)
+	}
+}
+
 // TestTOCNode_AddChild tests adding a child to a TOCNode.
 func TestTOCNode_AddChild(t *testing.T) {
 	parent := &TOCNode{

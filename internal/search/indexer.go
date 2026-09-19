@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/onedusk/jot/pkg/scanner"
 )
@@ -119,7 +120,7 @@ func (idx *Indexer) processDocument(doc scanner.Document) IndexDocument {
 		Headings:  headings,
 		Keywords:  keywords,
 		Summary:   summary,
-		Modified:  doc.ModTime.Format("2006-01-02T15:04:05Z"),
+		Modified:  doc.ModTime.UTC().Format(time.RFC3339),
 		WordCount: wordCount,
 		ReadTime:  readTime,
 		Tags:      tags,

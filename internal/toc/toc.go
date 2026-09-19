@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"strings"
+	"time"
 )
 
 // TableOfContents represents the entire hierarchical structure of the documentation,
@@ -83,7 +84,7 @@ func (t *TableOfContents) nodeToXML(builder *strings.Builder, node *TOCNode, dep
 		// Add metadata attributes
 		if !node.Metadata.Modified.IsZero() {
 			builder.WriteString(` modified="`)
-			builder.WriteString(node.Metadata.Modified.Format("2006-01-02T15:04:05Z"))
+			builder.WriteString(node.Metadata.Modified.UTC().Format(time.RFC3339))
 			builder.WriteString(`"`)
 		}
 		if node.Metadata.Size > 0 {
