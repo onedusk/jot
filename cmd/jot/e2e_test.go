@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -168,6 +170,44 @@ func TestE2EDuplicateOutputPathsFail(t *testing.T) {
 	}
 	if _, statErr := os.Stat(filepath.Join(dir, "dist", "README.html")); statErr == nil {
 		t.Error("build should fail before writing any pages")
+	}
+}
+
+// captureStdout runs fn with os.Stdout redirected and returns what it wrote.
+func captureStdout(t *testing.T, fn func() error) (string, error) {
+	t.Helper()
+	r, w, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("pipe: %v", err)
+	}
+	orig := os.Stdout
+	os.Stdout = w
+	done := make(chan []byte)
+	go func() {
+		out, _ := io.ReadAll(r)
+		done <- out
+	}()
+	runErr := fn()
+	w.Close()
+	os.Stdout = orig
+	return string(<-done), runErr
+}
+
+func TestE2EExportToStdoutIsPureJSON(t *testing.T) {
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\"]\n",
+		"docs/index.md": "# Home\n\nWelcome.\n",
+	})
+	enterFixture(t, dir)
+
+	out, err := captureStdout(t, func() error { return runExport(exportCmd, nil) })
+	if err != nil {
+		t.Fatalf("export failed: %v", err)
+	}
+	var decoded map[string]interface{}
+	if err := json.Unmarshal([]byte(out), &decoded); err != nil {
+		t.Fatalf("stdout is not valid JSON: %v\nstdout:\n%s", err, out)
 	}
 }
 

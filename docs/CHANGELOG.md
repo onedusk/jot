@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Rebuilds reading their own output**: The markdown copies written to the output directory were scanned as source on the next build whenever the output directory sat inside an input path (the default: input `.`, output `./dist`), so every rebuild doubled the page count and nested `dist/dist/...`. The output directory is now always excluded from scanning in `build`, `export`, `toc`, and `debug`. New `Scanner.Exclude` method in `pkg/scanner`
 - **Pages silently overwritten across input roots**: Document paths are relative to each input root, so with the input paths `jot init` generates (`docs` and `README.md`), `docs/README.md` and `README.md` both wrote `README.html` and one page was lost while the build reported both as generated. `build` and `export` now fail with an error naming both source files
 - **No `index.html` for README-rooted sites**: When the root document was `README.md`, no index page was generated and the page was only written as `README.html`, so static hosts (GitHub Pages, S3, Netlify) returned 404 at `/` and the header logo link was broken. The root README is now also written as `index.html`
+- **Piped exports**: `jot export` wrote progress messages to stdout along with the exported data, so `jot export --format json | jq .` failed. Progress now goes to stderr, and stdout output ends with exactly one newline (previously JSONL gained a trailing blank line)
 
 ## [0.2.0] - 2026-02-27
 

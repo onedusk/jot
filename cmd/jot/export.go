@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/onedusk/jot/pkg/export"
 	"github.com/onedusk/jot/pkg/scanner"
@@ -178,25 +179,25 @@ func runExport(cmd *cobra.Command, args []string) error {
 		strategy = "semantic"
 		chunkSize = 512
 		chunkOverlap = 128
-		fmt.Println(" Using RAG preset: jsonl format, semantic strategy, 512 token chunks")
+		fmt.Fprintln(os.Stderr, " Using RAG preset: jsonl format, semantic strategy, 512 token chunks")
 	} else if forContext {
 		format = "markdown"
 		strategy = "markdown-headers"
 		chunkSize = 1024
 		chunkOverlap = 256
-		fmt.Println(" Using context preset: markdown format, headers strategy, 1024 token chunks")
+		fmt.Fprintln(os.Stderr, " Using context preset: markdown format, headers strategy, 1024 token chunks")
 	} else if forTraining {
 		format = "jsonl"
 		strategy = "fixed"
 		chunkSize = 256
 		chunkOverlap = 64
-		fmt.Println(" Using training preset: jsonl format, fixed strategy, 256 token chunks")
+		fmt.Fprintln(os.Stderr, " Using training preset: jsonl format, fixed strategy, 256 token chunks")
 	}
 
 	// Load configuration
 	config := loadConfig()
 
-	fmt.Println(" Scanning for markdown files...")
+	fmt.Fprintln(os.Stderr, " Scanning for markdown files...")
 
 	var allDocs []scanner.Document
 	for _, inputPath := range config.InputPaths {
@@ -230,13 +231,13 @@ func runExport(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Printf("  Found %d markdown files\n\n", len(allDocs))
+	fmt.Fprintf(os.Stderr, "  Found %d markdown files\n\n", len(allDocs))
 
 	// Log embeddings warning if applicable
 	if includeEmbeddings && format == "jsonl" {
-		fmt.Println(" WARNING: --include-embeddings will generate embeddings using external API")
-		fmt.Println(" This may incur costs and take significant time depending on document size")
-		fmt.Println("")
+		fmt.Fprintln(os.Stderr, " WARNING: --include-embeddings will generate embeddings using external API")
+		fmt.Fprintln(os.Stderr, " This may incur costs and take significant time depending on document size")
+		fmt.Fprintln(os.Stderr)
 	}
 
 	// Create exporter
@@ -248,15 +249,15 @@ func runExport(cmd *cobra.Command, args []string) error {
 	// Export based on format
 	switch format {
 	case "json":
-		fmt.Println(" Exporting to JSON...")
+		fmt.Fprintln(os.Stderr, " Exporting to JSON...")
 		output, err = exporter.ToJSON(allDocs)
 
 	case "yaml":
-		fmt.Println(" Exporting to YAML...")
+		fmt.Fprintln(os.Stderr, " Exporting to YAML...")
 		output, err = exporter.ToYAML(allDocs)
 
 	case "llms-txt":
-		fmt.Println(" Exporting to llms.txt format...")
+		fmt.Fprintln(os.Stderr, " Exporting to llms.txt format...")
 		llmsTxtExporter := export.NewLLMSTxtExporter()
 		projectConfig := export.ProjectConfig{
 			Name:        config.ProjectName,
@@ -265,7 +266,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 		output, err = llmsTxtExporter.ToLLMSTxt(allDocs, projectConfig)
 
 	case "llms-full":
-		fmt.Println(" Exporting to llms-full.txt format...")
+		fmt.Fprintln(os.Stderr, " Exporting to llms-full.txt format...")
 		llmsTxtExporter := export.NewLLMSTxtExporter()
 		projectConfig := export.ProjectConfig{
 			Name:        config.ProjectName,
@@ -274,12 +275,12 @@ func runExport(cmd *cobra.Command, args []string) error {
 		output, err = llmsTxtExporter.ToLLMSFullTxt(allDocs, projectConfig)
 
 	case "jsonl":
-		fmt.Printf(" Exporting to JSONL format (strategy: %s, chunk-size: %d, overlap: %d)...\n", strategy, chunkSize, chunkOverlap)
+		fmt.Fprintf(os.Stderr, " Exporting to JSONL format (strategy: %s, chunk-size: %d, overlap: %d)...\n", strategy, chunkSize, chunkOverlap)
 		jsonlExporter := export.NewJSONLExporter()
 		output, err = jsonlExporter.ToJSONL(allDocs, chunkSize, chunkOverlap)
 
 	case "markdown":
-		fmt.Printf(" Exporting to enriched markdown (strategy: %s, chunk-size: %d)...\n", strategy, chunkSize)
+		fmt.Fprintf(os.Stderr, " Exporting to enriched markdown (strategy: %s, chunk-size: %d)...\n", strategy, chunkSize)
 		markdownExporter, mdErr := export.NewMarkdownExporter()
 		if mdErr != nil {
 			err = mdErr
@@ -289,7 +290,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 
 	case "llm":
 		// Legacy format - keep for backward compatibility
-		fmt.Println(" Exporting for LLM consumption (legacy format)...")
+		fmt.Fprintln(os.Stderr, " Exporting for LLM consumption (legacy format)...")
 		llmData, llmErr := exporter.ToLLMFormat(allDocs, chunkSize, chunkOverlap)
 		if llmErr != nil {
 			err = llmErr
@@ -317,10 +318,13 @@ func runExport(cmd *cobra.Command, args []string) error {
 		if err := os.WriteFile(outputFile, []byte(output), 0644); err != nil {
 			return fmt.Errorf("failed to write output file: %w", err)
 		}
-		fmt.Printf(" Exported to %s\n", outputFile)
+		fmt.Fprintf(os.Stderr, " Exported to %s\n", outputFile)
 	} else {
-		// Write to stdout
-		fmt.Println(output)
+		// Write to stdout, ending with exactly one newline
+		if !strings.HasSuffix(output, "\n") {
+			output += "\n"
+		}
+		fmt.Print(output)
 	}
 
 	return nil
