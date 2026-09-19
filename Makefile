@@ -1,5 +1,5 @@
 # Jot Makefile for building and releasing
-VERSION := $(shell cat VERSION)
+VERSION := $(shell cat docs/VERSION)
 BINARY_NAME := jot
 BUILD_DIR := build
 DIST_DIR := dist-release

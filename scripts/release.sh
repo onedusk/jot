@@ -5,7 +5,7 @@
 
 set -e
 
-VERSION=$(cat VERSION)
+VERSION=$(cat docs/VERSION)
 BUILD_DIR="build"
 DIST_DIR="dist-release"
 

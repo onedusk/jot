@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated 28 import paths across all consumer files
 - **Formatting**: Applied `gofmt` to all Go sources (no behavior change)
 
+### Fixed
+
+- **Build version stamping**: `make build` and `scripts/release.sh` read `VERSION` from the repository root, where it does not exist, so binaries were built with an empty version string. Both now read `docs/VERSION`
+
 ## [0.2.0] - 2026-02-27
 
 ### Added
