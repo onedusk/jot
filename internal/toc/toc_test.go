@@ -96,6 +96,45 @@ func TestBuilder_Build(t *testing.T) {
 	}
 }
 
+// TestBuilder_DocumentAndDirectoryWithSameTitle verifies that a document and a
+// sibling directory that humanize to the same title stay separate nodes.
+func TestBuilder_DocumentAndDirectoryWithSameTitle(t *testing.T) {
+	docs := []scanner.Document{
+		{RelativePath: "guides.md", Title: "Guides"},
+		{RelativePath: "guides/intro.md", Title: "Intro"},
+		{RelativePath: "my-dir/a.md", Title: "A"},
+		{RelativePath: "my_dir/b.md", Title: "B"},
+	}
+
+	root := NewBuilder().Build(docs).Root
+
+	if len(root.Children) != 4 {
+		var titles []string
+		for _, child := range root.Children {
+			titles = append(titles, child.Title)
+		}
+		t.Fatalf("root has %d children %v, want 4 (guides.md, guides/, my-dir/, my_dir/)", len(root.Children), titles)
+	}
+
+	var guidesDoc, guidesDir *TOCNode
+	for _, child := range root.Children {
+		if child.Title != "Guides" {
+			continue
+		}
+		if child.IsLeaf() {
+			guidesDoc = child
+		} else {
+			guidesDir = child
+		}
+	}
+	if guidesDoc == nil || len(guidesDoc.Children) != 0 {
+		t.Errorf("guides.md should be a leaf with no children, got %+v", guidesDoc)
+	}
+	if guidesDir == nil || len(guidesDir.Children) != 1 || guidesDir.Children[0].Path != "guides/intro.md" {
+		t.Errorf("guides/ should contain guides/intro.md, got %+v", guidesDir)
+	}
+}
+
 // TestTOCNode_AddChild tests adding a child to a TOCNode.
 func TestTOCNode_AddChild(t *testing.T) {
 	parent := &TOCNode{

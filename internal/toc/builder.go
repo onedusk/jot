@@ -80,14 +80,18 @@ func (b *Builder) addDocumentToTree(root *TOCNode, doc scanner.Document) {
 			// This is a directory
 			pathParts = append(pathParts, part)
 
-			// Look for existing child
-			child := currentNode.FindChildByTitle(humanizeTitle(part))
+			// Look for an existing directory node for this path segment. Matching by
+			// title would also match a sibling document with the same title (for
+			// example guides.md next to guides/), or a directory whose name only
+			// differs in separators (my-dir/ and my_dir/).
+			child := currentNode.findDirectory(part)
 			if child == nil {
 				// Create new directory node
 				child = &TOCNode{
 					ID:       generateNodeID(pathParts),
 					Title:    humanizeTitle(part),
 					Children: make([]*TOCNode, 0),
+					dirName:  part,
 				}
 				currentNode.AddChild(child)
 			}

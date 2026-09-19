@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **No `index.html` for README-rooted sites**: When the root document was `README.md`, no index page was generated and the page was only written as `README.html`, so static hosts (GitHub Pages, S3, Netlify) returned 404 at `/` and the header logo link was broken. The root README is now also written as `index.html`
 - **Piped exports**: `jot export` wrote progress messages to stdout along with the exported data, so `jot export --format json | jq .` failed. Progress now goes to stderr, and stdout output ends with exactly one newline (previously JSONL gained a trailing blank line)
 - **Duplicated error output**: Errors were printed twice (by Cobra and by `main`), and runtime failures such as "no markdown files found" were followed by the full usage text. Errors now print once, without usage
+- **Pages missing from navigation**: A document and a directory with the same title (for example `guides.md` next to `guides/`), or directories whose names differ only in separators (`my-dir/` and `my_dir/`), were merged into one table of contents node. Documents under the merged directory disappeared from the sidebar. Directories are now matched by name, and only against other directories
 
 ## [0.2.0] - 2026-02-27
 

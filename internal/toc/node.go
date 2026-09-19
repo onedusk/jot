@@ -16,6 +16,8 @@ type TOCNode struct {
 
 	// Enhanced metadata for searchability and richer display.
 	Metadata NodeMetadata
+
+	dirName string // The source directory name for directory nodes; empty for documents.
 }
 
 // NodeMetadata contains supplementary information about a TOC node, primarily
@@ -41,6 +43,17 @@ func (n *TOCNode) AddChild(child *TOCNode) {
 func (n *TOCNode) FindChildByTitle(title string) *TOCNode {
 	for _, child := range n.Children {
 		if child.Title == title {
+			return child
+		}
+	}
+	return nil
+}
+
+// findDirectory returns the immediate child directory node created for the
+// given directory name, or nil if there is none.
+func (n *TOCNode) findDirectory(name string) *TOCNode {
+	for _, child := range n.Children {
+		if !child.IsLeaf() && child.dirName == name {
 			return child
 		}
 	}
