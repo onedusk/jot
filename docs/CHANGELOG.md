@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Decoupled viper from export package**: `ToLLMFormat()` now accepts `chunkSize, overlap int` parameters instead of reading from `viper.GetInt()`, removing the CLI framework dependency from the library layer
 - Updated 28 import paths across all consumer files
 - **Formatting**: Applied `gofmt` to all Go sources (no behavior change)
+- **Dependencies**: `go mod tidy` now lists `tiktoken-go` as a direct dependency
 
 ### Fixed
 
