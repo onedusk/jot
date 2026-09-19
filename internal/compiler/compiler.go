@@ -3,7 +3,9 @@ package compiler
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -11,6 +13,7 @@ import (
 	"github.com/onedusk/jot/internal/search"
 	"github.com/onedusk/jot/internal/toc"
 	"github.com/onedusk/jot/pkg/scanner"
+	"github.com/onedusk/jot/web"
 )
 
 // Compiler orchestrates the documentation build process. It handles file processing,
@@ -177,46 +180,28 @@ func (c *Compiler) generateSearchIndex(documents []scanner.Document) error {
 	return indexer.SaveIndex(index)
 }
 
-// copyAssets copies static assets (CSS, JS) required for the documentation to the output directory.
+// copyAssets writes the static assets (CSS, JS) embedded in the binary to the output directory.
 func (c *Compiler) copyAssets() error {
 	assetsDir := filepath.Join(c.outputPath, "assets")
 	if err := os.MkdirAll(assetsDir, 0755); err != nil {
 		return err
 	}
 
-	// Copy syntax highlighting CSS if it exists
-	syntaxCSSPath := filepath.Join("web", "templates", "assets", "syntax-highlighting.css")
-	if syntaxContent, err := os.ReadFile(syntaxCSSPath); err == nil {
-		syntaxOutputPath := filepath.Join(assetsDir, "syntax-highlighting.css")
-		if err := os.WriteFile(syntaxOutputPath, syntaxContent, 0644); err != nil {
-			return fmt.Errorf("failed to copy syntax highlighting CSS: %w", err)
-		}
+	entries, err := fs.ReadDir(web.Assets, web.AssetsDir)
+	if err != nil {
+		return fmt.Errorf("failed to read embedded assets: %w", err)
 	}
 
-	// Copy search.js if it exists
-	searchJSPath := filepath.Join("web", "templates", "assets", "search.js")
-	if searchContent, err := os.ReadFile(searchJSPath); err == nil {
-		searchOutputPath := filepath.Join(assetsDir, "search.js")
-		if err := os.WriteFile(searchOutputPath, searchContent, 0644); err != nil {
-			return fmt.Errorf("failed to copy search JS: %w", err)
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
 		}
-	}
-
-	// Copy style.css if it exists
-	styleCSSPath := filepath.Join("web", "templates", "assets", "style.css")
-	if styleContent, err := os.ReadFile(styleCSSPath); err == nil {
-		styleOutputPath := filepath.Join(assetsDir, "style.css")
-		if err := os.WriteFile(styleOutputPath, styleContent, 0644); err != nil {
-			return fmt.Errorf("failed to copy style.css: %w", err)
+		content, err := fs.ReadFile(web.Assets, path.Join(web.AssetsDir, entry.Name()))
+		if err != nil {
+			return fmt.Errorf("failed to read embedded asset %s: %w", entry.Name(), err)
 		}
-	}
-
-	// Copy highlight.js if it exists
-	highlightJSPath := filepath.Join("web", "templates", "assets", "highlight.js")
-	if highlightContent, err := os.ReadFile(highlightJSPath); err == nil {
-		highlightOutputPath := filepath.Join(assetsDir, "highlight.js")
-		if err := os.WriteFile(highlightOutputPath, highlightContent, 0644); err != nil {
-			return fmt.Errorf("failed to copy highlight.js: %w", err)
+		if err := os.WriteFile(filepath.Join(assetsDir, entry.Name()), content, 0644); err != nil {
+			return fmt.Errorf("failed to write asset %s: %w", entry.Name(), err)
 		}
 	}
 

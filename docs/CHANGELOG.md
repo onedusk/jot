@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Build version stamping**: `make build` and `scripts/release.sh` read `VERSION` from the repository root, where it does not exist, so binaries were built with an empty version string. Both now read `docs/VERSION`
+- **Unstyled sites from installed binaries**: CSS and JavaScript assets were read from `web/templates/assets/` relative to the current directory, so `jot build` run anywhere other than the jot source tree produced pages with no styles, search, or syntax highlighting, and silently skipped the missing files. Assets are now embedded in the binary with `go:embed`, and a failure to write one fails the build
+- **Build summary**: `jot build` no longer reports creating `assets/styles.css`, a file that was never written
 
 ## [0.2.0] - 2026-02-27
 

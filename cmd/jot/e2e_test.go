@@ -101,8 +101,6 @@ func TestE2EBuildOutOfTree(t *testing.T) {
 }
 
 func TestE2EBuildWritesAssets(t *testing.T) {
-	t.Skip("A1: web assets are read from the working directory instead of being embedded")
-
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{
 		"jot.yml":       "input:\n  paths: [\"docs\"]\noutput:\n  path: dist\n",

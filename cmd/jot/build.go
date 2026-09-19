@@ -111,7 +111,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to compile documents: %w", err)
 	}
 	fmt.Printf("  Generated %d HTML files\n", len(allDocs))
-	fmt.Printf("  Created assets/styles.css\n\n")
+	fmt.Printf("  Wrote static assets to %s\n\n", filepath.Join(config.OutputPath, "assets"))
 
 	// Generate llms.txt and llms-full.txt
 	if config.GenerateLLMSTxt {
