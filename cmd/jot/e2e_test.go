@@ -324,25 +324,52 @@ func TestE2EExportToStdoutIsPureJSON(t *testing.T) {
 	}
 }
 
-func TestE2ERuntimeErrorNotPrintedByCobra(t *testing.T) {
-	// main prints the returned error; cobra must not print it again or dump usage.
-	enterFixture(t, t.TempDir())
-
-	var cobraOut strings.Builder
-	rootCmd.SetOut(&cobraOut)
-	rootCmd.SetErr(&cobraOut)
-	rootCmd.SetArgs([]string{"build"})
-	t.Cleanup(func() {
-		rootCmd.SetOut(nil)
-		rootCmd.SetErr(nil)
-		rootCmd.SetArgs(nil)
-	})
-
-	if err := rootCmd.Execute(); err == nil {
-		t.Fatal("expected an error building an empty directory")
+func TestE2EErrorOutput(t *testing.T) {
+	tests := []struct {
+		name      string
+		args      []string
+		want      []string
+		wantUsage bool
+	}{
+		{"runtime error", []string{"build"}, []string{"Error: no markdown files found"}, false},
+		{"unknown flag", []string{"build", "--bogus"}, []string{"Error: unknown flag: --bogus"}, true},
+		{"unknown command", []string{"biuld"}, []string{`Error: unknown command "biuld"`, "Run 'jot --help' for usage."}, false},
 	}
-	if got := cobraOut.String(); got != "" {
-		t.Errorf("cobra printed output for a runtime error:\n%s", got)
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			enterFixture(t, t.TempDir())
+
+			var cobraOut strings.Builder
+			rootCmd.SetOut(&cobraOut)
+			rootCmd.SetErr(&cobraOut)
+			rootCmd.SetArgs(tt.args)
+			t.Cleanup(func() {
+				rootCmd.SetOut(nil)
+				rootCmd.SetErr(nil)
+				rootCmd.SetArgs(nil)
+				// PersistentPreRun sets this on the command that ran; reset for the next case
+				for _, cmd := range rootCmd.Commands() {
+					cmd.SilenceUsage = false
+				}
+			})
+
+			if err := rootCmd.Execute(); err == nil {
+				t.Fatal("expected an error")
+			}
+			got := cobraOut.String()
+			for _, want := range tt.want {
+				if !strings.Contains(got, want) {
+					t.Errorf("output missing %q:\n%s", want, got)
+				}
+			}
+			if n := strings.Count(got, "Error:"); n != 1 {
+				t.Errorf("error printed %d times, want once:\n%s", n, got)
+			}
+			if hasUsage := strings.Contains(got, "Usage:"); hasUsage != tt.wantUsage {
+				t.Errorf("usage shown = %v, want %v:\n%s", hasUsage, tt.wantUsage, got)
+			}
+		})
 	}
 }
 

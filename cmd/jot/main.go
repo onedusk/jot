@@ -2,7 +2,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 )
 
@@ -11,8 +10,8 @@ var version = "0.1.0"
 
 // main is the main function for the Jot CLI.
 func main() {
+	// Cobra has already printed the error
 	if err := Execute(); err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
 		os.Exit(1)
 	}
 }

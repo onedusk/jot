@@ -31,9 +31,12 @@ It provides features like:
 - LLM-friendly exports
 - Live reload during development`,
 	Version: version,
-	// main prints returned errors once; don't repeat them or dump usage on runtime failures.
-	SilenceErrors: true,
-	SilenceUsage:  true,
+	// Cobra prints errors (main does not), with usage for flag and argument
+	// errors. Once those have parsed, failures are runtime errors, where usage
+	// text would only bury the message.
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		cmd.SilenceUsage = true
+	},
 }
 
 // init sets up the application's commands and flags.
