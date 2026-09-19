@@ -38,17 +38,6 @@ func (n *TOCNode) AddChild(child *TOCNode) {
 	n.Children = append(n.Children, child)
 }
 
-// FindChildByTitle searches the immediate children of the node for one with a
-// matching title and returns it. If no match is found, it returns nil.
-func (n *TOCNode) FindChildByTitle(title string) *TOCNode {
-	for _, child := range n.Children {
-		if child.Title == title {
-			return child
-		}
-	}
-	return nil
-}
-
 // findDirectory returns the immediate child directory node created for the
 // given directory name, or nil if there is none.
 func (n *TOCNode) findDirectory(name string) *TOCNode {

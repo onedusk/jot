@@ -133,6 +133,20 @@ func TestBuilder_DocumentAndDirectoryWithSameTitle(t *testing.T) {
 	if guidesDir == nil || len(guidesDir.Children) != 1 || guidesDir.Children[0].Path != "guides/intro.md" {
 		t.Errorf("guides/ should contain guides/intro.md, got %+v", guidesDir)
 	}
+
+	// Separate nodes must also get distinct IDs
+	seen := map[string]string{}
+	var walk func(n *TOCNode)
+	walk = func(n *TOCNode) {
+		if other, ok := seen[n.ID]; ok {
+			t.Errorf("ID %q is used by both %q and %q", n.ID, other, n.Title)
+		}
+		seen[n.ID] = n.Title
+		for _, child := range n.Children {
+			walk(child)
+		}
+	}
+	walk(root)
 }
 
 // TestToXML_ModifiedIsUTC verifies that modification times are converted to
@@ -183,54 +197,6 @@ func TestTOCNode_AddChild(t *testing.T) {
 
 	if parent.Children[0] != child {
 		t.Error("AddChild() failed, child not added correctly")
-	}
-}
-
-// TestTOCNode_FindChildByTitle tests finding a child node by its title.
-func TestTOCNode_FindChildByTitle(t *testing.T) {
-	parent := &TOCNode{
-		ID:    "parent",
-		Title: "Parent",
-		Children: []*TOCNode{
-			{ID: "child1", Title: "Child One"},
-			{ID: "child2", Title: "Child Two"},
-		},
-	}
-
-	tests := []struct {
-		name      string
-		title     string
-		wantFound bool
-		wantID    string
-	}{
-		{
-			name:      "existing child",
-			title:     "Child One",
-			wantFound: true,
-			wantID:    "child1",
-		},
-		{
-			name:      "non-existing child",
-			title:     "Child Three",
-			wantFound: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			child := parent.FindChildByTitle(tt.title)
-			if tt.wantFound {
-				if child == nil {
-					t.Error("FindChildByTitle() returned nil, expected child")
-				} else if child.ID != tt.wantID {
-					t.Errorf("FindChildByTitle() returned wrong child, got ID %s, want %s", child.ID, tt.wantID)
-				}
-			} else {
-				if child != nil {
-					t.Error("FindChildByTitle() returned child, expected nil")
-				}
-			}
-		})
 	}
 }
 

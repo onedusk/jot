@@ -17,6 +17,8 @@ import (
 // Builder is responsible for constructing a TableOfContents from a slice of documents.
 type Builder struct {
 	// Configuration options for the builder can be added here in the future.
+
+	usedIDs map[string]bool // Node IDs assigned during the current Build.
 }
 
 // NewBuilder creates and returns a new TOC Builder.
@@ -32,6 +34,7 @@ func (b *Builder) Build(documents []scanner.Document) *TableOfContents {
 	b.sortDocuments(documents)
 
 	// Create root node
+	b.usedIDs = map[string]bool{"root": true}
 	root := &TOCNode{
 		ID:       "root",
 		Title:    "Table of Contents",
@@ -70,7 +73,7 @@ func (b *Builder) addDocumentToTree(root *TOCNode, doc scanner.Document) {
 			// This is the document file
 			pathParts = append(pathParts, strings.TrimSuffix(part, ".md"))
 			child := &TOCNode{
-				ID:       generateNodeID(pathParts),
+				ID:       b.uniqueID(generateNodeID(pathParts)),
 				Title:    doc.Title,
 				Path:     doc.RelativePath,
 				Metadata: b.extractMetadata(doc),
@@ -88,7 +91,7 @@ func (b *Builder) addDocumentToTree(root *TOCNode, doc scanner.Document) {
 			if child == nil {
 				// Create new directory node
 				child = &TOCNode{
-					ID:       generateNodeID(pathParts),
+					ID:       b.uniqueID(generateNodeID(pathParts)),
 					Title:    humanizeTitle(part),
 					Children: make([]*TOCNode, 0),
 					dirName:  part,
@@ -107,7 +110,22 @@ func (b *Builder) sortDocuments(docs []scanner.Document) {
 	})
 }
 
-// generateNodeID creates a unique and URL-friendly ID for a TOC node from its path parts.
+// uniqueID returns id, or id with a numeric suffix if it is already taken.
+// Distinct paths can share an ID: guides.md and guides/, or my-dir/ and my_dir/.
+func (b *Builder) uniqueID(id string) string {
+	if id == "" {
+		id = "node"
+	}
+	candidate := id
+	for n := 2; b.usedIDs[candidate]; n++ {
+		candidate = fmt.Sprintf("%s-%d", id, n)
+	}
+	b.usedIDs[candidate] = true
+	return candidate
+}
+
+// generateNodeID creates a URL-friendly ID for a TOC node from its path parts.
+// Different paths can produce the same ID; Builder.uniqueID resolves collisions.
 func generateNodeID(parts []string) string {
 	cleanParts := make([]string, len(parts))
 	for i, part := range parts {
