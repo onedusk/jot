@@ -211,6 +211,28 @@ func TestE2EExportToStdoutIsPureJSON(t *testing.T) {
 	}
 }
 
+func TestE2ERuntimeErrorNotPrintedByCobra(t *testing.T) {
+	// main prints the returned error; cobra must not print it again or dump usage.
+	enterFixture(t, t.TempDir())
+
+	var cobraOut strings.Builder
+	rootCmd.SetOut(&cobraOut)
+	rootCmd.SetErr(&cobraOut)
+	rootCmd.SetArgs([]string{"build"})
+	t.Cleanup(func() {
+		rootCmd.SetOut(nil)
+		rootCmd.SetErr(nil)
+		rootCmd.SetArgs(nil)
+	})
+
+	if err := rootCmd.Execute(); err == nil {
+		t.Fatal("expected an error building an empty directory")
+	}
+	if got := cobraOut.String(); got != "" {
+		t.Errorf("cobra printed output for a runtime error:\n%s", got)
+	}
+}
+
 func TestE2EInitThenBuild(t *testing.T) {
 	// The project `jot init` creates must build without errors.
 	dir := t.TempDir()
