@@ -194,7 +194,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 	}
 
 	// Load configuration
-	config := loadBuildConfig(cmd)
+	config := loadConfig()
 
 	fmt.Println(" Scanning for markdown files...")
 

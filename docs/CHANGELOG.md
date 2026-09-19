@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated 28 import paths across all consumer files
 - **Formatting**: Applied `gofmt` to all Go sources (no behavior change)
 - **Dependencies**: `go mod tidy` now lists `tiktoken-go` as a direct dependency
+- **Config loading**: `export`, `toc`, and `debug` load configuration without `build`'s flag overrides. Previously `export --output docs.jsonl` was also read as the site output directory
 
 ### Fixed
 

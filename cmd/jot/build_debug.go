@@ -22,7 +22,7 @@ func init() {
 
 // runDebug executes the debug command logic.
 func runDebug(cmd *cobra.Command, args []string) error {
-	config := loadBuildConfig(cmd)
+	config := loadConfig()
 
 	fmt.Println("Debug: Scanning documents...")
 

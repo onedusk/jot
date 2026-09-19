@@ -36,7 +36,7 @@ func runTOC(cmd *cobra.Command, args []string) error {
 	recursive, _ := cmd.Flags().GetBool("recursive")
 
 	// Load configuration
-	config := loadBuildConfig(cmd)
+	config := loadConfig()
 
 	if dryRun {
 		fmt.Println(" [DRY RUN MODE] - No files will be written")

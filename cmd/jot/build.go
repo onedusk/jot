@@ -183,9 +183,28 @@ type BuildConfig struct {
 	ProjectDescription string
 }
 
-// loadBuildConfig loads the build configuration from Viper and overrides it with
-// any values provided via command-line flags. It also sets default values.
+// loadBuildConfig loads the configuration from Viper and overrides it with the
+// build command's flags. Only the build command should call it: other commands
+// give --output a different meaning and should use loadConfig instead.
 func loadBuildConfig(cmd *cobra.Command) BuildConfig {
+	config := loadConfig()
+
+	// Override with command flags
+	if output, _ := cmd.Flags().GetString("output"); output != "" {
+		config.OutputPath = output
+	}
+	if clean, _ := cmd.Flags().GetBool("clean"); clean {
+		config.Clean = true
+	}
+	if skipLLMSTxt, _ := cmd.Flags().GetBool("skip-llms-txt"); skipLLMSTxt {
+		config.GenerateLLMSTxt = false
+	}
+
+	return config
+}
+
+// loadConfig loads the configuration from Viper and applies default values.
+func loadConfig() BuildConfig {
 	config := BuildConfig{
 		InputPaths:         viper.GetStringSlice("input.paths"),
 		OutputPath:         viper.GetString("output.path"),
@@ -199,17 +218,6 @@ func loadBuildConfig(cmd *cobra.Command) BuildConfig {
 	// Read llm_export from config if explicitly set
 	if viper.IsSet("features.llm_export") {
 		config.GenerateLLMSTxt = viper.GetBool("features.llm_export")
-	}
-
-	// Override with command flags
-	if output, _ := cmd.Flags().GetString("output"); output != "" {
-		config.OutputPath = output
-	}
-	if clean, _ := cmd.Flags().GetBool("clean"); clean {
-		config.Clean = true
-	}
-	if skipLLMSTxt, _ := cmd.Flags().GetBool("skip-llms-txt"); skipLLMSTxt {
-		config.GenerateLLMSTxt = false
 	}
 
 	// Defaults
