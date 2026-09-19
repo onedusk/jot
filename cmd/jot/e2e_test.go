@@ -150,6 +150,35 @@ func TestE2ERebuildDoesNotIngestOutput(t *testing.T) {
 	}
 }
 
+func TestE2EInPlaceBuildKeepsSources(t *testing.T) {
+	// Output directory equal to the input root: sources must still be scanned
+	// and must not be overwritten by the markdown copies.
+	source := "---\ntitle: Guide\n---\n\n# Guide\n\nSteps.\n"
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":  "input:\n  paths: [\".\"]\noutput:\n  path: .\n",
+		"index.md": "# Home\n",
+		"guide.md": source,
+	})
+	enterFixture(t, dir)
+
+	for i := 1; i <= 2; i++ {
+		if err := runBuild(newTestBuildCmd(), nil); err != nil {
+			t.Fatalf("build %d failed: %v", i, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "guide.html")); err != nil {
+		t.Errorf("expected guide.html: %v", err)
+	}
+	got, err := os.ReadFile(filepath.Join(dir, "guide.md"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != source {
+		t.Errorf("source guide.md was modified:\n%s", got)
+	}
+}
+
 func TestE2EDuplicateOutputPathsFail(t *testing.T) {
 	// This is the input layout `jot init` generates.
 	dir := t.TempDir()

@@ -99,13 +99,34 @@ func (c *Compiler) compileDocument(doc scanner.Document, toc *toc.TableOfContent
 		return err
 	}
 
-	// Copy source markdown file for "Open Markdown" feature
+	// Copy source markdown file for "Open Markdown" feature. When building into
+	// the source directory the copy would overwrite the source itself (with its
+	// frontmatter stripped), so leave the source in place instead.
 	mdOutputPath := filepath.Join(c.outputPath, doc.RelativePath)
+	if isSameFile(doc.Path, mdOutputPath) {
+		return nil
+	}
 	mdOutputDir := filepath.Dir(mdOutputPath)
 	if err := os.MkdirAll(mdOutputDir, 0755); err != nil {
 		return err
 	}
 	return os.WriteFile(mdOutputPath, doc.Content, 0644)
+}
+
+// isSameFile reports whether a and b both exist and are the same file.
+func isSameFile(a, b string) bool {
+	if a == "" {
+		return false
+	}
+	aInfo, err := os.Stat(a)
+	if err != nil {
+		return false
+	}
+	bInfo, err := os.Stat(b)
+	if err != nil {
+		return false
+	}
+	return os.SameFile(aInfo, bInfo)
 }
 
 // getOutputPath converts a markdown file's relative path to its corresponding HTML output path.

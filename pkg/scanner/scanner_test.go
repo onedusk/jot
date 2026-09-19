@@ -4,6 +4,7 @@ package scanner
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -171,6 +172,60 @@ func TestScanner_Exclude(t *testing.T) {
 			paths = append(paths, doc.RelativePath)
 		}
 		t.Errorf("Scan() returned %v, want only README.md and guide.md", paths)
+	}
+}
+
+// TestScanner_ExcludeMatchesByIdentity verifies that an excluded directory is
+// matched through a symlink, and that excluding the root does not empty the scan.
+func TestScanner_ExcludeMatchesByIdentity(t *testing.T) {
+	tmpDir := t.TempDir()
+	for path, content := range map[string]string{
+		"README.md":          "# Home",
+		"build/site/copy.md": "# Copied home",
+	} {
+		fullPath := filepath.Join(tmpDir, path)
+		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	// public -> build/site, a common deploy layout
+	if err := os.Symlink(filepath.Join(tmpDir, "build", "site"), filepath.Join(tmpDir, "public")); err != nil {
+		t.Skipf("symlinks not supported: %v", err)
+	}
+
+	tests := []struct {
+		name    string
+		exclude string
+		want    []string
+	}{
+		{"symlinked output directory", filepath.Join(tmpDir, "public"), []string{"README.md"}},
+		{"output directory is the scan root", tmpDir, []string{"README.md", "build/site/copy.md"}},
+		{"output directory does not exist", filepath.Join(tmpDir, "missing"), []string{"README.md", "build/site/copy.md"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			scanner, err := NewScanner(tmpDir, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := scanner.Exclude(tt.exclude); err != nil {
+				t.Fatal(err)
+			}
+			docs, err := scanner.Scan()
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, doc := range docs {
+				got = append(got, doc.RelativePath)
+			}
+			if strings.Join(got, ",") != strings.Join(tt.want, ",") {
+				t.Errorf("Scan() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

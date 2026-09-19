@@ -17,7 +17,7 @@ import (
 type Scanner struct {
 	rootPath string
 	filter   *IgnoreFilter
-	excluded []string
+	excluded []os.FileInfo
 }
 
 // NewScanner creates a new Scanner for the given root path and ignore patterns.
@@ -47,15 +47,40 @@ func NewScanner(rootPath string, ignorePatterns []string) (*Scanner, error) {
 // Exclude prevents the scanner from descending into the given directories,
 // regardless of ignore patterns. Use it to keep a build's output directory
 // from being read back in as source.
+//
+// Directories are matched by file identity, so symlinks and other spellings of
+// the same directory are excluded too. Directories that do not exist are
+// ignored, and the scan root itself is never excluded, so building into an
+// input directory still scans it.
 func (s *Scanner) Exclude(dirs ...string) error {
 	for _, dir := range dirs {
-		absDir, err := filepath.Abs(dir)
+		info, err := os.Stat(dir)
+		if errors.Is(err, fs.ErrNotExist) {
+			continue
+		}
 		if err != nil {
 			return err
 		}
-		s.excluded = append(s.excluded, absDir)
+		s.excluded = append(s.excluded, info)
 	}
 	return nil
+}
+
+// isExcluded reports whether a directory entry is one of the excluded directories.
+func (s *Scanner) isExcluded(d fs.DirEntry) bool {
+	if len(s.excluded) == 0 {
+		return false
+	}
+	info, err := d.Info()
+	if err != nil {
+		return false
+	}
+	for _, excluded := range s.excluded {
+		if os.SameFile(info, excluded) {
+			return true
+		}
+	}
+	return false
 }
 
 // Scan walks the configured root path, discovers all markdown files that are not
@@ -70,10 +95,8 @@ func (s *Scanner) Scan() ([]Document, error) {
 
 		// Skip directories, and do not descend into excluded ones
 		if d.IsDir() {
-			for _, excluded := range s.excluded {
-				if path == excluded {
-					return filepath.SkipDir
-				}
+			if path != s.rootPath && s.isExcluded(d) {
+				return filepath.SkipDir
 			}
 			return nil
 		}
