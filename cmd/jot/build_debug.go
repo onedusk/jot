@@ -33,6 +33,9 @@ func runDebug(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return err
 		}
+		if err := s.Exclude(config.OutputPath); err != nil {
+			return err
+		}
 
 		docs, err := s.Scan()
 		if err != nil {

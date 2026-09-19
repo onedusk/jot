@@ -67,6 +67,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("failed to create scanner: %w", err)
 		}
+		if err := s.Exclude(config.OutputPath); err != nil {
+			return fmt.Errorf("failed to exclude output directory: %w", err)
+		}
 
 		// Scan documents
 		docs, err := s.Scan()

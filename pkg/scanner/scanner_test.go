@@ -134,6 +134,46 @@ func TestScanner_Scan(t *testing.T) {
 	}
 }
 
+// TestScanner_Exclude verifies that excluded directories are not scanned.
+func TestScanner_Exclude(t *testing.T) {
+	tmpDir := t.TempDir()
+	testFiles := map[string]string{
+		"README.md":            "# Home",
+		"guide.md":             "# Guide",
+		"dist/README.md":       "# Copied home",
+		"dist/nested/guide.md": "# Copied guide",
+	}
+	for path, content := range testFiles {
+		fullPath := filepath.Join(tmpDir, path)
+		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	scanner, err := NewScanner(tmpDir, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := scanner.Exclude(filepath.Join(tmpDir, "dist")); err != nil {
+		t.Fatal(err)
+	}
+
+	docs, err := scanner.Scan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(docs) != 2 {
+		var paths []string
+		for _, doc := range docs {
+			paths = append(paths, doc.RelativePath)
+		}
+		t.Errorf("Scan() returned %v, want only README.md and guide.md", paths)
+	}
+}
+
 // TestDocument_ExtractTitle tests the title extraction logic.
 func TestDocument_ExtractTitle(t *testing.T) {
 	tests := []struct {

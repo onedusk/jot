@@ -125,8 +125,6 @@ func TestE2EBuildWritesAssets(t *testing.T) {
 }
 
 func TestE2ERebuildDoesNotIngestOutput(t *testing.T) {
-	t.Skip("A2: the scanner does not exclude the output directory")
-
 	// No jot.yml: defaults are input "." and output "./dist", without clean.
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{

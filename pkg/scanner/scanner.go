@@ -17,6 +17,7 @@ import (
 type Scanner struct {
 	rootPath string
 	filter   *IgnoreFilter
+	excluded []string
 }
 
 // NewScanner creates a new Scanner for the given root path and ignore patterns.
@@ -43,6 +44,20 @@ func NewScanner(rootPath string, ignorePatterns []string) (*Scanner, error) {
 	}, nil
 }
 
+// Exclude prevents the scanner from descending into the given directories,
+// regardless of ignore patterns. Use it to keep a build's output directory
+// from being read back in as source.
+func (s *Scanner) Exclude(dirs ...string) error {
+	for _, dir := range dirs {
+		absDir, err := filepath.Abs(dir)
+		if err != nil {
+			return err
+		}
+		s.excluded = append(s.excluded, absDir)
+	}
+	return nil
+}
+
 // Scan walks the configured root path, discovers all markdown files that are not
 // ignored, and returns them as a slice of parsed Document structs.
 func (s *Scanner) Scan() ([]Document, error) {
@@ -53,8 +68,13 @@ func (s *Scanner) Scan() ([]Document, error) {
 			return err
 		}
 
-		// Skip directories
+		// Skip directories, and do not descend into excluded ones
 		if d.IsDir() {
+			for _, excluded := range s.excluded {
+				if path == excluded {
+					return filepath.SkipDir
+				}
+			}
 			return nil
 		}
 

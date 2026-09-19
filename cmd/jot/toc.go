@@ -45,7 +45,7 @@ func runTOC(cmd *cobra.Command, args []string) error {
 	fmt.Println(" Scanning for directories with markdown files...")
 
 	// Scan directories and group documents
-	dirMap, err := scanDirectoriesWithMarkdown(config.InputPaths, config.IgnorePatterns)
+	dirMap, err := scanDirectoriesWithMarkdown(config.InputPaths, config.IgnorePatterns, config.OutputPath)
 	if err != nil {
 		return fmt.Errorf("failed to scan directories: %w", err)
 	}
@@ -86,8 +86,9 @@ func runTOC(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// scanDirectoriesWithMarkdown walks input paths and groups documents by their parent directory.
-func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string) (map[string][]scanner.Document, error) {
+// scanDirectoriesWithMarkdown walks input paths, skipping the site output directory,
+// and groups documents by their parent directory.
+func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string, outputDir string) (map[string][]scanner.Document, error) {
 	dirMap := make(map[string][]scanner.Document)
 
 	for _, inputPath := range paths {
@@ -101,6 +102,9 @@ func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string) (map[s
 		s, err := scanner.NewScanner(inputPath, ignorePatterns)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create scanner for %s: %w", inputPath, err)
+		}
+		if err := s.Exclude(outputDir); err != nil {
+			return nil, fmt.Errorf("failed to exclude output directory: %w", err)
 		}
 
 		// Scan documents
