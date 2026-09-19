@@ -179,6 +179,25 @@ func TestE2EInPlaceBuildKeepsSources(t *testing.T) {
 	}
 }
 
+func TestE2ECleanRefusesToDeleteSources(t *testing.T) {
+	source := "# Guide\n"
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\"]\noutput:\n  path: docs\n  clean: true\n",
+		"docs/guide.md": source,
+	})
+	enterFixture(t, dir)
+
+	err := runBuild(newTestBuildCmd(), nil)
+	if err == nil || !strings.Contains(err.Error(), "refusing to clean") {
+		t.Fatalf("expected a refusal to clean the source directory, got %v", err)
+	}
+	got, readErr := os.ReadFile(filepath.Join(dir, "docs", "guide.md"))
+	if readErr != nil || string(got) != source {
+		t.Fatalf("source file was removed or changed: %v", readErr)
+	}
+}
+
 func TestE2EDuplicateOutputPathsFail(t *testing.T) {
 	// This is the input layout and clean setting `jot init` generates.
 	dir := t.TempDir()

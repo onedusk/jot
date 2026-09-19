@@ -80,6 +80,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	// Touch the output directory only once the input is known to be valid, so a
 	// failed build leaves the previous output in place
 	if config.Clean {
+		if err := checkCleanIsSafe(config.OutputPath, config.InputPaths); err != nil {
+			return err
+		}
 		if err := os.RemoveAll(config.OutputPath); err != nil {
 			return fmt.Errorf("failed to clean output directory: %w", err)
 		}
@@ -207,6 +210,37 @@ func dedupeDocuments(docs []scanner.Document) ([]scanner.Document, error) {
 		unique = append(unique, doc)
 	}
 	return unique, nil
+}
+
+// checkCleanIsSafe returns an error if removing outputDir would also remove an
+// input path, which happens when the output directory is, or contains, a source
+// directory.
+func checkCleanIsSafe(outputDir string, inputPaths []string) error {
+	out, err := resolvePath(outputDir)
+	if err != nil {
+		// Nothing to remove
+		return nil
+	}
+	for _, inputPath := range inputPaths {
+		in, err := resolvePath(inputPath)
+		if err != nil {
+			continue
+		}
+		rel, err := filepath.Rel(out, in)
+		if err == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return fmt.Errorf("refusing to clean output directory %s because it contains input path %s; choose a separate output directory or disable clean", outputDir, inputPath)
+		}
+	}
+	return nil
+}
+
+// resolvePath returns the absolute path of an existing file with symlinks resolved.
+func resolvePath(path string) (string, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return "", err
+	}
+	return filepath.EvalSymlinks(abs)
 }
 
 // displayPath returns path relative to the working directory when possible.
