@@ -49,18 +49,20 @@ func (c *Compiler) Compile(documents []scanner.Document, tableOfContents *toc.Ta
 		}
 	}
 
-	// Static hosts serve index.html at the site root, so make sure it exists
-	switch {
-	case c.hasDocument(documents, "index.md"):
-		// Already written as index.html
-	case c.hasDocument(documents, "README.md"):
-		if err := c.copyPage("README.html", "index.html"); err != nil {
+	// Static hosts serve index.html at the site root, so make sure it exists.
+	// Names are matched case-insensitively: on case-insensitive filesystems
+	// Index.html and index.html are the same file, so a root Index.md must win
+	// over README.md rather than be overwritten by it.
+	if index, ok := c.findDocument(documents, "index.md"); ok {
+		if err := c.copyPage(index.RelativePath, "index.html"); err != nil {
 			return fmt.Errorf("failed to write index page: %w", err)
 		}
-	default:
-		if err := c.generateIndexPage(tableOfContents); err != nil {
-			return fmt.Errorf("failed to generate index page: %w", err)
+	} else if readme, ok := c.findDocument(documents, "README.md"); ok {
+		if err := c.copyPage(readme.RelativePath, "index.html"); err != nil {
+			return fmt.Errorf("failed to write index page: %w", err)
 		}
+	} else if err := c.generateIndexPage(tableOfContents); err != nil {
+		return fmt.Errorf("failed to generate index page: %w", err)
 	}
 
 	// Generate search index
@@ -138,19 +140,20 @@ func (c *Compiler) getOutputPath(relativePath string) string {
 	return filepath.Join(c.outputPath, htmlPath)
 }
 
-// hasDocument checks if the list of documents includes one at the given relative path.
-func (c *Compiler) hasDocument(documents []scanner.Document, relativePath string) bool {
+// findDocument returns the document at the given relative path, ignoring case.
+func (c *Compiler) findDocument(documents []scanner.Document, relativePath string) (scanner.Document, bool) {
 	for _, doc := range documents {
-		if doc.RelativePath == relativePath {
-			return true
+		if strings.EqualFold(doc.RelativePath, relativePath) {
+			return doc, true
 		}
 	}
-	return false
+	return scanner.Document{}, false
 }
 
-// copyPage copies an already-written page to another path within the output directory.
-func (c *Compiler) copyPage(from, to string) error {
-	content, err := os.ReadFile(filepath.Join(c.outputPath, from))
+// copyPage copies the page rendered for the document at sourcePath to another
+// path within the output directory. Copying a page onto itself is harmless.
+func (c *Compiler) copyPage(sourcePath, to string) error {
+	content, err := os.ReadFile(c.getOutputPath(sourcePath))
 	if err != nil {
 		return err
 	}

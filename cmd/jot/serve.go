@@ -51,10 +51,10 @@ func runServe(cmd *cobra.Command, args []string) error {
 	}
 
 	// Check for index file
-	indexPath := filepath.Join(serveDir, "README.html")
+	indexPath := filepath.Join(serveDir, "index.html")
 	if _, err := os.Stat(indexPath); os.IsNotExist(err) {
-		// Try index.html
-		indexPath = filepath.Join(serveDir, "index.html")
+		// Try README.html, for sites built before index.html was always written
+		indexPath = filepath.Join(serveDir, "README.html")
 		if _, err := os.Stat(indexPath); os.IsNotExist(err) {
 			return fmt.Errorf("no index file found in %s. Run 'jot build' first", serveDir)
 		}
@@ -63,20 +63,19 @@ func runServe(cmd *cobra.Command, args []string) error {
 	// Create file server with custom handler for root
 	fs := http.FileServer(http.Dir(serveDir))
 
-	// Handle root path to serve README.html or index.html
+	// Handle root path to serve index.html, as a static host would
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/" {
-			// Serve README.html as the index
-			readmePath := filepath.Join(serveDir, "README.html")
-			if _, err := os.Stat(readmePath); err == nil {
-				http.ServeFile(w, r, readmePath)
-				return
-			}
-
-			// Fallback to index.html
 			indexPath := filepath.Join(serveDir, "index.html")
 			if _, err := os.Stat(indexPath); err == nil {
 				http.ServeFile(w, r, indexPath)
+				return
+			}
+
+			// Fallback to README.html, for sites built before index.html was always written
+			readmePath := filepath.Join(serveDir, "README.html")
+			if _, err := os.Stat(readmePath); err == nil {
+				http.ServeFile(w, r, readmePath)
 				return
 			}
 		}

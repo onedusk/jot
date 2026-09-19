@@ -261,6 +261,51 @@ func captureStdout(t *testing.T, fn func() error) (string, error) {
 	return string(<-done), runErr
 }
 
+func TestE2EIndexNameCasing(t *testing.T) {
+	tests := []struct {
+		name      string
+		files     map[string]string
+		wantIndex string
+	}{
+		{
+			name:      "capitalized Index.md wins over README.md",
+			files:     map[string]string{"docs/Index.md": "# My Index\n", "docs/README.md": "# My Readme\n"},
+			wantIndex: "My Index",
+		},
+		{
+			name:      "lowercase readme.md becomes the index",
+			files:     map[string]string{"docs/readme.md": "# My Readme\n", "docs/guide.md": "# Guide\n"},
+			wantIndex: "My Readme",
+		},
+		{
+			name:      "README.md in a subdirectory is not the index",
+			files:     map[string]string{"docs/sub/README.md": "# Sub Readme\n", "docs/guide.md": "# Guide\n"},
+			wantIndex: "Documentation",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			tt.files["jot.yml"] = "input:\n  paths: [\"docs\"]\noutput:\n  path: dist\n"
+			writeFixture(t, dir, tt.files)
+			enterFixture(t, dir)
+
+			if err := runBuild(newTestBuildCmd(), nil); err != nil {
+				t.Fatalf("build failed: %v", err)
+			}
+			index, err := os.ReadFile(filepath.Join(dir, "dist", "index.html"))
+			if err != nil {
+				t.Fatalf("expected dist/index.html: %v", err)
+			}
+			// Every page lists every title in its sidebar, so check the page title
+			if want := "<title>" + tt.wantIndex + " |"; !strings.Contains(string(index), want) {
+				t.Errorf("index.html should be the %q page", tt.wantIndex)
+			}
+		})
+	}
+}
+
 func TestE2EExportToStdoutIsPureJSON(t *testing.T) {
 	dir := t.TempDir()
 	writeFixture(t, dir, map[string]string{
