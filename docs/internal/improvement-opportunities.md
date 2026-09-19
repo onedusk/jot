@@ -6,7 +6,7 @@
 | Commit reviewed | `88fe938` (main, clean tree) |
 | Scope | Entire repository: `cmd/`, `internal/`, `pkg/`, `web/`, build tooling, scripts, docs |
 | Code size | ~4,500 lines of Go (non-test), ~4,300 lines of tests, ~1,750 lines of front-end assets |
-| Changes made | None. This is a findings-and-plan document only. |
+| Changes made | None at the time of the audit. Phase 0 and Phase 1 have since been implemented on branch `fix/remediation-phase-1`; see [Section 11](#11-progress-and-verification). |
 
 ## How to read this document
 
@@ -255,11 +255,12 @@ the first step is a test harness that would have caught items 1-6.
 - Commit `c303e52` is described as "config-driven branding", but only the project name is configurable.
 - **Fix:** Drive nav links, footer text, and optional widgets from config, defaulting to absent. Self-host or drop the web fonts.
 
-### B11. Breadcrumbs use absolute URLs - P1, Code-evident
+### B11. Breadcrumbs use absolute URLs - P2 (corrected), Code-evident
 
 - **Where:** `internal/renderer/renderer.go:418,425,449,452`
+- **Correction (Phase 1):** the page template never renders `.Breadcrumb`, so these URLs never reach generated output. This is dead code (see `D3`), not a user-facing defect. The original text follows for context.
 - Everything else in the template uses `RelativePrefix`, but breadcrumbs link to `/` and `/dir/`. These break under a sub-path (any GitHub Pages project site) and under `file://`, which the search index explicitly supports. Directory crumbs point to pages that are never generated.
-- **Fix:** Prefix with `relativePrefix`; render directory crumbs as plain text unless a directory index exists.
+- **Fix:** Delete `GenerateBreadcrumb` and `PageData.Breadcrumb` with the rest of `D3`, or, if breadcrumbs are wanted in the template, prefix with `relativePrefix` and render directory crumbs as plain text.
 
 ### B12. Accessibility basics - P2, Code-evident
 
@@ -540,6 +541,63 @@ Measure before and after each step against a corpus of roughly 2,500 files and r
 Phase 0 plus the first four rows of Phase 1 (`F1`, `F3`, `E1`, `A1`, `A2`, `A3`, `A4`) and the stderr change in `B1`. That makes a freshly installed binary produce a correct, styled, hostable site from the generated config, makes piped exports usable, and puts a test in place to keep it that way.
 
 ---
+
+## 11. Progress and verification
+
+### Phase 0 and Phase 1 status (branch `fix/remediation-phase-1`)
+
+| Finding | Status | Commits |
+|---|---|---|
+| F4 gofmt | Done | `f73e44e` |
+| F1 version stamping | Done (path only; value still disagrees with CHANGELOG, see D8) | `1dfff3a` |
+| F5 go.mod tidy | Done | `6f46de9` |
+| F3 CI | Done (fmt, tidy, vet, build, `test -race`; no lint yet) | `64ab2fe` |
+| E1 end-to-end tests | Done (`cmd/jot/e2e_test.go`) | `7a2ad57`, extended in later commits |
+| B9 config loading | Done | `4afd849` |
+| A1 embedded assets, B6 summary | Done | `9aa7093`, `c70ac16` |
+| A2 output exclusion | Done | `5077fc8`, `2c81699` |
+| A3 duplicate output paths | Done | `9ae4b92`, `ff3f642` |
+| A4 index.html | Done, including `serve` preferring `index.html` | `6e8f45c`, `729aa56` |
+| A5 TOC merge | Done | `c1d57ac`, `f04e698` |
+| A11 UTC timestamps | Done for `toc.xml` and the search index | `70fc925` |
+| A14 escaping | Done for the sidebar and `toc.xml` attributes; not for the generated index page (V3) | `ad9ead7` |
+| B1 export stdout | Done | `fe33c31`, `52dab47` |
+| B2 duplicate errors | Done | `3be28fe`, `54eba8c` |
+| B11 breadcrumbs | Not a defect; reclassified above | - |
+| New: `clean` deleting sources | Done | `98f85c3` |
+
+Every fix has a test that was confirmed to fail with the fix reverted.
+
+### Adversarial verification
+
+After the first pass, seven read-only agents each tried to refute one group of fixes by building the binary from the branch and the pre-audit binary from `88fe938`, running both out of tree, and diffing results; one more reviewed the full diff. They found regressions introduced by the first pass, all since fixed in the follow-up commits listed above:
+
+- Output exclusion compared path strings, so symlinked or differently-cased output paths were re-scanned, and an output directory equal to an input root skipped all input (`2c81699`).
+- The collision check ran after `clean` had deleted the previous site, missed case-only collisions on macOS, and rejected one file reached through two input paths (`ff3f642`).
+- A root `Index.md` was overwritten by the README on case-insensitive filesystems (`729aa56`).
+- Separated TOC nodes shared `id` values in `toc.xml` (`f04e698`).
+- `--verbose` still wrote to stdout during export; some formats ended with several newlines (`52dab47`).
+- Usage hints disappeared for flag and unknown-command errors (`54eba8c`).
+- The embed glob included dotfiles; subdirectories were skipped (`c70ac16`).
+
+While reordering `clean`, an older data-loss bug surfaced: `clean` with an output directory that contained an input directory deleted the sources. `build` now refuses (`98f85c3`).
+
+### New findings from verification (not yet addressed)
+
+These predate this branch unless noted, and belong in the later phases.
+
+| ID | Priority | Finding | Where |
+|---|---|---|---|
+| V1 | P1 | `export --format yaml` is not valid YAML to PyYAML or Ruby Psych when a document has frontmatter or leading blank lines (`- content: \|4` block scalars). | `pkg/export/export.go` `ToYAML` |
+| V2 | P1 | Non-ASCII directory names produce invalid UTF-8 titles: `humanizeTitle` upper-cases the first byte, not the first rune. `toc.xml` then fails to parse. | `internal/toc/builder.go:152` |
+| V3 | P1 | The synthesized index page writes titles and paths into markdown unescaped; Blackfriday passes inline HTML through, so a title containing `<script>` runs in `index.html`. Same class as A14. | `internal/compiler/compiler.go:198,201` |
+| V4 | P2 | Sidebar hrefs are HTML-escaped but not URL-encoded, so file names containing `#`, `?`, or `%` are unreachable from the sidebar. `search.js` builds result hrefs without escaping. | `internal/renderer/renderer.go:305,325`, `web/templates/assets/search.js:126-131` |
+| V5 | P2 | `export --format json` and `markdown` write `modified` with the local UTC offset, so output bytes vary by machine time zone (A12). | `pkg/export/export.go:138`, `pkg/export/markdown.go:65` |
+| V6 | P2 | A markdown export written inside an input path (the help text's own `--output docs.md` example) is scanned as source next time. `build -o X` is invisible to a later `export` or `toc`, which only know `output.path`. | `cmd/jot/export.go`, `cmd/jot/build.go` |
+| V7 | P2 | Output paths that differ only in Unicode normalization (NFC vs NFD) are not detected as collisions. | `cmd/jot/build.go` `dedupeDocuments` |
+| V8 | P2 | Titles written with HTML entities (`&lt;T&gt;`) now show the literal entity in the sidebar, matching `<title>` and prev/next links, where before the sidebar alone decoded them. Behavior change from A14. | `internal/renderer/renderer.go` |
+| V9 | P2 | Tests in `cmd/jot` mutate process globals (working directory, viper, `rootCmd`, `exportCmd`, `os.Stdout`). They pass shuffled and with `-race`, but cannot use `t.Parallel()`. Resolved properly by D4. | `cmd/jot/e2e_test.go` |
+| V10 | P2 | The new `web` package sits outside `internal/`, so `web.Assets` is importable by other modules. Moving the assets under `internal/` would keep it private. | `web/embed.go` |
 
 ## Appendix A. Reproduction commands
 
