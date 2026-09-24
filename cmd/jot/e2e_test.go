@@ -452,3 +452,186 @@ func TestE2EIndexFromRootReadme(t *testing.T) {
 		t.Error("index.html should be the rendered README page")
 	}
 }
+
+func TestE2EProjectStructureKeepsInputDirectories(t *testing.T) {
+	// The input paths `jot init` generates, with output.structure: project
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":         "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: dist\n  structure: project\n",
+		"README.md":       "# Root\n",
+		"docs/README.md":  "# Docs\n",
+		"docs/sub/ref.md": "# Ref\n",
+	})
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	for _, want := range []string{"README.html", "docs/README.html", "docs/README.md", "docs/sub/ref.html", "docs/sub/ref.md"} {
+		if _, err := os.Stat(filepath.Join(dir, "dist", want)); err != nil {
+			t.Errorf("expected dist/%s: %v", want, err)
+		}
+	}
+	checks := map[string]string{
+		"index.html":               "<title>Root |",
+		"docs/sub/ref.html":        `href="../../assets/style.css"`,
+		"assets/search-index.json": `"docs/sub/ref.html"`,
+		"llms.txt":                 "(docs/README.md)",
+	}
+	for file, want := range checks {
+		content, err := os.ReadFile(filepath.Join(dir, "dist", file))
+		if err != nil || !strings.Contains(string(content), want) {
+			t.Errorf("dist/%s should contain %q (read error: %v)", file, want, err)
+		}
+	}
+}
+
+func TestE2EProjectStructureGeneratedIndex(t *testing.T) {
+	// Only a document at the project root can become index.html
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\"]\noutput:\n  path: dist\n  structure: project\n",
+		"docs/index.md": "# Docs Home\n",
+		"docs/guide.md": "# Guide\n",
+	})
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	index, err := os.ReadFile(filepath.Join(dir, "dist", "index.html"))
+	if err != nil || !strings.Contains(string(index), "<title>Documentation |") {
+		t.Errorf("index.html should be the generated contents page (read error: %v)", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "dist", "docs", "index.html")); err != nil {
+		t.Errorf("expected dist/docs/index.html: %v", err)
+	}
+}
+
+func TestE2EProjectStructureOverlappingInputs(t *testing.T) {
+	// A file reached through two input paths gets the same project-relative
+	// path from both, whichever is listed first.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":   "input:\n  paths: [\"docs\", \".\"]\noutput:\n  path: dist\n  structure: project\n",
+		"README.md": "# Root\n",
+		"docs/a.md": "# A\n",
+	})
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "dist", "docs", "a.html")); err != nil {
+		t.Errorf("expected dist/docs/a.html: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "dist", "a.html")); err == nil {
+		t.Error("dist/a.html should not exist")
+	}
+}
+
+func TestE2EProjectStructureAbsoluteInputThroughSymlink(t *testing.T) {
+	// The project root is matched by file identity, so an absolute input path
+	// spelled differently from the working directory is still inside it.
+	base := t.TempDir()
+	if err := os.Symlink(filepath.Join(base, "proj"), filepath.Join(base, "alias")); err != nil {
+		t.Skipf("symlinks not supported: %v", err)
+	}
+	input := filepath.ToSlash(filepath.Join(base, "alias", "docs"))
+	writeFixture(t, base, map[string]string{
+		"proj/jot.yml":       "input:\n  paths: [\"" + input + "\"]\noutput:\n  path: dist\n  structure: project\n",
+		"proj/docs/guide.md": "# Guide\n",
+	})
+	enterFixture(t, filepath.Join(base, "proj"))
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(base, "proj", "dist", "docs", "guide.html")); err != nil {
+		t.Errorf("expected dist/docs/guide.html: %v", err)
+	}
+}
+
+func TestE2EProjectStructureInputOutsideRoot(t *testing.T) {
+	base := t.TempDir()
+	writeFixture(t, base, map[string]string{
+		"site/jot.yml": "input:\n  paths: [\"../shared\"]\noutput:\n  path: dist\n  structure: project\n",
+		"shared/x.md":  "# X\n",
+	})
+	enterFixture(t, filepath.Join(base, "site"))
+
+	err := runBuild(newTestBuildCmd(), nil)
+	if err == nil {
+		t.Fatal("expected an error for an input path outside the project root")
+	}
+	for _, want := range []string{"input path ../shared is outside the project root", "set output.structure: input"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error should contain %q: %v", want, err)
+		}
+	}
+	if _, statErr := os.Stat(filepath.Join(base, "site", "dist")); statErr == nil {
+		t.Error("a rejected build should not create the output directory")
+	}
+}
+
+func TestE2EUnsupportedOutputStructure(t *testing.T) {
+	// The value is checked before scanning, so it is reported even when no
+	// input path exists.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml": "input:\n  paths: [\"missing\"]\noutput:\n  path: dist\n  structure: flat\n",
+	})
+	enterFixture(t, dir)
+
+	err := runBuild(newTestBuildCmd(), nil)
+	if err == nil || err.Error() != "unsupported output.structure: flat (supported: input, project)" {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
+func TestE2EProjectStructureInEveryCommand(t *testing.T) {
+	// export, toc, and debug name documents the same way build does.
+	files := map[string]string{
+		"jot.yml":        "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: dist\n  structure: project\n",
+		"README.md":      "# Root\n",
+		"docs/README.md": "# Docs\n",
+		"docs/guide.md":  "# Guide\n",
+	}
+	tests := []struct {
+		name  string
+		run   func() error
+		check func(t *testing.T, dir, stdout string)
+	}{
+		{"export", func() error { return runExport(exportCmd, nil) }, func(t *testing.T, dir, stdout string) {
+			for _, want := range []string{`"path": "README.md"`, `"path": "docs/README.md"`, `"path": "docs/guide.md"`} {
+				if !strings.Contains(stdout, want) {
+					t.Errorf("export should contain %s", want)
+				}
+			}
+		}},
+		{"toc", func() error { return runTOC(tocCmd, nil) }, func(t *testing.T, dir, stdout string) {
+			toc, err := os.ReadFile(filepath.Join(dir, "docs", "toc.xml"))
+			if err != nil || !strings.Contains(string(toc), `path="docs/guide.md"`) {
+				t.Errorf("docs/toc.xml should contain path=\"docs/guide.md\" (read error: %v)", err)
+			}
+		}},
+		{"debug", func() error { return runDebug(debugCmd, nil) }, func(t *testing.T, dir, stdout string) {
+			if !strings.Contains(stdout, `Found: "docs/guide.md"`) {
+				t.Errorf("debug output should list docs/guide.md:\n%s", stdout)
+			}
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeFixture(t, dir, files)
+			enterFixture(t, dir)
+
+			stdout, err := captureStdout(t, tt.run)
+			if err != nil {
+				t.Fatalf("%s failed: %v", tt.name, err)
+			}
+			tt.check(t, dir, stdout)
+		})
+	}
+}

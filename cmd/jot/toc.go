@@ -37,6 +37,10 @@ func runTOC(cmd *cobra.Command, args []string) error {
 
 	// Load configuration
 	config := loadConfig()
+	root, err := resolveProjectRoot(config)
+	if err != nil {
+		return err
+	}
 
 	if dryRun {
 		fmt.Println(" [DRY RUN MODE] - No files will be written")
@@ -45,7 +49,7 @@ func runTOC(cmd *cobra.Command, args []string) error {
 	fmt.Println(" Scanning for directories with markdown files...")
 
 	// Scan directories and group documents
-	dirMap, err := scanDirectoriesWithMarkdown(config.InputPaths, config.IgnorePatterns, config.OutputPath)
+	dirMap, err := scanDirectoriesWithMarkdown(config.InputPaths, config.IgnorePatterns, config.OutputPath, root)
 	if err != nil {
 		return fmt.Errorf("failed to scan directories: %w", err)
 	}
@@ -87,8 +91,9 @@ func runTOC(cmd *cobra.Command, args []string) error {
 }
 
 // scanDirectoriesWithMarkdown walks input paths, skipping the site output directory,
-// and groups documents by their parent directory.
-func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string, outputDir string) (map[string][]scanner.Document, error) {
+// and groups documents by their parent directory. A non-empty root makes
+// document paths relative to it.
+func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string, outputDir, root string) (map[string][]scanner.Document, error) {
 	dirMap := make(map[string][]scanner.Document)
 
 	for _, inputPath := range paths {
@@ -105,6 +110,9 @@ func scanDirectoriesWithMarkdown(paths []string, ignorePatterns []string, output
 		}
 		if err := s.Exclude(outputDir); err != nil {
 			return nil, fmt.Errorf("failed to exclude output directory: %w", err)
+		}
+		if err := relativeToProject(s, inputPath, root); err != nil {
+			return nil, err
 		}
 
 		// Scan documents

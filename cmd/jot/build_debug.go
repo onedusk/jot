@@ -23,6 +23,10 @@ func init() {
 // runDebug executes the debug command logic.
 func runDebug(cmd *cobra.Command, args []string) error {
 	config := loadConfig()
+	root, err := resolveProjectRoot(config)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println("Debug: Scanning documents...")
 
@@ -34,6 +38,9 @@ func runDebug(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		if err := s.Exclude(config.OutputPath); err != nil {
+			return err
+		}
+		if err := relativeToProject(s, inputPath, root); err != nil {
 			return err
 		}
 

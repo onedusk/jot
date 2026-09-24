@@ -44,6 +44,9 @@ input:
 
 output:
   path: "dist"
+  # "input": page paths are relative to each input path (docs/guide.md -> dist/guide.html)
+  # "project": relative to the directory jot runs from (docs/guide.md -> dist/docs/guide.html)
+  structure: "input"
   format: "html"
   theme: "default"
   clean: true

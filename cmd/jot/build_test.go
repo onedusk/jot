@@ -241,10 +241,12 @@ func TestDedupeDocuments(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		docs      []scanner.Document
-		wantCount int
-		wantErr   string
+		name         string
+		docs         []scanner.Document
+		projectPaths bool
+		wantCount    int
+		wantErr      string
+		dontWant     string
 	}{
 		{
 			name:      "same basename in different directories",
@@ -266,14 +268,29 @@ func TestDedupeDocuments(t *testing.T) {
 			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
 			wantErr: "differ only in case",
 		},
+		{
+			name:    "collision suggests project-relative paths",
+			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/README.md", "README.md")},
+			wantErr: "or set output.structure: project",
+		},
+		{
+			name:         "project-relative collision does not suggest the setting",
+			docs:         []scanner.Document{doc("/p/Docs/a.md", "Docs/a.md"), doc("/p/docs/a.md", "docs/a.md")},
+			projectPaths: true,
+			wantErr:      "rename one of them or remove one of the input paths",
+			dontWant:     "output.structure",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := dedupeDocuments(tt.docs)
+			got, err := dedupeDocuments(tt.docs, tt.projectPaths)
 			if tt.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
 					t.Fatalf("dedupeDocuments() error = %v, want it to contain %q", err, tt.wantErr)
+				}
+				if tt.dontWant != "" && strings.Contains(err.Error(), tt.dontWant) {
+					t.Errorf("dedupeDocuments() error = %v, should not contain %q", err, tt.dontWant)
 				}
 				return
 			}

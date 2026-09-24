@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Project-relative output paths**: New `output.structure` setting in `jot.yml`. The default, `input`, keeps page paths relative to each input path, as before. With `project`, they are relative to the project root, the directory jot runs from, so `docs/guide.md` is built as `dist/docs/guide.html` and the input paths `jot init` generates (`docs` and `README.md`) no longer collide. `build`, `export`, `toc`, and `debug` all honor it, so it also changes the search index, `toc.xml` and llms.txt links, export `path` and `source` fields, and document IDs. Input paths outside the project root are rejected, and the collision error in the default layout now mentions the setting
 - **`Scanner.RelativeTo`**: New method in `pkg/scanner` that makes document paths and IDs relative to a given directory instead of the scan root, so scanners of several directories produce distinct paths and IDs
 - **Page export menu**: Split button with dropdown on every rendered page for copying and exporting content
   - "Copy page" copies rendered page text to clipboard

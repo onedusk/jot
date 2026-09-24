@@ -186,6 +186,7 @@ input:
 
 output:
   path: "dist"     # Output directory (default: "dist")
+  structure: "input" # Page paths relative to each input path ("input", default) or the project root ("project")
   format: "html"   # Output format: html, json, yaml (default: "html")
   theme: "default" # Theme name (default: "default")
 
@@ -198,6 +199,27 @@ llm:
   chunk_size: 512   # Maximum tokens per chunk (default: 512)
   overlap: 128      # Token overlap between chunks (default: 128)
 ```
+
+### Output paths with several input paths
+
+By default, each page's path is relative to the input path it was found in. With `input.paths: ["docs", "README.md"]`, `docs/guide.md` becomes `dist/guide.html`. If two input paths contain files with the same relative path, such as `docs/README.md` and `README.md`, the build stops and names both files.
+
+Set `output.structure: project` to make paths relative to the project root, the directory you run jot from:
+
+| Source | `input` (default) | `project` |
+|---|---|---|
+| `README.md` | `dist/README.html` | `dist/README.html` |
+| `docs/guide.md` | `dist/guide.html` | `dist/docs/guide.html` |
+| `docs/README.md` | collides with `README.md` | `dist/docs/README.html` |
+
+With `project`:
+
+- Every input path must be inside the project root. An input path such as `../shared` is an error.
+- `dist/index.html` is the project root's `index.md` or `README.md`, so list `README.md` in `input.paths` to use it. Otherwise jot generates a contents page, and `docs/index.md` becomes `dist/docs/index.html`.
+- `build`, `export`, `toc`, and `debug` all use project-relative paths, including export `path` and `source` fields and document IDs.
+- `input.ignore` patterns still match paths relative to each input path, so the same files are included either way.
+
+Changing the setting changes page URLs and document IDs. Rebuild with `--clean` so pages from the old layout are removed, and re-index anything built from an export. With a single input path of `.`, both settings produce the same output.
 
 ## Project Structure
 

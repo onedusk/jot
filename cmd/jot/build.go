@@ -39,6 +39,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 
 	// Load configuration
 	config := loadBuildConfig(cmd)
+	root, err := resolveProjectRoot(config)
+	if err != nil {
+		return err
+	}
 
 	fmt.Println(" Scanning for markdown files...")
 
@@ -59,6 +63,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 		if err := s.Exclude(config.OutputPath); err != nil {
 			return fmt.Errorf("failed to exclude output directory: %w", err)
 		}
+		if err := relativeToProject(s, inputPath, root); err != nil {
+			return err
+		}
 
 		// Scan documents
 		docs, err := s.Scan()
@@ -72,7 +79,7 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	if len(allDocs) == 0 {
 		return fmt.Errorf("no markdown files found")
 	}
-	allDocs, err := dedupeDocuments(allDocs)
+	allDocs, err = dedupeDocuments(allDocs, root != "")
 	if err != nil {
 		return err
 	}
@@ -184,10 +191,10 @@ func runBuild(cmd *cobra.Command, args []string) error {
 // dedupeDocuments drops repeat scans of the same source file (an input path
 // listed twice, or a file that is also inside another input path) and returns
 // an error if two different files would be written to the same output path.
-// Relative paths are computed per input root, so files from different roots can
-// collide. They are compared case-insensitively because on the default macOS
+// By default relative paths are computed per input root, so files from different
+// roots can collide. They are compared case-insensitively because on the default macOS
 // and Windows filesystems README.md and readme.md are the same file.
-func dedupeDocuments(docs []scanner.Document) ([]scanner.Document, error) {
+func dedupeDocuments(docs []scanner.Document, projectPaths bool) ([]scanner.Document, error) {
 	unique := make([]scanner.Document, 0, len(docs))
 	seenSource := make(map[string]bool, len(docs))
 	seenOutput := make(map[string]scanner.Document, len(docs))
@@ -204,12 +211,44 @@ func dedupeDocuments(docs []scanner.Document) ([]scanner.Document, error) {
 			if first.RelativePath != doc.RelativePath {
 				msg += " (paths that differ only in case collide on case-insensitive filesystems)"
 			}
+			if !projectPaths {
+				return nil, fmt.Errorf("%s; rename one of them, remove one of the input paths, or set output.structure: project", msg)
+			}
 			return nil, fmt.Errorf("%s; rename one of them or remove one of the input paths", msg)
 		}
 		seenOutput[key] = doc
 		unique = append(unique, doc)
 	}
 	return unique, nil
+}
+
+// resolveProjectRoot returns the directory document paths are relative to: ""
+// when output.structure is "input" (each input path), or the project root, the
+// working directory, when it is "project". Input and output paths in jot.yml
+// are resolved against the working directory too.
+func resolveProjectRoot(config BuildConfig) (string, error) {
+	switch config.Structure {
+	case "input":
+		return "", nil
+	case "project":
+		root, err := os.Getwd()
+		if err != nil {
+			return "", fmt.Errorf("failed to get working directory: %w", err)
+		}
+		return root, nil
+	}
+	return "", fmt.Errorf("unsupported output.structure: %s (supported: input, project)", config.Structure)
+}
+
+// relativeToProject makes s name documents relative to root, unless root is "".
+func relativeToProject(s *scanner.Scanner, inputPath, root string) error {
+	if root == "" {
+		return nil
+	}
+	if err := s.RelativeTo(root); err != nil {
+		return fmt.Errorf("output.structure is project, but input path %s is outside the project root: %w; run jot from a directory that contains every input path, or set output.structure: input", inputPath, err)
+	}
+	return nil
 }
 
 // checkCleanIsSafe returns an error if removing outputDir would also remove an
@@ -261,6 +300,7 @@ func displayPath(path string) string {
 type BuildConfig struct {
 	InputPaths         []string
 	OutputPath         string
+	Structure          string // "input" or "project": what document paths are relative to
 	IgnorePatterns     []string
 	Clean              bool
 	GenerateLLMSTxt    bool
@@ -293,6 +333,7 @@ func loadConfig() BuildConfig {
 	config := BuildConfig{
 		InputPaths:         viper.GetStringSlice("input.paths"),
 		OutputPath:         viper.GetString("output.path"),
+		Structure:          viper.GetString("output.structure"),
 		IgnorePatterns:     viper.GetStringSlice("input.ignore"),
 		Clean:              viper.GetBool("output.clean"),
 		GenerateLLMSTxt:    true, // Default to true
@@ -311,6 +352,9 @@ func loadConfig() BuildConfig {
 	}
 	if config.OutputPath == "" {
 		config.OutputPath = "./dist"
+	}
+	if config.Structure == "" {
+		config.Structure = "input"
 	}
 
 	return config

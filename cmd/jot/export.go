@@ -196,6 +196,10 @@ func runExport(cmd *cobra.Command, args []string) error {
 
 	// Load configuration
 	config := loadConfig()
+	root, err := resolveProjectRoot(config)
+	if err != nil {
+		return err
+	}
 
 	fmt.Fprintln(os.Stderr, " Scanning for markdown files...")
 
@@ -214,6 +218,9 @@ func runExport(cmd *cobra.Command, args []string) error {
 		if err := s.Exclude(config.OutputPath); err != nil {
 			return fmt.Errorf("failed to exclude output directory: %w", err)
 		}
+		if err := relativeToProject(s, inputPath, root); err != nil {
+			return err
+		}
 
 		// Scan documents
 		docs, err := s.Scan()
@@ -227,7 +234,7 @@ func runExport(cmd *cobra.Command, args []string) error {
 	if len(allDocs) == 0 {
 		return fmt.Errorf("no markdown files found")
 	}
-	allDocs, dupErr := dedupeDocuments(allDocs)
+	allDocs, dupErr := dedupeDocuments(allDocs, root != "")
 	if dupErr != nil {
 		return dupErr
 	}
@@ -245,7 +252,6 @@ func runExport(cmd *cobra.Command, args []string) error {
 	exporter := export.NewExporter()
 
 	var output string
-	var err error
 
 	// Export based on format
 	switch format {
