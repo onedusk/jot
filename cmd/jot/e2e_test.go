@@ -576,16 +576,24 @@ func TestE2EProjectStructureInputOutsideRoot(t *testing.T) {
 
 func TestE2EUnsupportedOutputStructure(t *testing.T) {
 	// The value is checked before scanning, so it is reported even when no
-	// input path exists.
-	dir := t.TempDir()
-	writeFixture(t, dir, map[string]string{
-		"jot.yml": "input:\n  paths: [\"missing\"]\noutput:\n  path: dist\n  structure: flat\n",
-	})
-	enterFixture(t, dir)
+	// input path exists. A YAML list must not fall back to the default.
+	tests := []struct{ value, want string }{
+		{"flat", `unsupported output.structure: "flat" (supported: input, project)`},
+		{"[project]", `unsupported output.structure: "[project]" (supported: input, project)`},
+	}
+	for _, tt := range tests {
+		t.Run(tt.value, func(t *testing.T) {
+			dir := t.TempDir()
+			writeFixture(t, dir, map[string]string{
+				"jot.yml": "input:\n  paths: [\"missing\"]\noutput:\n  path: dist\n  structure: " + tt.value + "\n",
+			})
+			enterFixture(t, dir)
 
-	err := runBuild(newTestBuildCmd(), nil)
-	if err == nil || err.Error() != "unsupported output.structure: flat (supported: input, project)" {
-		t.Fatalf("unexpected error: %v", err)
+			err := runBuild(newTestBuildCmd(), nil)
+			if err == nil || err.Error() != tt.want {
+				t.Fatalf("error = %v, want %q", err, tt.want)
+			}
+		})
 	}
 }
 

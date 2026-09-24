@@ -240,7 +240,7 @@ func resolveProjectRoot(config BuildConfig) (string, error) {
 		}
 		return root, nil
 	}
-	return "", fmt.Errorf("unsupported output.structure: %s (supported: input, project)", config.Structure)
+	return "", fmt.Errorf("unsupported output.structure: %q (supported: input, project)", config.Structure)
 }
 
 // relativeToProject makes s name documents relative to root, unless root is "".
@@ -372,7 +372,6 @@ func loadConfig() BuildConfig {
 	config := BuildConfig{
 		InputPaths:         viper.GetStringSlice("input.paths"),
 		OutputPath:         viper.GetString("output.path"),
-		Structure:          viper.GetString("output.structure"),
 		IgnorePatterns:     viper.GetStringSlice("input.ignore"),
 		Clean:              viper.GetBool("output.clean"),
 		GenerateLLMSTxt:    true, // Default to true
@@ -392,8 +391,18 @@ func loadConfig() BuildConfig {
 	if config.OutputPath == "" {
 		config.OutputPath = "./dist"
 	}
-	if config.Structure == "" {
+	// viper.GetString turns a YAML list or map into "", which would silently
+	// select the default; keep such values so resolveProjectRoot rejects them
+	switch structure := viper.Get("output.structure").(type) {
+	case nil:
 		config.Structure = "input"
+	case string:
+		config.Structure = structure
+		if structure == "" {
+			config.Structure = "input"
+		}
+	default:
+		config.Structure = fmt.Sprint(structure)
 	}
 
 	return config
