@@ -184,14 +184,3 @@ func generateDocumentID(relPath string) string {
 	hash := md5.Sum([]byte(relPath))
 	return hex.EncodeToString(hash[:])
 }
-
-// ScanSingle reads and parses a single file specified by its path.
-func (s *Scanner) ScanSingle(path string) (Document, error) {
-	// Get relative path
-	relPath, err := filepath.Rel(s.rootPath, path)
-	if err != nil {
-		return Document{}, err
-	}
-
-	return s.readDocument(path, relPath)
-}

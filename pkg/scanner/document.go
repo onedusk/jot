@@ -17,7 +17,6 @@ type Document struct {
 	RelativePath string                 // File path relative to the scanned root directory.
 	Title        string                 // The title of the document, extracted from frontmatter or the first H1.
 	Content      []byte                 // The raw markdown content of the file, with frontmatter removed.
-	HTML         string                 // Rendered HTML content (populated by the renderer).
 	Metadata     map[string]interface{} // Key-value data parsed from YAML frontmatter.
 	ModTime      time.Time              // The last modification time of the file.
 	Sections     []Section              // A slice of sections extracted from the document.

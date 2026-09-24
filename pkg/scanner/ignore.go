@@ -137,12 +137,3 @@ func (f *IgnoreFilter) matchInSubpath(pattern, path string) bool {
 
 	return false
 }
-
-// LoadIgnoreFile reads a .jotignore file from the given path and returns a slice
-// of patterns.
-// TODO: Implement the file reading logic.
-func LoadIgnoreFile(path string) ([]string, error) {
-	// TODO: Implement reading from file
-	// For now, return empty patterns
-	return []string{}, nil
-}
