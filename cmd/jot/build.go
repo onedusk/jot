@@ -276,12 +276,13 @@ func relativeToProject(s *scanner.Scanner, inputPath, root string) error {
 	return nil
 }
 
-// checkCopiesStayOnSources returns an error if the output directory is also an
-// input path and a document's markdown copy would be written there somewhere
-// other than onto its own source. Such a copy would overwrite a different
-// source file, or be scanned as a new source on the next build. Building into
-// the only input path, or into the project root with output.structure:
-// project, keeps every copy on its source and is allowed.
+// checkCopiesStayOnSources returns an error if the output directory is or
+// contains an input path and a document's markdown copy would be written there
+// somewhere other than onto its own source. Such a copy would overwrite a
+// different file in the source tree (another source, or a file such as the
+// project README that is not an input), or be scanned as a new source on the
+// next build. Building into the only input path, or into the project root with
+// output.structure: project, keeps every copy on its source and is allowed.
 func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scanner.Document) error {
 	outInfo, err := os.Stat(outputDir)
 	if err != nil {
@@ -290,7 +291,7 @@ func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scan
 	}
 	input := ""
 	for _, p := range inputPaths {
-		if info, err := os.Stat(p); err == nil && os.SameFile(info, outInfo) {
+		if dirContains(outInfo, p) {
 			input = p
 			break
 		}
@@ -306,10 +307,27 @@ func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scan
 				continue
 			}
 		}
-		return fmt.Errorf("output directory %s is also input path %s, and the markdown copy of %s would be written to %s instead of onto itself, overwriting or adding a source file; use an output directory that is not an input path",
+		return fmt.Errorf("output directory %s is or contains input path %s, and the markdown copy of %s would be written to %s instead of onto itself, overwriting or adding a file in the source tree; use an output directory outside the input paths",
 			outputDir, input, displayPath(doc.Path), displayPath(target))
 	}
 	return nil
+}
+
+// dirContains reports whether the directory described by dirInfo is path or
+// one of its ancestors, matching by file identity.
+func dirContains(dirInfo os.FileInfo, path string) bool {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		return false
+	}
+	for p := abs; ; p = filepath.Dir(p) {
+		if info, err := os.Stat(p); err == nil && os.SameFile(info, dirInfo) {
+			return true
+		}
+		if filepath.Dir(p) == p {
+			return false
+		}
+	}
 }
 
 // checkCleanIsSafe returns an error if removing outputDir would also remove an

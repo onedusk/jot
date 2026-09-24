@@ -676,7 +676,7 @@ func TestE2EOutputInputDirectoryRejectedWhenCopiesMove(t *testing.T) {
 				t.Fatal(err)
 			}
 			err := runBuild(cmd, nil)
-			if err == nil || !strings.Contains(err.Error(), "is also input path docs") {
+			if err == nil || !strings.Contains(err.Error(), "is or contains input path docs") {
 				t.Fatalf("expected the output directory to be rejected, got %v", err)
 			}
 			for rel, content := range tt.files {
@@ -747,5 +747,26 @@ func TestE2EOnlyTheMarkdownExtensionIsReplaced(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(dir, "dist", "site.htmlocs")); err == nil {
 		t.Error("the directory name must not be rewritten")
+	}
+}
+
+func TestE2EOutputContainingInputKeepsOtherFiles(t *testing.T) {
+	// With input docs and output ".", the copy of docs/README.md would land on
+	// the project's own README.md, which is not an input.
+	dir := t.TempDir()
+	files := map[string]string{
+		"jot.yml":        "input:\n  paths: [\"docs\"]\noutput:\n  path: .\n",
+		"README.md":      "# Project readme\n",
+		"docs/README.md": "# Docs\n",
+	}
+	writeFixture(t, dir, files)
+	enterFixture(t, dir)
+
+	err := runBuild(newTestBuildCmd(), nil)
+	if err == nil || !strings.Contains(err.Error(), "is or contains input path docs") {
+		t.Fatalf("expected the output directory to be rejected, got %v", err)
+	}
+	if got, readErr := os.ReadFile(filepath.Join(dir, "README.md")); readErr != nil || string(got) != files["README.md"] {
+		t.Errorf("the project README was changed: %q (%v)", got, readErr)
 	}
 }
