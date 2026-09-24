@@ -264,9 +264,10 @@ func TestDedupeDocuments(t *testing.T) {
 			wantErr: "both map to README.md",
 		},
 		{
-			name:    "output paths differing only in case",
-			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
-			wantErr: "differ only in case",
+			name:     "output paths differing only in case",
+			docs:     []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
+			wantErr:  "differ only in case",
+			dontWant: "output.structure",
 		},
 		{
 			name:    "collision suggests project-relative paths",
@@ -302,6 +303,49 @@ func TestDedupeDocuments(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestDedupeDocumentsSameFileSpellings verifies that one file reached through
+// a symlink or a differently-cased path is kept once rather than built twice
+// or reported as a collision.
+func TestDedupeDocumentsSameFileSpellings(t *testing.T) {
+	dir := t.TempDir()
+	guide := filepath.Join(dir, "docs", "guide.md")
+	if err := os.MkdirAll(filepath.Dir(guide), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(guide, []byte("# Guide"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("symlinked directory", func(t *testing.T) {
+		if err := os.Symlink(filepath.Join(dir, "docs"), filepath.Join(dir, "docslink")); err != nil {
+			t.Skipf("symlinks not supported: %v", err)
+		}
+		docs := []scanner.Document{
+			{Path: filepath.Join(dir, "docslink", "guide.md"), RelativePath: "docslink/guide.md"},
+			{Path: guide, RelativePath: "docs/guide.md"},
+		}
+		got, err := dedupeDocuments(docs, true)
+		if err != nil || len(got) != 1 {
+			t.Fatalf("dedupeDocuments() = %d documents, %v; want 1, nil", len(got), err)
+		}
+	})
+
+	t.Run("differently-cased directory", func(t *testing.T) {
+		upper := filepath.Join(dir, "Docs", "guide.md")
+		if _, err := os.Stat(upper); err != nil {
+			t.Skip("filesystem is case-sensitive")
+		}
+		docs := []scanner.Document{
+			{Path: upper, RelativePath: "Docs/guide.md"},
+			{Path: guide, RelativePath: "docs/guide.md"},
+		}
+		got, err := dedupeDocuments(docs, true)
+		if err != nil || len(got) != 1 {
+			t.Fatalf("dedupeDocuments() = %d documents, %v; want 1, nil", len(got), err)
+		}
+	})
 }
 
 // TestHumanizeBytes verifies the humanizeBytes function
