@@ -83,6 +83,9 @@ func runBuild(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	if err := checkCopiesStayOnSources(config.OutputPath, config.InputPaths, allDocs); err != nil {
+		return err
+	}
 
 	// Touch the output directory only once the input is known to be valid, so a
 	// failed build leaves the previous output in place
@@ -247,6 +250,42 @@ func relativeToProject(s *scanner.Scanner, inputPath, root string) error {
 	}
 	if err := s.RelativeTo(root); err != nil {
 		return fmt.Errorf("output.structure is project, but input path %s is outside the project root: %w; run jot from a directory that contains every input path, or set output.structure: input", inputPath, err)
+	}
+	return nil
+}
+
+// checkCopiesStayOnSources returns an error if the output directory is also an
+// input path and a document's markdown copy would be written there somewhere
+// other than onto its own source. Such a copy would overwrite a different
+// source file, or be scanned as a new source on the next build. Building into
+// the only input path, or into the project root with output.structure:
+// project, keeps every copy on its source and is allowed.
+func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scanner.Document) error {
+	outInfo, err := os.Stat(outputDir)
+	if err != nil {
+		// A missing output directory cannot be an input path
+		return nil
+	}
+	input := ""
+	for _, p := range inputPaths {
+		if info, err := os.Stat(p); err == nil && os.SameFile(info, outInfo) {
+			input = p
+			break
+		}
+	}
+	if input == "" {
+		return nil
+	}
+	for _, doc := range docs {
+		target := filepath.Join(outputDir, filepath.FromSlash(doc.RelativePath))
+		targetInfo, err := os.Stat(target)
+		if err == nil {
+			if sourceInfo, err := os.Stat(doc.Path); err == nil && os.SameFile(targetInfo, sourceInfo) {
+				continue
+			}
+		}
+		return fmt.Errorf("output directory %s is also input path %s, and the markdown copy of %s would be written to %s instead of onto itself, overwriting or adding a source file; use an output directory that is not an input path",
+			outputDir, input, displayPath(doc.Path), displayPath(target))
 	}
 	return nil
 }

@@ -635,3 +635,83 @@ func TestE2EProjectStructureInEveryCommand(t *testing.T) {
 		})
 	}
 }
+
+func TestE2EOutputInputDirectoryRejectedWhenCopiesMove(t *testing.T) {
+	// Building into an input path is only safe when every markdown copy lands
+	// on its own source. Otherwise a copy overwrites another source or is read
+	// back as a new source by the next build.
+	tests := []struct {
+		name      string
+		structure string
+		files     map[string]string
+	}{
+		{
+			name:      "project mode, output is a non-root input",
+			structure: "project",
+			files:     map[string]string{"README.md": "# Root\n", "docs/README.md": "# Docs\n", "docs/guide.md": "# Guide\n"},
+		},
+		{
+			name:      "input mode, output is one of several inputs",
+			structure: "input",
+			files:     map[string]string{"README.md": "# Root\n", "docs/guide.md": "# Guide\n"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			tt.files["jot.yml"] = "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: dist\n  structure: " + tt.structure + "\n"
+			writeFixture(t, dir, tt.files)
+			enterFixture(t, dir)
+
+			cmd := newTestBuildCmd()
+			if err := cmd.Flags().Set("output", "docs"); err != nil {
+				t.Fatal(err)
+			}
+			err := runBuild(cmd, nil)
+			if err == nil || !strings.Contains(err.Error(), "is also input path docs") {
+				t.Fatalf("expected the output directory to be rejected, got %v", err)
+			}
+			for rel, content := range tt.files {
+				if rel == "jot.yml" {
+					continue
+				}
+				got, readErr := os.ReadFile(filepath.Join(dir, rel))
+				if readErr != nil || string(got) != content {
+					t.Errorf("source %s was changed: %q (%v)", rel, got, readErr)
+				}
+			}
+			if _, statErr := os.Stat(filepath.Join(dir, "docs", "docs")); statErr == nil {
+				t.Error("docs/docs should not be created")
+			}
+			if tt.structure == "input" {
+				if _, statErr := os.Stat(filepath.Join(dir, "docs", "README.md")); statErr == nil {
+					t.Error("the root README should not be copied into docs/")
+				}
+			}
+		})
+	}
+}
+
+func TestE2EProjectStructureInPlaceBuild(t *testing.T) {
+	// Building into the project root puts every copy on its own source.
+	source := "---\ntitle: Guide\n---\n\n# Guide\n"
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\", \"README.md\"]\noutput:\n  path: .\n  structure: project\n",
+		"README.md":     "# Root\n",
+		"docs/guide.md": source,
+	})
+	enterFixture(t, dir)
+
+	for i := 1; i <= 2; i++ {
+		if err := runBuild(newTestBuildCmd(), nil); err != nil {
+			t.Fatalf("build %d failed: %v", i, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "docs", "guide.html")); err != nil {
+		t.Errorf("expected docs/guide.html: %v", err)
+	}
+	if got, err := os.ReadFile(filepath.Join(dir, "docs", "guide.md")); err != nil || string(got) != source {
+		t.Errorf("source docs/guide.md was modified: %q (%v)", got, err)
+	}
+}
