@@ -182,11 +182,14 @@ func (s *Scanner) readDocument(path, relPath string) (Document, error) {
 	// Extract frontmatter
 	metadata, cleanContent := ExtractFrontmatter(content)
 
+	// Normalize to forward slashes before hashing, so IDs match across platforms
+	relPath = filepath.ToSlash(relPath)
+
 	// Create document
 	doc := Document{
 		ID:           generateDocumentID(relPath),
 		Path:         path,
-		RelativePath: filepath.ToSlash(relPath), // Normalize to forward slashes
+		RelativePath: relPath,
 		Content:      cleanContent,
 		Metadata:     metadata,
 		ModTime:      info.ModTime(),
