@@ -676,7 +676,7 @@ func TestE2EOutputInputDirectoryRejectedWhenCopiesMove(t *testing.T) {
 				t.Fatal(err)
 			}
 			err := runBuild(cmd, nil)
-			if err == nil || !strings.Contains(err.Error(), "is or contains input path docs") {
+			if err == nil || !strings.Contains(err.Error(), "is also input path docs") {
 				t.Fatalf("expected the output directory to be rejected, got %v", err)
 			}
 			for rel, content := range tt.files {
@@ -763,10 +763,77 @@ func TestE2EOutputContainingInputKeepsOtherFiles(t *testing.T) {
 	enterFixture(t, dir)
 
 	err := runBuild(newTestBuildCmd(), nil)
-	if err == nil || !strings.Contains(err.Error(), "is or contains input path docs") {
+	if err == nil || !strings.Contains(err.Error(), "which jot did not write") {
 		t.Fatalf("expected the output directory to be rejected, got %v", err)
 	}
 	if got, readErr := os.ReadFile(filepath.Join(dir, "README.md")); readErr != nil || string(got) != files["README.md"] {
 		t.Errorf("the project README was changed: %q (%v)", got, readErr)
+	}
+}
+
+func TestE2EOutputContainingInputWithoutConflicts(t *testing.T) {
+	// When the output directory contains an input path, copies that create new
+	// files outside every input, or replace jot's own earlier copies, are fine.
+	tests := []struct {
+		name   string
+		config string
+		files  map[string]string
+		page   string
+	}{
+		{
+			name:   "sources in a subdirectory of the output",
+			config: "input:\n  paths: [\"docs/src\"]\noutput:\n  path: docs\n",
+			files:  map[string]string{"docs/src/guide.md": "# Guide\n", "docs/src/README.md": "# Home\n"},
+			page:   "docs/guide.html",
+		},
+		{
+			name:   "output is the parent of the only input",
+			config: "input:\n  paths: [\"docs\"]\noutput:\n  path: .\n",
+			files:  map[string]string{"docs/guide.md": "# Guide\n"},
+			page:   "guide.html",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			tt.files["jot.yml"] = tt.config
+			writeFixture(t, dir, tt.files)
+			enterFixture(t, dir)
+
+			// The second build replaces the first build's copies
+			for i := 1; i <= 2; i++ {
+				if err := runBuild(newTestBuildCmd(), nil); err != nil {
+					t.Fatalf("build %d failed: %v", i, err)
+				}
+			}
+			if _, err := os.Stat(filepath.Join(dir, tt.page)); err != nil {
+				t.Errorf("expected %s: %v", tt.page, err)
+			}
+			for rel, content := range tt.files {
+				if got, err := os.ReadFile(filepath.Join(dir, rel)); err != nil || string(got) != content {
+					t.Errorf("%s was changed: %q (%v)", rel, got, err)
+				}
+			}
+		})
+	}
+}
+
+func TestE2EOutputContainingInputCopyInsideInput(t *testing.T) {
+	// With input docs and output ".", docs/docs/y.md is named docs/y.md, so
+	// its copy would land inside the input and be read back as a source.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":        "input:\n  paths: [\"docs\"]\noutput:\n  path: .\n",
+		"docs/x.md":      "# X\n",
+		"docs/docs/y.md": "# Y\n",
+	})
+	enterFixture(t, dir)
+
+	err := runBuild(newTestBuildCmd(), nil)
+	if err == nil || !strings.Contains(err.Error(), "inside input path docs") {
+		t.Fatalf("expected the copy into the input to be rejected, got %v", err)
+	}
+	if _, statErr := os.Stat(filepath.Join(dir, "docs", "y.md")); statErr == nil {
+		t.Error("docs/y.md should not be created")
 	}
 }
