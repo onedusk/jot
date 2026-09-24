@@ -45,6 +45,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Timestamps labeled UTC but in local time**: `modified` values in `toc.xml` and the search index appended a literal `Z` to the local wall-clock time. They are now converted to UTC first
 - **Unescaped titles in navigation**: Document and directory titles and link paths were inserted into the sidebar HTML verbatim, so a title such as `Using <T> generics` or `Q&A` broke the markup on every page. They are now HTML-escaped. The `path` attribute in `toc.xml` is now XML-escaped as well
 
+### Removed
+
+- **Unused code**: `internal/compiler.MarkdownCompiler`, which was never called and wrote a markdown mirror of the site that no command produced
+
 ## [0.2.0] - 2026-02-27
 
 ### Added
