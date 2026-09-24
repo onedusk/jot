@@ -21,12 +21,12 @@ make release        # Multi-platform release build (darwin/linux/windows)
 
 Run a single test:
 ```bash
-go test -v -run TestFunctionName ./internal/chunking/
+go test -v -run TestFunctionName ./pkg/chunking/
 ```
 
 Run benchmarks:
 ```bash
-go test -bench=. ./internal/chunking/
+go test -bench=. ./pkg/chunking/
 ```
 
 ## Architecture
@@ -35,18 +35,22 @@ go test -bench=. ./internal/chunking/
 
 Entry point is `cmd/jot/main.go`. Uses Cobra for commands and Viper for configuration (reads `jot.yml`, supports `JOT_*` env vars). Commands: `build`, `export`, `init`, `toc`, `serve`, `watch`.
 
-### Internal Modules (`internal/`)
+### Modules
+
+Packages under `pkg/` are importable by other modules (mlpipe imports them through a `replace` directive) but are not API-stable before 1.0; list breaking changes in `docs/CHANGELOG.md` and keep mlpipe building. Packages under `internal/` are private.
 
 | Module | Purpose |
 |--------|---------|
-| `scanner/` | Recursively discovers .md files, extracts metadata into `Document` structs. Applies glob-based ignore patterns. |
-| `toc/` | Builds hierarchical `TOCNode` tree from flat document list. Generates toc.xml per directory. |
-| `compiler/` | Orchestrates the build pipeline: scan → TOC → render → search index → assets. |
-| `renderer/` | Converts markdown to HTML using Blackfriday. Template-based page rendering. |
-| `export/` | Multi-format export adapters (JSON, YAML, llms.txt, llms-full, JSONL, markdown). Each format has its own file and test. |
-| `chunking/` | Pluggable `ChunkStrategy` interface with Factory pattern. Implementations: `fixed` (token-based), `headers` (markdown headings), `recursive` (hierarchical), `semantic`. |
-| `tokenizer/` | Wraps tiktoken-go (cl100k_base encoding, GPT-4/Claude compatible). Provides `Encode()` and `Count()`. |
-| `search/` | Full-text search indexing with fuzzy matching. |
+| `pkg/scanner/` | Recursively discovers .md files, extracts metadata into `Document` structs. Applies glob-based ignore patterns. `Exclude` skips the output directory; `RelativeTo` names documents relative to the project root (`output.structure: project`). |
+| `internal/toc/` | Builds hierarchical `TOCNode` tree from flat document list. Generates toc.xml per directory. |
+| `internal/compiler/` | Orchestrates the build pipeline: scan → TOC → render → search index → assets. |
+| `internal/renderer/` | Converts markdown to HTML using Blackfriday. Template-based page rendering. |
+| `internal/htmlpath/` | Maps a markdown path to its page path (only a trailing `.md` becomes `.html`). |
+| `pkg/export/` | Multi-format export adapters (JSON, YAML, llms.txt, llms-full, JSONL, markdown). Each format has its own file and test. |
+| `pkg/chunking/` | Pluggable `ChunkStrategy` interface with Factory pattern. Implementations: `fixed` (token-based), `headers` (markdown headings), `recursive` (hierarchical), `semantic` (currently runs `fixed`). |
+| `pkg/tokenizer/` | Wraps tiktoken-go with the `cl100k_base` vocabulary embedded, so it works offline. Provides `Encode()` and `Count()`. |
+| `internal/search/` | Full-text search indexing. |
+| `web/` | Embeds the CSS and JavaScript assets copied into every site. |
 
 ### Data Flow
 
@@ -75,8 +79,11 @@ Project config lives in `jot.yml`. Config precedence: CLI flags > env vars (`JOT
 ## Module Dependencies
 
 ```
-cmd/jot → scanner, toc, compiler, export, chunking
-compiler → renderer, scanner, search, toc
+cmd/jot → compiler, renderer, toc, export, scanner
+compiler → renderer, search, toc, htmlpath, scanner, web
+renderer → toc, htmlpath, scanner
+search → htmlpath, scanner
+toc → scanner
 export → scanner, tokenizer
 chunking → tokenizer, export (types), scanner (types)
 ```

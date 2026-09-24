@@ -219,7 +219,13 @@ With `project`:
 - `build`, `export`, `toc`, and `debug` all use project-relative paths, including export `path` and `source` fields and document IDs.
 - `input.ignore` patterns still match paths relative to each input path, so the same files are included either way.
 
-Changing the setting changes page URLs and document IDs. Rebuild with `--clean` so pages from the old layout are removed, and re-index anything built from an export. With a single input path of `.`, both settings produce the same output.
+Changing the setting changes page URLs and document IDs:
+
+- Rebuild with `--clean`. Without it, pages from the old layout stay in the output directory, and their links now point at different pages. When the output directory contains an input path, `--clean` is refused, so delete the old pages yourself.
+- Run `jot toc` again if you use it, so the `toc.xml` files in your source directories use the new paths.
+- Re-index anything built from an export, since `path`, `source`, and document IDs change.
+
+With a single input path of `.`, both settings produce the same output.
 
 ## Project Structure
 

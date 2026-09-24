@@ -151,7 +151,7 @@ func (r *HTMLRenderer) processCallouts(html string) string {
 }
 
 // RenderPage renders a full HTML page for a given document, including layout,
-// navigation, breadcrumbs, and the document's content.
+// navigation, previous/next links, and the document's content.
 func (r *HTMLRenderer) RenderPage(doc scanner.Document, tableOfContents *toc.TableOfContents, config SiteConfig) (string, error) {
 	// Render the document content
 	content, err := r.RenderDocument(doc)

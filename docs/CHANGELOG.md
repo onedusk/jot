@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Decoupled viper from export package**: `ToLLMFormat()` now accepts `chunkSize, overlap int` parameters instead of reading from `viper.GetInt()`, removing the CLI framework dependency from the library layer
 - Updated 28 import paths across all consumer files
 - **Formatting**: Applied `gofmt` to all Go sources (no behavior change)
+- **Contributor docs**: `CLAUDE.md` now lists packages under their real `pkg/` and `internal/` paths (they moved to `pkg/` in 0.2.0) with an accurate dependency diagram, and its test commands point at `./pkg/chunking/`
 - **Dependencies**: `go mod tidy` now lists `tiktoken-go` as a direct dependency
 - **Config loading**: `export`, `toc`, and `debug` load configuration without `build`'s flag overrides. Previously `export --output docs.jsonl` was also read as the site output directory
 
@@ -56,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unused code**: `internal/compiler.MarkdownCompiler`, which was never called and wrote a markdown mirror of the site that no command produced
 - **Unused renderer code**: breadcrumb generation (`GenerateBreadcrumb`, `BreadcrumbItem`, `PageData.Breadcrumb`), which the page template never displayed, plus an unused navigation helper and template field. Generated pages are unchanged
 - **Unused table of contents stubs**: `TOCNode.SortChildren` (an empty TODO), the `TOCNode.Weight` field nothing read, and `TableOfContents.MarshalXML`, which would have encoded the whole document as escaped text
-- **`pkg/scanner` stubs (public API)**: `Scanner.ScanSingle`, `LoadIgnoreFile` (a no-op that always returned no patterns; `.jotignore` is still not read, see finding A9), and the `Document.HTML` field, which nothing populated
+- **`pkg/scanner` stubs (public API)**: `Scanner.ScanSingle`, `LoadIgnoreFile` (a no-op that always returned no patterns; `.jotignore` files are still not read), and the `Document.HTML` field, which nothing populated
 - **Unused export code (public API)**: the `export.LLMDocument.HTML` field, which nothing set, so it never appeared in LLM-format output, and an unused `minInt` helper
 - **Unset search index field**: `IndexDocument.ContentHash` was declared but never set, so it never appeared in `search-index.json`
 
