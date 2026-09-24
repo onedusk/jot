@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`Scanner.RelativeTo`**: New method in `pkg/scanner` that makes document paths and IDs relative to a given directory instead of the scan root, so scanners of several directories produce distinct paths and IDs
 - **Page export menu**: Split button with dropdown on every rendered page for copying and exporting content
   - "Copy page" copies rendered page text to clipboard
   - "Copy page as Markdown" copies raw markdown source to clipboard (base64-encoded and embedded in page)

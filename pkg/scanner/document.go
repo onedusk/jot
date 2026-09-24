@@ -14,7 +14,7 @@ import (
 type Document struct {
 	ID           string                 // Unique identifier (MD5 hash of RelativePath)
 	Path         string                 // Absolute file path on the filesystem.
-	RelativePath string                 // File path relative to the scanned root directory.
+	RelativePath string                 // File path relative to the scan root, or to the directory given to Scanner.RelativeTo.
 	Title        string                 // The title of the document, extracted from frontmatter or the first H1.
 	Content      []byte                 // The raw markdown content of the file, with frontmatter removed.
 	Metadata     map[string]interface{} // Key-value data parsed from YAML frontmatter.

@@ -6,6 +6,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -16,6 +17,7 @@ import (
 // applying ignore patterns and parsing files into Document structs.
 type Scanner struct {
 	rootPath string
+	prefix   string // rootPath relative to the directory given to RelativeTo
 	filter   *IgnoreFilter
 	excluded []os.FileInfo
 }
@@ -64,6 +66,30 @@ func (s *Scanner) Exclude(dirs ...string) error {
 		s.excluded = append(s.excluded, info)
 	}
 	return nil
+}
+
+// RelativeTo makes document paths, and the IDs derived from them, relative to
+// dir instead of the scan root. With dir as the project root, scanning docs
+// yields docs/guide.md rather than guide.md, and scanning the file
+// docs/README.md yields docs/README.md rather than README.md. Ignore patterns
+// still match paths relative to the scan root. Call it before Scan.
+//
+// The scan root must be dir or inside it. As with Exclude, dir is matched by
+// file identity, so it may be spelled through a symlink.
+func (s *Scanner) RelativeTo(dir string) error {
+	dirInfo, err := os.Stat(dir)
+	if err != nil {
+		return err
+	}
+	for p := s.rootPath; ; p = filepath.Dir(p) {
+		if info, err := os.Stat(p); err == nil && os.SameFile(info, dirInfo) {
+			s.prefix, err = filepath.Rel(p, s.rootPath)
+			return err
+		}
+		if filepath.Dir(p) == p {
+			return fmt.Errorf("%s is outside %s", s.rootPath, dir)
+		}
+	}
 }
 
 // isExcluded reports whether a directory entry is one of the excluded directories.
@@ -118,7 +144,7 @@ func (s *Scanner) Scan() ([]Document, error) {
 		}
 
 		// Read file
-		doc, err := s.readDocument(path, relPath)
+		doc, err := s.readDocument(path, filepath.Join(s.prefix, relPath))
 		if err != nil {
 			// Log error but continue scanning
 			return nil

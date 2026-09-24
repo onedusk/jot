@@ -229,6 +229,96 @@ func TestScanner_ExcludeMatchesByIdentity(t *testing.T) {
 	}
 }
 
+// TestScanner_RelativeTo verifies that document paths and IDs become relative
+// to the given directory, for directory and single-file roots and for a
+// directory spelled through a symlink, while ignore patterns stay relative to
+// the scan root.
+func TestScanner_RelativeTo(t *testing.T) {
+	tmpDir := t.TempDir()
+	proj := filepath.Join(tmpDir, "proj")
+	for _, path := range []string{"README.md", "docs/README.md", "docs/guide.md", "docs/drafts/wip.md"} {
+		fullPath := filepath.Join(proj, path)
+		if err := os.MkdirAll(filepath.Dir(fullPath), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(fullPath, []byte("# Page"), 0644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	alias := filepath.Join(tmpDir, "alias")
+	if err := os.Symlink(proj, alias); err != nil {
+		t.Skipf("symlinks not supported: %v", err)
+	}
+
+	tests := []struct {
+		name   string
+		root   string
+		dir    string
+		ignore []string
+		want   []string
+	}{
+		{"directory root", filepath.Join(proj, "docs"), proj, nil, []string{"docs/README.md", "docs/drafts/wip.md", "docs/guide.md"}},
+		{"root equal to dir", proj, proj, []string{"docs/**"}, []string{"README.md"}},
+		{"single file at dir", filepath.Join(proj, "README.md"), proj, nil, []string{"README.md"}},
+		{"nested single file", filepath.Join(proj, "docs", "README.md"), proj, nil, []string{"docs/README.md"}},
+		{"ignore patterns stay root-relative", filepath.Join(proj, "docs"), proj, []string{"drafts/**"}, []string{"docs/README.md", "docs/guide.md"}},
+		{"dir spelled through a symlink", filepath.Join(proj, "docs"), alias, nil, []string{"docs/README.md", "docs/drafts/wip.md", "docs/guide.md"}},
+		{"root spelled through a symlink", filepath.Join(alias, "docs", "guide.md"), proj, nil, []string{"docs/guide.md"}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := NewScanner(tt.root, tt.ignore)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := s.RelativeTo(tt.dir); err != nil {
+				t.Fatalf("RelativeTo() error = %v", err)
+			}
+			docs, err := s.Scan()
+			if err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, doc := range docs {
+				got = append(got, doc.RelativePath)
+				if doc.ID != generateDocumentID(doc.RelativePath) {
+					t.Errorf("%s: ID %s does not match its path", doc.RelativePath, doc.ID)
+				}
+			}
+			if strings.Join(got, " ") != strings.Join(tt.want, " ") {
+				t.Errorf("Scan() paths = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+// TestScanner_RelativeToOutside verifies that a scan root outside the given
+// directory is rejected rather than named with a leading "..".
+func TestScanner_RelativeToOutside(t *testing.T) {
+	tmpDir := t.TempDir()
+	for _, dir := range []string{"docs", "docs-old"} {
+		if err := os.MkdirAll(filepath.Join(tmpDir, dir), 0755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	tests := []struct{ name, root, dir string }{
+		{"sibling with a shared name prefix", filepath.Join(tmpDir, "docs-old"), filepath.Join(tmpDir, "docs")},
+		{"parent", tmpDir, filepath.Join(tmpDir, "docs")},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := NewScanner(tt.root, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = s.RelativeTo(tt.dir)
+			if err == nil || !strings.Contains(err.Error(), "is outside") {
+				t.Fatalf("RelativeTo() error = %v, want an \"is outside\" error", err)
+			}
+		})
+	}
+}
+
 // TestDocument_ExtractTitle tests the title extraction logic.
 func TestDocument_ExtractTitle(t *testing.T) {
 	tests := []struct {
