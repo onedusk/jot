@@ -5,7 +5,7 @@ All notable changes to Jot will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-09-18
+## [Unreleased] - 2026-09-24
 
 ### Added
 
@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Piped exports**: `jot export` wrote progress messages to stdout along with the exported data, so `jot export --format json | jq .` failed. Progress, including the `--verbose` "Using config file" line, now goes to stderr, and stdout output ends with exactly one newline (previously JSONL gained a trailing blank line, and `llms-txt`, `llms-full`, and `markdown` could end with several)
 - **Duplicated error output**: Errors were printed twice (by Cobra and by `main`), and runtime failures such as "no markdown files found" were followed by the full usage text. Errors now print once. Runtime failures no longer show usage; flag and argument errors still do, and unknown commands still suggest `jot --help`
 - **Pages missing from navigation**: A document and a directory with the same title (for example `guides.md` next to `guides/`), or directories whose names differ only in separators (`my-dir/` and `my_dir/`), were merged into one table of contents node. Documents under the merged directory disappeared from the sidebar. Directories are now matched by name, and only against other directories. Nodes whose names normalize to the same ID now get distinct `id` attributes in `toc.xml` (`guides`, `guides-2`)
+- **Token counting needed the network**: `pkg/tokenizer` downloaded the `cl100k_base` vocabulary from OpenAI on first use, so `jot export` (JSONL, markdown, and the RAG and training presets) failed offline, in sandboxed CI, and in air-gapped environments, and the test suite was not hermetic. The vocabulary is now embedded in the binary (about 1 MB larger) and the encoding is built without touching tiktoken's process-wide loader, so other tiktoken users in the same process are unaffected
 - **Timestamps labeled UTC but in local time**: `modified` values in `toc.xml` and the search index appended a literal `Z` to the local wall-clock time. They are now converted to UTC first
 - **Unescaped titles in navigation**: Document and directory titles and link paths were inserted into the sidebar HTML verbatim, so a title such as `Using <T> generics` or `Q&A` broke the markup on every page. They are now HTML-escaped. The `path` attribute in `toc.xml` is now XML-escaped as well
 
