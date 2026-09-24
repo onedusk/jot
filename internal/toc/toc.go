@@ -4,7 +4,6 @@
 package toc
 
 import (
-	"encoding/xml"
 	"fmt"
 	"strings"
 	"time"
@@ -192,11 +191,4 @@ func escapeXML(s string) string {
 	s = strings.ReplaceAll(s, "\"", "&quot;")
 	s = strings.ReplaceAll(s, "'", "&apos;")
 	return s
-}
-
-// MarshalXML provides a custom XML marshaling implementation for the TableOfContents.
-// This allows it to be easily encoded into XML format.
-func (t *TableOfContents) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	// For now, just use the string representation
-	return e.EncodeElement(t.ToXML(), start)
 }

@@ -11,7 +11,6 @@ type TOCNode struct {
 	ID       string     // A unique, URL-friendly identifier for the node.
 	Title    string     // The display title, derived from the file/directory name or document title.
 	Path     string     // The relative file path for document nodes; empty for directory nodes.
-	Weight   int        // An optional weight for custom sorting of sibling nodes.
 	Children []*TOCNode // Child nodes, representing files and subdirectories.
 
 	// Enhanced metadata for searchability and richer display.
@@ -52,12 +51,4 @@ func (n *TOCNode) findDirectory(name string) *TOCNode {
 // IsLeaf returns true if the node represents a document (i.e., it has a non-empty path).
 func (n *TOCNode) IsLeaf() bool {
 	return n.Path != ""
-}
-
-// SortChildren sorts the node's children based on their weight, and then alphabetically
-// by title for nodes with the same weight.
-// TODO: Implement the sorting logic.
-func (n *TOCNode) SortChildren() {
-	// TODO: Implement sorting logic
-	// For now, children remain in insertion order
 }

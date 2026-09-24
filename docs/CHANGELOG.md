@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Unused code**: `internal/compiler.MarkdownCompiler`, which was never called and wrote a markdown mirror of the site that no command produced
 - **Unused renderer code**: breadcrumb generation (`GenerateBreadcrumb`, `BreadcrumbItem`, `PageData.Breadcrumb`), which the page template never displayed, plus an unused navigation helper and template field. Generated pages are unchanged
+- **Unused table of contents stubs**: `TOCNode.SortChildren` (an empty TODO), the `TOCNode.Weight` field nothing read, and `TableOfContents.MarshalXML`, which would have encoded the whole document as escaped text
 
 ## [0.2.0] - 2026-02-27
 
