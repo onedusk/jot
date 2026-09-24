@@ -380,11 +380,3 @@ func maxInt(a, b int) int {
 	}
 	return b
 }
-
-// minInt returns the smaller of two integers.
-func minInt(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
-}

@@ -25,7 +25,6 @@ type LLMDocument struct {
 	Title      string                 `json:"title" yaml:"title"`
 	Path       string                 `json:"path" yaml:"path"`
 	Content    string                 `json:"content" yaml:"content"`
-	HTML       string                 `json:"html,omitempty" yaml:"html,omitempty"`
 	Chunks     []Chunk                `json:"chunks" yaml:"chunks"`
 	Sections   []LLMSection           `json:"sections" yaml:"sections"`
 	CodeBlocks []LLMCodeBlock         `json:"code_blocks" yaml:"code_blocks"`
