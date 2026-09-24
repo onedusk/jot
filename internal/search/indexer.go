@@ -24,18 +24,17 @@ type Index struct {
 // IndexDocument represents a single document within the search index. It includes
 // the document's content and metadata, optimized for efficient searching.
 type IndexDocument struct {
-	ID          string   `json:"id"`
-	Title       string   `json:"title"`
-	Path        string   `json:"path"`
-	Content     string   `json:"content"`
-	Headings    []string `json:"headings"`
-	Keywords    []string `json:"keywords"`
-	Summary     string   `json:"summary"`
-	Modified    string   `json:"modified,omitempty"`
-	WordCount   int      `json:"wordCount,omitempty"`
-	ReadTime    string   `json:"readTime,omitempty"`
-	Tags        []string `json:"tags,omitempty"`
-	ContentHash string   `json:"contentHash,omitempty"`
+	ID        string   `json:"id"`
+	Title     string   `json:"title"`
+	Path      string   `json:"path"`
+	Content   string   `json:"content"`
+	Headings  []string `json:"headings"`
+	Keywords  []string `json:"keywords"`
+	Summary   string   `json:"summary"`
+	Modified  string   `json:"modified,omitempty"`
+	WordCount int      `json:"wordCount,omitempty"`
+	ReadTime  string   `json:"readTime,omitempty"`
+	Tags      []string `json:"tags,omitempty"`
 }
 
 // Indexer is responsible for building a search index from a collection of documents.

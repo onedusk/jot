@@ -51,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Unused renderer code**: breadcrumb generation (`GenerateBreadcrumb`, `BreadcrumbItem`, `PageData.Breadcrumb`), which the page template never displayed, plus an unused navigation helper and template field. Generated pages are unchanged
 - **Unused table of contents stubs**: `TOCNode.SortChildren` (an empty TODO), the `TOCNode.Weight` field nothing read, and `TableOfContents.MarshalXML`, which would have encoded the whole document as escaped text
 - **`pkg/scanner` stubs (public API)**: `Scanner.ScanSingle`, `LoadIgnoreFile` (a no-op that always returned no patterns; `.jotignore` is still not read, see finding A9), and the `Document.HTML` field, which nothing populated
+- **Unset search index field**: `IndexDocument.ContentHash` was declared but never set, so it never appeared in `search-index.json`
 
 ## [0.2.0] - 2026-02-27
 
