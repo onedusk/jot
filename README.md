@@ -288,6 +288,16 @@ Jot uses `tiktoken-go` with `cl100k_base` encoding for accurate token counting:
 - Word boundary preservation to avoid splitting mid-word
 - Configurable chunk size and overlap
 
+## Go Packages
+
+The packages under `pkg/` (`scanner`, `chunking`, `export`, and `tokenizer`) can be imported by other Go modules:
+
+```go
+import "github.com/onedusk/jot/pkg/scanner"
+```
+
+They are not API-stable yet. Until jot 1.0, exported names and types in `pkg/` may change between releases; every such change is listed in `docs/CHANGELOG.md`. The only known importer is mlpipe, which is developed alongside jot and updated in lockstep. Packages under `internal/` are not importable.
+
 ## Troubleshooting
 
 ### Build fails with "config file not found"
