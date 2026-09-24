@@ -1,6 +1,7 @@
 package tokenizer
 
 import (
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"reflect"
@@ -59,5 +60,21 @@ func TestNewTokenizerOffline(t *testing.T) {
 	}
 	if got := tok.Count("hello world"); got != 2 {
 		t.Errorf("Count() = %d, want 2", got)
+	}
+}
+
+// TestParseRanksCRLF verifies that a vocabulary with CRLF line endings parses
+// the same as one with LF endings.
+func TestParseRanksCRLF(t *testing.T) {
+	lf, err := parseRanks(cl100kBase)
+	if err != nil {
+		t.Fatal(err)
+	}
+	crlf, err := parseRanks(bytes.ReplaceAll(cl100kBase, []byte("\n"), []byte("\r\n")))
+	if err != nil {
+		t.Fatalf("parseRanks() with CRLF line endings: %v", err)
+	}
+	if !reflect.DeepEqual(lf, crlf) {
+		t.Error("CRLF and LF vocabularies parsed differently")
 	}
 }

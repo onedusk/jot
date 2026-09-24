@@ -91,6 +91,8 @@ func NewTokenizer() (*TikTokenizer, error) {
 func parseRanks(data []byte) (map[string]int, error) {
 	ranks := make(map[string]int, bytes.Count(data, []byte("\n")))
 	for i, line := range bytes.Split(data, []byte("\n")) {
+		// Tolerate CRLF line endings, as from a checkout that converted them
+		line = bytes.TrimSuffix(line, []byte("\r"))
 		if len(line) == 0 {
 			continue
 		}
