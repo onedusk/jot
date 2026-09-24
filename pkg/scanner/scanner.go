@@ -87,7 +87,7 @@ func (s *Scanner) RelativeTo(dir string) error {
 			return err
 		}
 		if filepath.Dir(p) == p {
-			return fmt.Errorf("%s is outside %s", s.rootPath, dir)
+			return fmt.Errorf("%s is not inside %s", s.rootPath, dir)
 		}
 	}
 }

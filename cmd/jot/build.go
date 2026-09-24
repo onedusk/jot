@@ -249,7 +249,7 @@ func relativeToProject(s *scanner.Scanner, inputPath, root string) error {
 		return nil
 	}
 	if err := s.RelativeTo(root); err != nil {
-		return fmt.Errorf("output.structure is project, but input path %s is outside the project root: %w; run jot from a directory that contains every input path, or set output.structure: input", inputPath, err)
+		return fmt.Errorf("output.structure is project, so input path %s must be inside the project root: %w; run jot from a directory that contains every input path, or set output.structure: input", inputPath, err)
 	}
 	return nil
 }

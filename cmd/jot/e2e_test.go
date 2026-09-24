@@ -564,7 +564,7 @@ func TestE2EProjectStructureInputOutsideRoot(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error for an input path outside the project root")
 	}
-	for _, want := range []string{"input path ../shared is outside the project root", "set output.structure: input"} {
+	for _, want := range []string{"input path ../shared must be inside the project root", "set output.structure: input"} {
 		if !strings.Contains(err.Error(), want) {
 			t.Errorf("error should contain %q: %v", want, err)
 		}

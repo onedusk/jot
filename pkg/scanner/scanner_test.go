@@ -312,8 +312,8 @@ func TestScanner_RelativeToOutside(t *testing.T) {
 				t.Fatal(err)
 			}
 			err = s.RelativeTo(tt.dir)
-			if err == nil || !strings.Contains(err.Error(), "is outside") {
-				t.Fatalf("RelativeTo() error = %v, want an \"is outside\" error", err)
+			if err == nil || !strings.Contains(err.Error(), "is not inside") {
+				t.Fatalf("RelativeTo() error = %v, want an \"is not inside\" error", err)
 			}
 		})
 	}
