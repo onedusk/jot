@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/onedusk/jot/internal/htmlpath"
 	"github.com/onedusk/jot/internal/renderer"
 	"github.com/onedusk/jot/internal/search"
 	"github.com/onedusk/jot/internal/toc"
@@ -132,8 +133,7 @@ func isSameFile(a, b string) bool {
 
 // getOutputPath converts a markdown file's relative path to its corresponding HTML output path.
 func (c *Compiler) getOutputPath(relativePath string) string {
-	// Replace .md with .html
-	htmlPath := strings.Replace(relativePath, ".md", ".html", 1)
+	htmlPath := htmlpath.FromMarkdown(relativePath)
 
 	// Join with output directory
 	return filepath.Join(c.outputPath, htmlPath)
@@ -194,7 +194,7 @@ func (c *Compiler) writeTOCNode(sb *strings.Builder, node *toc.TOCNode, depth in
 
 	if node.Path != "" {
 		// Document link
-		htmlPath := strings.Replace(node.Path, ".md", ".html", 1)
+		htmlPath := htmlpath.FromMarkdown(node.Path)
 		sb.WriteString(fmt.Sprintf("%s- [%s](%s)\n", indent, node.Title, htmlPath))
 	} else {
 		// Section header

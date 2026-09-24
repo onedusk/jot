@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/onedusk/jot/internal/htmlpath"
 	"github.com/onedusk/jot/internal/toc"
 	"github.com/onedusk/jot/pkg/scanner"
 	"github.com/russross/blackfriday/v2"
@@ -215,14 +216,14 @@ func (r *HTMLRenderer) computeAdjacentPages(root *toc.TOCNode, currentPath strin
 	for i, leaf := range unique {
 		if leaf.Path == currentPath {
 			if i > 0 {
-				htmlPath := strings.Replace(unique[i-1].Path, ".md", ".html", 1)
+				htmlPath := htmlpath.FromMarkdown(unique[i-1].Path)
 				prevPage = &PageLink{
 					Title: unique[i-1].Title,
 					Path:  relativePrefix + htmlPath,
 				}
 			}
 			if i < len(unique)-1 {
-				htmlPath := strings.Replace(unique[i+1].Path, ".md", ".html", 1)
+				htmlPath := htmlpath.FromMarkdown(unique[i+1].Path)
 				nextPage = &PageLink{
 					Title: unique[i+1].Title,
 					Path:  relativePrefix + htmlPath,
@@ -254,9 +255,12 @@ func (r *HTMLRenderer) ResolveInternalLinks(html string) string {
 			return match
 		}
 
-		// Replace .md with .html
-		newURL := strings.Replace(url, ".md", ".html", 1)
-		return fmt.Sprintf(`href="%s"`, newURL)
+		// Replace the .md extension with .html, keeping any #fragment
+		path, fragment := url, ""
+		if i := strings.Index(url, "#"); i >= 0 {
+			path, fragment = url[:i], url[i:]
+		}
+		return fmt.Sprintf(`href="%s"`, htmlpath.FromMarkdown(path)+fragment)
 	})
 }
 
@@ -283,7 +287,7 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 	// Check if this is a directory or file
 	if node.Path != "" {
 		// This is a file - render as a nav item
-		htmlPath := strings.Replace(node.Path, ".md", ".html", 1)
+		htmlPath := htmlpath.FromMarkdown(node.Path)
 		activeClass := ""
 		if node.Path == currentPath {
 			activeClass = " active"
@@ -311,7 +315,7 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 		// Render children
 		for _, child := range node.Children {
 			if child.Path != "" {
-				htmlPath := strings.Replace(child.Path, ".md", ".html", 1)
+				htmlPath := htmlpath.FromMarkdown(child.Path)
 				activeClass := ""
 				if child.Path == currentPath {
 					activeClass = " active"

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/onedusk/jot/internal/htmlpath"
 	"github.com/onedusk/jot/pkg/scanner"
 )
 
@@ -114,7 +115,7 @@ func (idx *Indexer) processDocument(doc scanner.Document) IndexDocument {
 	return IndexDocument{
 		ID:        id,
 		Title:     doc.Title,
-		Path:      strings.Replace(doc.RelativePath, ".md", ".html", 1),
+		Path:      htmlpath.FromMarkdown(doc.RelativePath),
 		Content:   cleanContent,
 		Headings:  headings,
 		Keywords:  keywords,

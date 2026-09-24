@@ -723,3 +723,29 @@ func TestE2EProjectStructureInPlaceBuild(t *testing.T) {
 		t.Errorf("source docs/guide.md was modified: %q (%v)", got, err)
 	}
 }
+
+func TestE2EOnlyTheMarkdownExtensionIsReplaced(t *testing.T) {
+	// A directory whose name contains ".md" keeps its name, and an uppercase
+	// .MD extension still produces an .html page instead of a page written to
+	// the markdown copy's path.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":             "input:\n  paths: [\"site.mdocs\"]\noutput:\n  path: dist\n  structure: project\n",
+		"site.mdocs/a.md":     "# A\n\nSee [upper](Upper.MD).\n",
+		"site.mdocs/Upper.MD": "# Upper\n",
+	})
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	for _, page := range []string{"site.mdocs/a.html", "site.mdocs/Upper.html"} {
+		content, err := os.ReadFile(filepath.Join(dir, "dist", page))
+		if err != nil || !strings.Contains(string(content), "<html") {
+			t.Errorf("expected rendered page dist/%s (read error: %v)", page, err)
+		}
+	}
+	if _, err := os.Stat(filepath.Join(dir, "dist", "site.htmlocs")); err == nil {
+		t.Error("the directory name must not be rewritten")
+	}
+}
