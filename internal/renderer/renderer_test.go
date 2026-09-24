@@ -255,59 +255,6 @@ func TestHTMLRenderer_ResolveInternalLinks(t *testing.T) {
 	}
 }
 
-// TestGenerateBreadcrumb tests the breadcrumb generation logic.
-func TestGenerateBreadcrumb(t *testing.T) {
-	tests := []struct {
-		name string
-		path string
-		want []BreadcrumbItem
-	}{
-		{
-			name: "root level",
-			path: "index.md",
-			want: []BreadcrumbItem{
-				{Title: "Home", Path: "/"},
-			},
-		},
-		{
-			name: "one level deep",
-			path: "docs/getting-started.md",
-			want: []BreadcrumbItem{
-				{Title: "Home", Path: "/"},
-				{Title: "Docs", Path: "/docs/"},
-				{Title: "Getting Started", Path: "/docs/getting-started.html"},
-			},
-		},
-		{
-			name: "multiple levels",
-			path: "docs/api/reference/endpoints.md",
-			want: []BreadcrumbItem{
-				{Title: "Home", Path: "/"},
-				{Title: "Docs", Path: "/docs/"},
-				{Title: "Api", Path: "/docs/api/"},
-				{Title: "Reference", Path: "/docs/api/reference/"},
-				{Title: "Endpoints", Path: "/docs/api/reference/endpoints.html"},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := GenerateBreadcrumb(tt.path, "")
-			if len(got) != len(tt.want) {
-				t.Errorf("GenerateBreadcrumb() returned %d items, want %d", len(got), len(tt.want))
-				return
-			}
-			for i, item := range got {
-				if item.Title != tt.want[i].Title || item.Path != tt.want[i].Path {
-					t.Errorf("GenerateBreadcrumb()[%d] = {%s, %s}, want {%s, %s}",
-						i, item.Title, item.Path, tt.want[i].Title, tt.want[i].Path)
-				}
-			}
-		})
-	}
-}
-
 // TestHTMLRenderer_GenerateNavigation tests the navigation tree generation.
 func TestHTMLRenderer_GenerateNavigation(t *testing.T) {
 	tocRoot := &toc.TOCNode{

@@ -20,9 +20,7 @@ import (
 
 // HTMLRenderer is responsible for converting markdown documents into final HTML pages.
 // It manages templates, markdown-to-HTML conversion, and generation of navigation elements.
-type HTMLRenderer struct {
-	templates *template.Template
-}
+type HTMLRenderer struct{}
 
 // NewHTMLRenderer creates and returns a new HTMLRenderer instance.
 func NewHTMLRenderer() *HTMLRenderer {
@@ -163,9 +161,6 @@ func (r *HTMLRenderer) RenderPage(doc scanner.Document, tableOfContents *toc.Tab
 	// Calculate relative path prefix based on document depth
 	relativePrefix := r.getRelativePrefix(doc.RelativePath)
 
-	// Generate breadcrumb
-	breadcrumb := GenerateBreadcrumb(doc.RelativePath, relativePrefix)
-
 	// Generate navigation
 	nav := r.GenerateNavigation(tableOfContents.Root, doc.RelativePath, relativePrefix)
 
@@ -177,7 +172,6 @@ func (r *HTMLRenderer) RenderPage(doc scanner.Document, tableOfContents *toc.Tab
 		Title:          doc.Title,
 		Content:        template.HTML(content),
 		Navigation:     template.HTML(nav),
-		Breadcrumb:     breadcrumb,
 		RelativePrefix: relativePrefix,
 		ProjectName:    config.ProjectName,
 		NavLinks:       config.NavLinks,
@@ -334,20 +328,6 @@ func (r *HTMLRenderer) renderNavSection(buf *bytes.Buffer, node *toc.TOCNode, cu
 	}
 }
 
-// containsActivePage recursively checks if a TOC node or any of its children
-// corresponds to the currently active page path.
-func (r *HTMLRenderer) containsActivePage(node *toc.TOCNode, currentPath string) bool {
-	if node.Path == currentPath {
-		return true
-	}
-	for _, child := range node.Children {
-		if r.containsActivePage(child, currentPath) {
-			return true
-		}
-	}
-	return false
-}
-
 // renderTemplate executes the HTML template with the provided page data.
 func (r *HTMLRenderer) renderTemplate(data PageData) (string, error) {
 	// Use the exact template design from proposal_template_001.html
@@ -391,7 +371,6 @@ type PageData struct {
 	Title          string
 	Content        template.HTML
 	Navigation     template.HTML
-	Breadcrumb     []BreadcrumbItem
 	RelativePrefix string
 	ProjectName    string
 	NavLinks       []NavLink
@@ -399,65 +378,4 @@ type PageData struct {
 	NextPage       *PageLink
 	MarkdownSource string // base64-encoded raw markdown for clipboard copy
 	MarkdownPath   string // relative .md file path for "Open Markdown" link
-}
-
-// BreadcrumbItem represents a single item in a breadcrumb navigation trail.
-type BreadcrumbItem struct {
-	Title string
-	Path  string
-}
-
-// GenerateBreadcrumb creates a slice of BreadcrumbItem for a given document path,
-// which can be used to render a breadcrumb navigation menu.
-func GenerateBreadcrumb(path string, relativePrefix string) []BreadcrumbItem {
-	// Clean and split the path
-	path = filepath.ToSlash(path)
-
-	// Special case for index
-	if path == "index.md" {
-		return []BreadcrumbItem{
-			{Title: "Home", Path: "/"},
-		}
-	}
-
-	parts := strings.Split(path, "/")
-
-	breadcrumbs := []BreadcrumbItem{
-		{Title: "Home", Path: "/"},
-	}
-
-	// Build breadcrumb path
-	currentPath := ""
-	for i, part := range parts {
-		if part == "" || part == "." {
-			continue
-		}
-
-		// Add path separator
-		if currentPath != "" {
-			currentPath += "/"
-		}
-		currentPath += part
-
-		// Create breadcrumb item
-		title := strings.Title(strings.ReplaceAll(strings.TrimSuffix(part, ".md"), "-", " "))
-
-		// For directories (not the last part or doesn't end with .md), append /
-		// For files (last part and ends with .md), replace .md with .html
-		var href string
-		if i == len(parts)-1 && strings.HasSuffix(part, ".md") {
-			// This is a file
-			href = "/" + strings.Replace(currentPath, ".md", ".html", 1)
-		} else {
-			// This is a directory
-			href = "/" + strings.TrimSuffix(currentPath, ".md") + "/"
-		}
-
-		breadcrumbs = append(breadcrumbs, BreadcrumbItem{
-			Title: title,
-			Path:  href,
-		})
-	}
-
-	return breadcrumbs
 }
