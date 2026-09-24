@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"os"
+	"os/exec"
 	"reflect"
 	"testing"
 )
@@ -48,11 +50,23 @@ func TestEncodeMatchesTiktoken(t *testing.T) {
 }
 
 // TestNewTokenizerOffline verifies that no download is attempted: with an
-// empty tiktoken cache and an unreachable proxy, a download would fail.
+// empty tiktoken cache and an unreachable proxy, a download would fail. It
+// runs in a fresh process, because tiktoken caches encodings process-wide and
+// an earlier test could otherwise hide a regression to tiktoken.GetEncoding.
 func TestNewTokenizerOffline(t *testing.T) {
-	t.Setenv("TIKTOKEN_CACHE_DIR", t.TempDir())
-	t.Setenv("HTTPS_PROXY", "http://127.0.0.1:1")
-	t.Setenv("HTTP_PROXY", "http://127.0.0.1:1")
+	if os.Getenv("JOT_TOKENIZER_OFFLINE_CHILD") != "1" {
+		cmd := exec.Command(os.Args[0], "-test.run=^TestNewTokenizerOffline$")
+		cmd.Env = append(os.Environ(),
+			"JOT_TOKENIZER_OFFLINE_CHILD=1",
+			"TIKTOKEN_CACHE_DIR="+t.TempDir(),
+			"HTTPS_PROXY=http://127.0.0.1:1",
+			"HTTP_PROXY=http://127.0.0.1:1",
+		)
+		if out, err := cmd.CombinedOutput(); err != nil {
+			t.Fatalf("NewTokenizer() without network, in a fresh process: %v\n%s", err, out)
+		}
+		return
+	}
 
 	tok, err := NewTokenizer()
 	if err != nil {
