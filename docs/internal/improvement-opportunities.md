@@ -6,7 +6,7 @@
 | Commit reviewed | `88fe938` (main, clean tree) |
 | Scope | Entire repository: `cmd/`, `internal/`, `pkg/`, `web/`, build tooling, scripts, docs |
 | Code size | ~4,500 lines of Go (non-test), ~4,300 lines of tests, ~1,750 lines of front-end assets |
-| Changes made | None at the time of the audit. Phase 0 and Phase 1 have since been implemented on branch `fix/remediation-phase-1`; see [Section 11](#11-progress-and-verification). |
+| Changes made | None at the time of the audit. Phase 0 and Phase 1 have since been implemented (branch `fix/remediation-phase-1`, merged to main); see [Section 11](#11-progress-and-verification). The Section 9 decisions are recorded in [Section 12](#12-section-9-decisions-2026-09-24) (branch `feat/section9-decisions`). |
 
 ## How to read this document
 
@@ -452,7 +452,7 @@ The roadmap's "Completed Features" list and `docs/spec/architecture.md` should b
 
 ## 9. Decisions needed from the maintainer
 
-These change user-visible behavior, so they should be chosen rather than assumed.
+These change user-visible behavior, so they should be chosen rather than assumed. The maintainer's answers and their status are in [Section 12](#12-section-9-decisions-2026-09-24).
 
 1. **URL layout for multiple input roots (`A3`).** Keep root-relative paths and fail on collision (no URL changes, smaller fix), or switch to project-relative paths (no collisions possible, but existing URLs change). Recommendation: fail on collision now; consider project-relative paths behind a config flag later.
 2. **Scope of LLM export features (`A16`).** Embeddings and semantic chunking require an embedding provider, API keys, and cost controls. Recommendation: remove `--include-embeddings`, and have `semantic` either be removed or documented plainly as an alias for `fixed` until there is a concrete design. Update `--for-rag` to use `recursive` or `markdown-headers`, which exist.
@@ -598,6 +598,51 @@ These predate this branch unless noted, and belong in the later phases.
 | V8 | P2 | Titles written with HTML entities (`&lt;T&gt;`) now show the literal entity in the sidebar, matching `<title>` and prev/next links, where before the sidebar alone decoded them. Behavior change from A14. | `internal/renderer/renderer.go` |
 | V9 | P2 | Tests in `cmd/jot` mutate process globals (working directory, viper, `rootCmd`, `exportCmd`, `os.Stdout`). They pass shuffled and with `-race`, but cannot use `t.Parallel()`. Resolved properly by D4. | `cmd/jot/e2e_test.go` |
 | V10 | P2 | The new `web` package sits outside `internal/`, so `web.Assets` is importable by other modules. Moving the assets under `internal/` would keep it private. | `web/embed.go` |
+
+## 12. Section 9 decisions (2026-09-24)
+
+Implemented on branch `feat/section9-decisions`.
+
+| Decision | Choice | Status | Commits |
+|---|---|---|---|
+| 1. URL layout for multiple input roots | Both: keep root-relative paths with collision errors as the default, and add opt-in project-relative paths | Done. New `output.structure: input \| project` in `jot.yml`; `project` makes paths relative to the working directory for `build`, `export`, `toc`, and `debug`. New `Scanner.RelativeTo` in `pkg/scanner` so library users can opt in | `30bb9a8`, `90b5189`, follow-ups below |
+| 2. Scope of LLM export features | Design it, and check whether mlpipe answers the question | Designed, awaiting approval. See [llm-export-design.md](llm-export-design.md) | - |
+| 3. `file://` support versus page weight | Keep embedded markdown (no change) | No change needed | - |
+| 4. Embed the tokenizer vocabulary | Embed | Done. `cl100k_base` embedded in `pkg/tokenizer`, built without replacing tiktoken's process-wide loader; no new module, so mlpipe's `go.sum` is unaffected | `a31b171`, `07c4b99`, `4bcebac` |
+| 5. Dead code and stubs | Delete | Done, except stubs tied to Decision 2 (`SemanticStrategy`, `contextualEnrichment`, the legacy `llm` CLI branch, `--include-embeddings`), which the design settles | `5d28aa6`, `a685f32`, `5436893`, `f0450e4`, `7db0997`, `86a60e5` |
+| 6. `pkg/` stability | Importable, not API-stable before 1.0; mlpipe moves in lockstep | Done. README "Go Packages" section; `CLAUDE.md` module table corrected | `d3ab0cc`, `1905d46` |
+
+`B11` (breadcrumb URLs) is closed: the dead breadcrumb code was removed in `a685f32`.
+
+### Verification of this branch
+
+Four read-only agents tried to refute the changes by running real binaries out of tree against the base (`2acde71`), and one reviewed the diff. Fixed in follow-up commits:
+
+- With the output directory equal to, or containing, an input path, a document's markdown copy could land somewhere other than on its own source: in project mode `-o docs` replaced `docs/README.md` with the root README and nested `docs/docs/...` on every rebuild; in the default mode, input `docs` with output `.` replaced the project's own `README.md`. `build` now refuses such layouts before writing anything (`8bf3f5f`, `1a7a6c7`).
+- The embedded vocabulary broke on checkouts with `core.autocrlf` (Git for Windows' default) (`07c4b99`), and the offline tokenizer test passed against the old implementation when run after other tests (`4bcebac`).
+- `output.structure` accepted YAML lists as the default (`f687bb5`); the outside-root error repeated itself and was wrong for ancestor inputs (`27972e2`).
+- One file reached through a symlink or a differently-cased path was built twice or reported as colliding with itself (`b1b524c`).
+- Page paths replaced the first `.md` anywhere in a path, and ignored uppercase `.MD` (`aa7b5ec`, part of D2).
+- Document IDs were hashed before `/` normalization, so they differed on Windows (`5f19e30`).
+- Stale comments and docs (`1905d46`).
+
+The mlpipe gate used during this work reported only build and vet failures for most commits, because `go test` was piped into `grep`. It was fixed, and mlpipe's build, vet, and tests were then re-run against every commit that claimed them; all pass.
+
+### Remaining items
+
+| ID | Priority | Finding | Where |
+|---|---|---|---|
+| V11 | P2 | An in-place build that generates a contents page (no root `index.md` or `README.md` among the documents) writes `index.md` into the output directory, replacing a root `index.md` that is not an input. Same in the base. | `internal/compiler/compiler.go` `generateIndexPage` |
+| V12 | P2 | CI runs only on Linux, so the Windows fixes (CRLF vocabulary, ID normalization) are untested. A `windows-latest` job would cover them. | `.github/workflows/ci.yml` |
+| V13 | P2 | `NewTokenizer` re-parses the 1.7 MB vocabulary on every call (tiktoken used to memoize it). Called once or twice per export, so the cost is small. | `pkg/tokenizer/tokenizer.go` |
+| V14 | P2 | `TableOfContents.GetNodeByID` and the `Index` map it reads are used only by tests. | `internal/toc/toc.go` |
+| V15 | P2 | Misspelled `jot.yml` keys and nested `JOT_*` environment variables are silently ignored (B3); `docs/spec/architecture.md` still documents removed fields (Phase 5). | `cmd/jot/root.go`, `docs/spec/architecture.md` |
+
+### Recommendations for mlpipe (not changed here)
+
+- Call `Scanner.RelativeTo` with one shared root per run, `Exclude(outputDir)`, and drop repeated `doc.Path` values in `ProcessMixed`, so a `README.md` in two markdown directories does not produce identical document and chunk IDs.
+- `--format llm` writes nothing (`cmd/mlpipe/process.go` only writes `result.JSONL`; mlpipe's own `export-bugs.md` Bug 2).
+- The vectors mlpipe's `Embedder` computes never reach `result.JSONL`; the Decision 2 design fixes this on the jot side.
 
 ## Appendix A. Reproduction commands
 
