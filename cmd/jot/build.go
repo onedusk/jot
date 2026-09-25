@@ -192,9 +192,11 @@ func runBuild(cmd *cobra.Command, args []string) error {
 }
 
 // dedupeDocuments drops repeat scans of the same source file (an input path
-// listed twice, a file that is also inside another input path, or a file
-// reached through a symlink or a differently-cased path) and returns an error
-// if two different files would be written to the same output path. By default
+// listed twice, or a file that is also inside another input path) and returns
+// an error if two different files would be written to the same output path.
+// One file reached through two spellings (a symlink, or a differently-cased
+// path) that maps to the same output path is kept once; if the spellings map to
+// different output paths, both pages are built, as for any alias. By default
 // relative paths are computed per input root, so files from different roots
 // can collide. They are compared case-insensitively because on the default
 // macOS and Windows filesystems README.md and readme.md are the same file.
@@ -203,27 +205,24 @@ func dedupeDocuments(docs []scanner.Document, projectPaths bool) ([]scanner.Docu
 	seenSource := make(map[string]bool, len(docs))
 	seenOutput := make(map[string]scanner.Document, len(docs))
 	for _, doc := range docs {
-		source := doc.Path
-		if resolved, err := filepath.EvalSymlinks(doc.Path); err == nil {
-			source = resolved
-		}
-		if seenSource[source] {
+		if seenSource[doc.Path] {
 			continue
 		}
-		seenSource[source] = true
+		seenSource[doc.Path] = true
 
 		key := strings.ToLower(doc.RelativePath)
 		if first, ok := seenOutput[key]; ok {
 			if sameFile(first.Path, doc.Path) {
-				// The same file through a differently-cased path
+				// The same file through another spelling, written to the same page
 				continue
 			}
 			msg := fmt.Sprintf("%s and %s both map to %s in the output",
 				displayPath(first.Path), displayPath(doc.Path), first.RelativePath)
 			if first.RelativePath != doc.RelativePath {
 				msg += " (paths that differ only in case collide on case-insensitive filesystems)"
-			} else if !projectPaths {
-				// Identical paths from different input roots, which project-relative paths keep apart
+			}
+			if !projectPaths && inputRoot(first) != inputRoot(doc) {
+				// Project-relative paths keep files from different input roots apart
 				return nil, fmt.Errorf("%s; rename one of them, remove one of the input paths, or set output.structure: project", msg)
 			}
 			return nil, fmt.Errorf("%s; rename one of them or remove one of the input paths", msg)
@@ -232,6 +231,11 @@ func dedupeDocuments(docs []scanner.Document, projectPaths bool) ([]scanner.Docu
 		unique = append(unique, doc)
 	}
 	return unique, nil
+}
+
+// inputRoot returns the directory a document's relative path is relative to.
+func inputRoot(doc scanner.Document) string {
+	return strings.TrimSuffix(doc.Path, filepath.FromSlash(doc.RelativePath))
 }
 
 // sameFile reports whether a and b both exist and are the same file.

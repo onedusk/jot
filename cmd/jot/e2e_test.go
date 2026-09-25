@@ -838,3 +838,25 @@ func TestE2EOutputContainingInputCopyInsideInput(t *testing.T) {
 		t.Error("docs/y.md should not be created")
 	}
 }
+
+func TestE2ESymlinkAliasKeepsBothPages(t *testing.T) {
+	// A symlink alias and its target map to different pages, so both are built.
+	dir := t.TempDir()
+	writeFixture(t, dir, map[string]string{
+		"jot.yml":       "input:\n  paths: [\"docs\"]\noutput:\n  path: dist\n",
+		"docs/guide.md": "# Guide\n",
+	})
+	if err := os.Symlink("guide.md", filepath.Join(dir, "docs", "alias.md")); err != nil {
+		t.Skipf("symlinks not supported: %v", err)
+	}
+	enterFixture(t, dir)
+
+	if err := runBuild(newTestBuildCmd(), nil); err != nil {
+		t.Fatalf("build failed: %v", err)
+	}
+	for _, page := range []string{"guide.html", "alias.html"} {
+		if _, err := os.Stat(filepath.Join(dir, "dist", page)); err != nil {
+			t.Errorf("expected dist/%s: %v", page, err)
+		}
+	}
+}

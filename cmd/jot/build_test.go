@@ -264,8 +264,18 @@ func TestDedupeDocuments(t *testing.T) {
 			wantErr: "both map to README.md",
 		},
 		{
-			name:     "output paths differing only in case",
-			docs:     []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
+			name:    "output paths differing only in case, from different roots",
+			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
+			wantErr: "differ only in case",
+		},
+		{
+			name:    "case-only collision across roots suggests project-relative paths",
+			docs:    []scanner.Document{doc("/p/README.md", "README.md"), doc("/p/docs/readme.md", "readme.md")},
+			wantErr: "or set output.structure: project",
+		},
+		{
+			name:     "case-only collision within one root does not suggest the setting",
+			docs:     []scanner.Document{doc("/p/docs/Guide.md", "Guide.md"), doc("/p/docs/guide.md", "guide.md")},
 			wantErr:  "differ only in case",
 			dontWant: "output.structure",
 		},
@@ -306,8 +316,8 @@ func TestDedupeDocuments(t *testing.T) {
 }
 
 // TestDedupeDocumentsSameFileSpellings verifies that one file reached through
-// a symlink or a differently-cased path is kept once rather than built twice
-// or reported as a collision.
+// two spellings is kept once when both map to the same page, and kept as two
+// pages, like any alias, when they map to different pages.
 func TestDedupeDocumentsSameFileSpellings(t *testing.T) {
 	dir := t.TempDir()
 	guide := filepath.Join(dir, "docs", "guide.md")
@@ -317,22 +327,34 @@ func TestDedupeDocumentsSameFileSpellings(t *testing.T) {
 	if err := os.WriteFile(guide, []byte("# Guide"), 0644); err != nil {
 		t.Fatal(err)
 	}
+	if err := os.Symlink(filepath.Join(dir, "docs"), filepath.Join(dir, "docslink")); err != nil {
+		t.Skipf("symlinks not supported: %v", err)
+	}
+	linked := filepath.Join(dir, "docslink", "guide.md")
 
-	t.Run("symlinked directory", func(t *testing.T) {
-		if err := os.Symlink(filepath.Join(dir, "docs"), filepath.Join(dir, "docslink")); err != nil {
-			t.Skipf("symlinks not supported: %v", err)
-		}
+	t.Run("symlink spelling with the same page", func(t *testing.T) {
 		docs := []scanner.Document{
-			{Path: filepath.Join(dir, "docslink", "guide.md"), RelativePath: "docslink/guide.md"},
-			{Path: guide, RelativePath: "docs/guide.md"},
+			{Path: linked, RelativePath: "guide.md"},
+			{Path: guide, RelativePath: "guide.md"},
 		}
-		got, err := dedupeDocuments(docs, true)
+		got, err := dedupeDocuments(docs, false)
 		if err != nil || len(got) != 1 {
 			t.Fatalf("dedupeDocuments() = %d documents, %v; want 1, nil", len(got), err)
 		}
 	})
 
-	t.Run("differently-cased directory", func(t *testing.T) {
+	t.Run("symlink spelling with a different page", func(t *testing.T) {
+		docs := []scanner.Document{
+			{Path: linked, RelativePath: "docslink/guide.md"},
+			{Path: guide, RelativePath: "docs/guide.md"},
+		}
+		got, err := dedupeDocuments(docs, true)
+		if err != nil || len(got) != 2 {
+			t.Fatalf("dedupeDocuments() = %d documents, %v; want 2, nil", len(got), err)
+		}
+	})
+
+	t.Run("differently-cased directory with the same page", func(t *testing.T) {
 		upper := filepath.Join(dir, "Docs", "guide.md")
 		if _, err := os.Stat(upper); err != nil {
 			t.Skip("filesystem is case-sensitive")
