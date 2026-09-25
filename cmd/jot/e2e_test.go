@@ -748,6 +748,10 @@ func TestE2EOnlyTheMarkdownExtensionIsReplaced(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "dist", "site.htmlocs")); err == nil {
 		t.Error("the directory name must not be rewritten")
 	}
+	page, err := os.ReadFile(filepath.Join(dir, "dist", "site.mdocs", "a.html"))
+	if err != nil || !strings.Contains(string(page), `href="Upper.html"`) {
+		t.Errorf("the in-page link to Upper.MD should point to Upper.html (read error: %v)", err)
+	}
 }
 
 func TestE2EOutputContainingInputKeepsOtherFiles(t *testing.T) {

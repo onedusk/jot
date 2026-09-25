@@ -239,7 +239,7 @@ func (r *HTMLRenderer) computeAdjacentPages(root *toc.TOCNode, currentPath strin
 // links to the corresponding HTML files (.html) within the generated HTML.
 func (r *HTMLRenderer) ResolveInternalLinks(html string) string {
 	// Regular expression to find href attributes with .md files
-	linkRegex := regexp.MustCompile(`href="([^"]+\.md(?:#[^"]*)?)"`)
+	linkRegex := regexp.MustCompile(`href="([^"]+\.(?i:md)(?:#[^"]*)?)"`)
 
 	return linkRegex.ReplaceAllStringFunc(html, func(match string) string {
 		// Extract the URL

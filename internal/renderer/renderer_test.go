@@ -242,6 +242,16 @@ func TestHTMLRenderer_ResolveInternalLinks(t *testing.T) {
 			input: `<a href="./doc.md#section">Section</a>`,
 			want:  `<a href="./doc.html#section">Section</a>`,
 		},
+		{
+			name:  "uppercase extension",
+			input: `<a href="Other.MD#section">Other</a>`,
+			want:  `<a href="Other.html#section">Other</a>`,
+		},
+		{
+			name:  "only the extension is replaced",
+			input: `<a href="site.mdocs/a.md">A</a>`,
+			want:  `<a href="site.mdocs/a.html">A</a>`,
+		},
 	}
 
 	renderer := NewHTMLRenderer()
