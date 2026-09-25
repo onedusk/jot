@@ -2,7 +2,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,7 +9,6 @@ import (
 	"time"
 
 	"github.com/onedusk/jot/internal/compiler"
-	"github.com/onedusk/jot/internal/htmlpath"
 	"github.com/onedusk/jot/internal/renderer"
 	"github.com/onedusk/jot/internal/toc"
 	"github.com/onedusk/jot/pkg/export"
@@ -278,14 +276,14 @@ func relativeToProject(s *scanner.Scanner, inputPath, root string) error {
 	return nil
 }
 
-// checkCopiesStayOnSources returns an error if a document's markdown copy would
-// damage the source tree. When the output directory is an input path, every
-// copy must land on its own source, since anything else inside the input would
-// be read back as a source on the next build (building into the only input
-// path, or into the project root with output.structure: project, is fine).
-// When the output directory only contains an input path, a copy may also not
-// land inside an input path, or replace an existing file that jot did not
-// write, such as a project README that is not an input.
+// checkCopiesStayOnSources returns an error if the output directory is or
+// contains an input path and a document's markdown copy would land somewhere
+// other than on its own source. Inside an input path, such a copy would be
+// read back as a source on the next build. Elsewhere in a directory that holds
+// the user's files, jot cannot tell its own earlier copies from files the user
+// wrote (such as a project README that is not an input), so it refuses rather
+// than risk overwriting them. Building into the only input path, or into the
+// project root with output.structure: project, keeps every copy on its source.
 func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scanner.Document) error {
 	outInfo, err := os.Stat(outputDir)
 	if err != nil {
@@ -322,19 +320,10 @@ func checkCopiesStayOnSources(outputDir string, inputPaths []string, docs []scan
 					outputDir, input, displayPath(doc.Path), displayPath(target), p)
 			}
 		}
-		if _, err := os.Stat(target); err == nil && !isJotPage(htmlpath.FromMarkdown(target)) {
-			return fmt.Errorf("output directory %s contains input path %s, and the markdown copy of %s would replace %s, which jot did not write; move that file, or use an output directory outside the input paths",
-				outputDir, input, displayPath(doc.Path), displayPath(target))
-		}
+		return fmt.Errorf("output directory %s contains input path %s, and the markdown copy of %s would be written to %s rather than onto its own source, where it could replace a file jot did not write; use an output directory outside the input paths",
+			outputDir, input, displayPath(doc.Path), displayPath(target))
 	}
 	return nil
-}
-
-// isJotPage reports whether path is a page jot generated, which marks the
-// markdown file next to it as jot's own copy.
-func isJotPage(path string) bool {
-	content, err := os.ReadFile(path)
-	return err == nil && bytes.Contains(content, []byte(`<script id="jot-md-source"`))
 }
 
 // dirContains reports whether the directory described by dirInfo is path or
