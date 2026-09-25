@@ -606,37 +606,53 @@ Implemented on branch `feat/section9-decisions`.
 | Decision | Choice | Status | Commits |
 |---|---|---|---|
 | 1. URL layout for multiple input roots | Both: keep root-relative paths with collision errors as the default, and add opt-in project-relative paths | Done. New `output.structure: input \| project` in `jot.yml`; `project` makes paths relative to the working directory for `build`, `export`, `toc`, and `debug`. New `Scanner.RelativeTo` in `pkg/scanner` so library users can opt in | `30bb9a8`, `90b5189`, follow-ups below |
-| 2. Scope of LLM export features | Design it, and check whether mlpipe answers the question | Designed, awaiting approval. See [llm-export-design.md](llm-export-design.md) | - |
+| 2. Scope of LLM export features | Design it, and check whether mlpipe answers the question | Designed, awaiting approval. See [llm-export-design.md](llm-export-design.md) | `02dfbaf` |
 | 3. `file://` support versus page weight | Keep embedded markdown (no change) | No change needed | - |
 | 4. Embed the tokenizer vocabulary | Embed | Done. `cl100k_base` embedded in `pkg/tokenizer`, built without replacing tiktoken's process-wide loader; no new module, so mlpipe's `go.sum` is unaffected | `a31b171`, `07c4b99`, `4bcebac` |
-| 5. Dead code and stubs | Delete | Done, except stubs tied to Decision 2 (`SemanticStrategy`, `contextualEnrichment`, the legacy `llm` CLI branch, `--include-embeddings`), which the design settles | `5d28aa6`, `a685f32`, `5436893`, `f0450e4`, `7db0997`, `86a60e5` |
+| 5. Dead code and stubs | Delete | Done, except stubs tied to Decision 2 (`SemanticStrategy`, `contextualEnrichment` and the `separateFiles` parameter, the legacy `llm` CLI branch, `--include-embeddings`), which the design settles. `chunking.DefaultStrategy` has no callers but is public API and was left | `5d28aa6`, `a685f32`, `5436893`, `f0450e4`, `7db0997`, `86a60e5` |
 | 6. `pkg/` stability | Importable, not API-stable before 1.0; mlpipe moves in lockstep | Done. README "Go Packages" section; `CLAUDE.md` module table corrected | `d3ab0cc`, `1905d46` |
 
 `B11` (breadcrumb URLs) is closed: the dead breadcrumb code was removed in `a685f32`.
 
 ### Verification of this branch
 
-Four read-only agents tried to refute the changes by running real binaries out of tree against the base (`2acde71`), and one reviewed the diff. Fixed in follow-up commits:
+Three rounds of read-only agents tried to refute the changes by running real binaries out of tree against `2acde71` (main) and intermediate commits, plus a diff review each round. What they found, and the commits that settled it:
 
-- With the output directory equal to, or containing, an input path, a document's markdown copy could land somewhere other than on its own source: in project mode `-o docs` replaced `docs/README.md` with the root README and nested `docs/docs/...` on every rebuild; in the default mode, input `docs` with output `.` replaced the project's own `README.md`. `build` now refuses such layouts before writing anything (`8bf3f5f`, `1a7a6c7`).
-- The embedded vocabulary broke on checkouts with `core.autocrlf` (Git for Windows' default) (`07c4b99`), and the offline tokenizer test passed against the old implementation when run after other tests (`4bcebac`).
-- `output.structure` accepted YAML lists as the default (`f687bb5`); the outside-root error repeated itself and was wrong for ancestor inputs (`27972e2`).
-- One file reached through a symlink or a differently-cased path was built twice or reported as colliding with itself (`b1b524c`).
-- Page paths replaced the first `.md` anywhere in a path, and ignored uppercase `.MD` (`aa7b5ec`, part of D2).
-- Document IDs were hashed before `/` normalization, so they differed on Windows (`5f19e30`).
-- Stale comments and docs (`1905d46`).
+- **Markdown copies landing in the source tree.** With the output directory equal to an input path, a copy could overwrite another source or be read back on the next build (project mode `-o docs` nested `docs/docs/...`). `build` refuses that before writing anything (`8bf3f5f`). The same guard covers an output directory that contains an input path, where a copy could replace a user file that is not an input, such as the project `README.md` (`1a7a6c7`). A later attempt to allow layouts where no names clash, by treating a markdown file with a jot page beside it as jot's own copy (`b9050fd`), was shown unsound and reverted (`79ee8dd`): jot writes pages next to user files in supported layouts, and two sequences silently replaced a user's `index.md`, `README.md` and `CHANGELOG.md`.
+- **Tokenizer.** The embedded vocabulary broke on checkouts with `core.autocrlf` (`07c4b99`); the offline test passed against the old implementation when run after other tests (`4bcebac`).
+- **`output.structure` values and messages.** YAML lists fell back to the default (`f687bb5`); the outside-root error repeated itself and was wrong for ancestor inputs (`27972e2`).
+- **Duplicate documents.** `b1b524c` merged one file reached through a symlink or a differently-cased path, but also merged a symlink alias with its target when they map to different pages, dropping a page silently, and withheld the project-mode hint from case-only collisions across roots. `67a602e` keeps aliases as separate pages, merges spellings only when they map to the same page, and offers the hint whenever the colliding files come from different input roots.
+- **Paths containing `.md`.** Page paths replaced the first `.md` anywhere in a path and ignored uppercase `.MD` (`aa7b5ec`, part of D2); in-page links to `.MD` files were still missed (`2ad7c3d`).
+- **Windows document IDs** were hashed before `/` normalization (`5f19e30`).
+- **Docs** (`1905d46`).
 
-The mlpipe gate used during this work reported only build and vet failures for most commits, because `go test` was piped into `grep`. It was fixed, and mlpipe's build, vet, and tests were then re-run against every commit that claimed them; all pass.
+The mlpipe gate used early in this work reported only build and vet failures, because `go test` was piped into `grep`. It was fixed, and mlpipe's build, vet, and tests were re-run against every commit that claimed them; all pass.
+
+### Open decision: markdown copies when the output directory contains an input path
+
+The copy guard is strict. When the output directory is or contains an input path, every markdown copy must land on its own source, because jot cannot tell its own earlier copies from files the user wrote there. That refuses two layouts that built without loss on main when no names clashed: sources in `docs/src` with output `docs` (GitHub Pages serving `/docs`), and input `docs` with output `.`. Their tests are kept as `t.Skip` (`TestE2EOutputContainingInputWithoutConflicts`) as the spec for the alternative. Options:
+
+1. **Keep the strict refusal** (current). Nothing is silently lost; those layouts must move the output elsewhere.
+2. **Link to the source instead of copying it** (recommended). When a document's source file is already inside the output directory, jot writes no copy and the page's "Open Markdown" link points at the source. The generated contents page gets no markdown copy, and its link is hidden. That allows both layouts without guessing ownership, and also fixes V11, since no copy lands in the source tree. Copies are still needed, and still guarded, for sources outside the output directory.
+3. **A manifest** of the copies jot wrote, kept in the output directory, so later builds can tell jot's files from the user's. More state and more code than option 2.
 
 ### Remaining items
 
+These predate this branch (same behavior at `2acde71`) unless noted.
+
 | ID | Priority | Finding | Where |
 |---|---|---|---|
-| V11 | P2 | An in-place build that generates a contents page (no root `index.md` or `README.md` among the documents) writes `index.md` into the output directory, replacing a root `index.md` that is not an input. Same in the base. | `internal/compiler/compiler.go` `generateIndexPage` |
+| V11 | P1 | The generated contents page (no root `index.md` or `README.md` among the documents) writes an `index.md` copy into the output directory. In a true in-place build (input `.`, output `.`), or with the output equal to an input path, that file lands in the input: the next build reads it back as a source ("Found 2" then "Found 3"), and its contents list is frozen from then on. The copy guard does not check this generated page. | `internal/compiler/compiler.go` `generateIndexPage` |
 | V12 | P2 | CI runs only on Linux, so the Windows fixes (CRLF vocabulary, ID normalization) are untested. A `windows-latest` job would cover them. | `.github/workflows/ci.yml` |
 | V13 | P2 | `NewTokenizer` re-parses the 1.7 MB vocabulary on every call (tiktoken used to memoize it). Called once or twice per export, so the cost is small. | `pkg/tokenizer/tokenizer.go` |
 | V14 | P2 | `TableOfContents.GetNodeByID` and the `Index` map it reads are used only by tests. | `internal/toc/toc.go` |
-| V15 | P2 | Misspelled `jot.yml` keys and nested `JOT_*` environment variables are silently ignored (B3); `docs/spec/architecture.md` still documents removed fields (Phase 5). | `cmd/jot/root.go`, `docs/spec/architecture.md` |
+| V15 | P2 | Misspelled `jot.yml` keys and nested `JOT_*` environment variables are silently ignored (B3); `docs/spec/architecture.md` still documents removed fields (Phase 5). An empty or null `output.structure` selects the default, like an absent key. | `cmd/jot/root.go`, `docs/spec/architecture.md` |
+| V16 | P1 | Outputs other than markdown copies (`index.html`, page `.html` files, `llms.txt`, `llms-full.txt`, `toc.xml`, `assets/`) replace same-named files when the output directory holds other content, with no warning. | `internal/compiler/compiler.go`, `cmd/jot/build.go` |
+| V17 | P2 | The offline tokenizer test's child process inherits `NO_PROXY`; with `NO_PROXY=*` a regression to downloading would pass it. (New on this branch.) | `pkg/tokenizer/tokenizer_test.go` |
+| V18 | P2 | A Windows clone that checked out a commit between `a31b171` and `07c4b99` keeps a CRLF vocabulary after upgrading, because Git does not re-check-out an unchanged blob when `.gitattributes` arrives; `git add --renormalize .` fixes it. The binary works (the `\r` is trimmed), but the pinned-hash test fails, and `TestParseRanksCRLF` assumes LF input. (New on this branch.) | `pkg/tokenizer` |
+| V19 | P2 | Links are HTML-escaped but not URL-escaped, so names containing `#`, `%`, or `?` break every link to that page (extends V4). In-page links with a query string are not rewritten, and non-HTTP schemes such as `mailto:` ending in `.md` are. Search index IDs still use `ReplaceAll(id, ".md", "")` (not read by `search.js`). | `internal/renderer/renderer.go`, `internal/search/indexer.go` |
+| V20 | P2 | A root `INDEX.MD` or `Index.md` on a case-insensitive filesystem produces its page as `INDEX.html`, and copying it to `index.html` writes the same file, so a case-sensitive static host returns 404 at `/`. | `internal/compiler/compiler.go` |
+| V21 | P2 | A symlinked input directory is scanned as empty (`filepath.WalkDir` does not descend a symlinked root), although the README advertises symlink support. The project-mode hint is offered even when an input is outside the working directory, where project mode rejects it. | `pkg/scanner/scanner.go`, `cmd/jot/build.go` |
 
 ### Recommendations for mlpipe (not changed here)
 

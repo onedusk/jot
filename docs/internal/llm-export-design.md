@@ -7,7 +7,7 @@ Status: proposed. Nothing gets implemented until you approve it.
 - The plan applies on top of `1a7a6c7`, the current head of `feat/section9-decisions`. #1 (project-relative paths), #4 (embedded tokenizer), #5 (dead code) and #6 (pkg/ stability note) have landed there.
 - Three changes after `90b5189` matter here:
   - `86a60e5` deleted `export.minInt` and `LLMDocument.HTML`.
-  - `b1b524c` made `dedupeDocuments` (`cmd/jot/build.go:201` at head) treat a file reached through a symlink or a differently-cased path as one document.
+  - `b1b524c` made `dedupeDocuments` (`cmd/jot/build.go:201` at head) treat a file reached through a symlink or a differently-cased path as one document. (After this document was written, `67a602e` narrowed that to spellings that map to the same page, keeping symlink aliases as separate pages; nothing in this design depends on the difference.)
   - `5f19e30` moved the document-ID hash to the forward-slash path (`pkg/scanner/scanner.go:186-190` at head).
 - `cmd/jot/export.go` has not changed since `90b5189`. Compared with `2acde71`, its lines after 196 sit 6 to 7 lines lower, because #1 added project-root resolution.
 - Each measurement names the commit it was taken at.
